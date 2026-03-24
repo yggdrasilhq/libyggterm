@@ -1,0 +1,9 @@
+libyggterm
+Copyright 2026 Avikalpa Kundu <avi@gour.top>
+
+Licensed under the Mozilla Public License, version 2.0.
+
+This code was extracted from the yggterm repository on 2026-08-02 and
+relicensed MPL-2.0 at extraction on sole copyright. Commits predating the
+extraction carry yggterm's GPL-3.0-or-later declaration in their trees; the
+licence of this work as distributed is MPL-2.0.

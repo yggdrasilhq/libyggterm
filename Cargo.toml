@@ -1,0 +1,26 @@
+# libyggterm — the app-hosting library for the Yggdrasil ecosystem.
+#
+# MPL-2.0, deliberately: apps that link this must be able to ship under their
+# own terms, including proprietary ones. GPL would kill that ecosystem and
+# LGPL fights Rust's static linking. MPL is file-scoped copyleft — improvements
+# to THESE files come back, everything an app builds on top does not have to.
+#
+# ⛔ Plain MPL-2.0 only. Never add the "Incompatible With Secondary Licenses"
+# notice (Exhibit B): it would break the GPL-app-links-MPL-library combination
+# this licence choice exists to permit, which is exactly how yggterm consumes
+# this crate.
+[workspace]
+members = ["crates/yggui", "crates/yggui-contract"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["Yggdrasil HQ"]
+license = "MPL-2.0"
+
+[workspace.dependencies]
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
