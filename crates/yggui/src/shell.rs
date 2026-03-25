@@ -173,6 +173,7 @@ struct ShellState {
     background_copy_scan_in_flight: bool,
     next_background_copy_scan_after_ms: u64,
     browser_tree_loading_in_flight: bool,
+    recent_ui_telemetry: HashMap<String, (String, u64)>,
 }
 
 #[derive(Clone, PartialEq, Eq)]
@@ -485,6 +486,7 @@ impl ShellState {
             background_copy_scan_in_flight: false,
             next_background_copy_scan_after_ms: 0,
             browser_tree_loading_in_flight: !browser_tree_loaded,
+            recent_ui_telemetry: HashMap::new(),
         };
         if let Some(path) = state.browser.selected_path().map(ToOwned::to_owned) {
             state.selected_tree_paths.insert(path.clone());
@@ -1532,7 +1534,7 @@ impl ShellState {
         );
     }
 
-    fn record_restore_issue_telemetry(&self, source: &str) {
+    fn record_restore_issue_telemetry(&mut self, source: &str) {
         let mut effective_expanded = self.browser.expanded_path_set();
         effective_expanded.extend(self.active_session_visibility_paths());
         let live_sessions = self.server.live_sessions();
@@ -1565,7 +1567,7 @@ impl ShellState {
         info!(source, payload=%payload, "restore debug");
     }
 
-    fn record_preview_issue_telemetry(&self, source: &str) {
+    fn record_preview_issue_telemetry(&mut self, source: &str) {
         let payload = if let Some(session) = self.server.active_session() {
             json!({
                 "source": source,
@@ -1594,7 +1596,17 @@ impl ShellState {
         info!(source, payload=%payload, "preview debug");
     }
 
-    fn record_ui_telemetry(&self, event: &str, payload: Value) {
+    fn record_ui_telemetry(&mut self, event: &str, payload: Value) {
+        let payload_text = payload.to_string();
+        let now = current_millis();
+        if let Some((last_payload, last_ms)) = self.recent_ui_telemetry.get(event)
+            && *last_payload == payload_text
+            && now.saturating_sub(*last_ms) < 2_000
+        {
+            return;
+        }
+        self.recent_ui_telemetry
+            .insert(event.to_string(), (payload_text.clone(), now));
         let telemetry = json!({
             "ts": std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -2026,13 +2038,17 @@ fn spawn_title_generation_for_target(
                 );
                 shell.last_action = format!("title generation failed: {error}");
                 warn!(session_path=%target.session_path, error=%error, "title generation failed");
-                shell.finish_job_notification(
-                    &job_key,
-                    NotificationTone::Error,
-                    "Title Generation Failed",
-                    error.to_string(),
-                    true,
-                );
+                if announce {
+                    shell.finish_job_notification(
+                        &job_key,
+                        NotificationTone::Error,
+                        "Title Generation Failed",
+                        error.to_string(),
+                        true,
+                    );
+                } else {
+                    shell.clear_job_notification(&job_key);
+                }
             }
             Err(error) => {
                 shell.title_requests_in_flight.remove(&session_path);
@@ -2049,13 +2065,17 @@ fn spawn_title_generation_for_target(
                 );
                 shell.last_action = format!("title generation task failed: {error}");
                 warn!(session_path=%target.session_path, error=%error, "title generation task join failed");
-                shell.finish_job_notification(
-                    &job_key,
-                    NotificationTone::Error,
-                    "Title Task Failed",
-                    error.to_string(),
-                    true,
-                );
+                if announce {
+                    shell.finish_job_notification(
+                        &job_key,
+                        NotificationTone::Error,
+                        "Title Task Failed",
+                        error.to_string(),
+                        true,
+                    );
+                } else {
+                    shell.clear_job_notification(&job_key);
+                }
             }
         });
         maybe_spawn_background_copy_generation(state);
@@ -2220,13 +2240,17 @@ fn spawn_precis_generation_for_target(
                         current_millis() + BACKGROUND_COPY_RETRY_MS,
                     );
                     shell.last_action = format!("precis generation failed: {error}");
-                    shell.finish_job_notification(
-                        &job_key,
-                        NotificationTone::Error,
-                        "Precis Generation Failed",
-                        error.to_string(),
-                        true,
-                    );
+                    if announce {
+                        shell.finish_job_notification(
+                            &job_key,
+                            NotificationTone::Error,
+                            "Precis Generation Failed",
+                            error.to_string(),
+                            true,
+                        );
+                    } else {
+                        shell.clear_job_notification(&job_key);
+                    }
                 }
                 Err(error) => {
                     if !announce && !force {
@@ -2241,13 +2265,17 @@ fn spawn_precis_generation_for_target(
                         current_millis() + BACKGROUND_COPY_RETRY_MS,
                     );
                     shell.last_action = format!("precis task failed: {error}");
-                    shell.finish_job_notification(
-                        &job_key,
-                        NotificationTone::Error,
-                        "Precis Task Failed",
-                        error.to_string(),
-                        true,
-                    );
+                    if announce {
+                        shell.finish_job_notification(
+                            &job_key,
+                            NotificationTone::Error,
+                            "Precis Task Failed",
+                            error.to_string(),
+                            true,
+                        );
+                    } else {
+                        shell.clear_job_notification(&job_key);
+                    }
                 }
             }
         });
@@ -2413,13 +2441,17 @@ fn spawn_summary_generation_for_target(
                         current_millis() + BACKGROUND_COPY_RETRY_MS,
                     );
                     shell.last_action = format!("summary generation failed: {error}");
-                    shell.finish_job_notification(
-                        &job_key,
-                        NotificationTone::Error,
-                        "Summary Generation Failed",
-                        error.to_string(),
-                        true,
-                    );
+                    if announce {
+                        shell.finish_job_notification(
+                            &job_key,
+                            NotificationTone::Error,
+                            "Summary Generation Failed",
+                            error.to_string(),
+                            true,
+                        );
+                    } else {
+                        shell.clear_job_notification(&job_key);
+                    }
                 }
                 Err(error) => {
                     if !announce && !force {
@@ -2434,13 +2466,17 @@ fn spawn_summary_generation_for_target(
                         current_millis() + BACKGROUND_COPY_RETRY_MS,
                     );
                     shell.last_action = format!("summary task failed: {error}");
-                    shell.finish_job_notification(
-                        &job_key,
-                        NotificationTone::Error,
-                        "Summary Task Failed",
-                        error.to_string(),
-                        true,
-                    );
+                    if announce {
+                        shell.finish_job_notification(
+                            &job_key,
+                            NotificationTone::Error,
+                            "Summary Task Failed",
+                            error.to_string(),
+                            true,
+                        );
+                    } else {
+                        shell.clear_job_notification(&job_key);
+                    }
                 }
             }
         });
@@ -3434,6 +3470,7 @@ fn maybe_spawn_background_copy_generation(mut state: Signal<ShellState>) {
             || PASSIVE_COPY_SUSPENDED.load(Ordering::Relaxed)
             || shell.passive_copy_suspended
             || shell.server.active_view_mode() == WorkspaceViewMode::Terminal
+            || shell.server.active_session().is_some()
             || !shell.title_requests_in_flight.is_empty()
             || !shell.precis_requests_in_flight.is_empty()
             || !shell.summary_requests_in_flight.is_empty()
@@ -6189,19 +6226,18 @@ fn app() -> Element {
             return;
         }
         if server_busy {
-            state.with(|shell| shell.record_preview_issue_telemetry("preview_refresh_wait_busy"));
+            state.with_mut(|shell| shell.record_preview_issue_telemetry("preview_refresh_wait_busy"));
             return;
         }
         if !session.session_path.starts_with("remote-session://") {
-            state.with(|shell| shell.record_preview_issue_telemetry("preview_refresh_skip_non_remote"));
+            state.with_mut(|shell| shell.record_preview_issue_telemetry("preview_refresh_skip_non_remote"));
             last_preview_refresh_path.set(None);
             return;
         }
         if *last_preview_refresh_path.read() == Some(session.session_path.clone()) {
-            state.with(|shell| shell.record_preview_issue_telemetry("preview_refresh_skip_duplicate"));
             return;
         }
-        state.with(|shell| shell.record_preview_issue_telemetry("preview_refresh_request"));
+        state.with_mut(|shell| shell.record_preview_issue_telemetry("preview_refresh_request"));
         last_preview_refresh_path.set(Some(session.session_path.clone()));
         spawn_server_snapshot_action(
             state,
@@ -7821,6 +7857,7 @@ fn MainSurface(
                                             .active_summary
                                             .clone()
                                             .unwrap_or_else(|| preview_summary_text(&session)),
+                                        allow_subtitle_scroll: false,
                                         palette: snapshot.palette,
                                         on_refresh_title: move |_| on_refresh_title.call(()),
                                         on_refresh_subtitle: move |_| on_refresh_summary.call(()),
@@ -7884,6 +7921,7 @@ fn MainSurface(
                                 .active_precis
                                 .clone()
                                 .unwrap_or_else(|| terminal_precis(&session)),
+                            allow_subtitle_scroll: true,
                             palette: snapshot.palette,
                             on_refresh_title: move |_| on_refresh_title.call(()),
                             on_refresh_subtitle: move |_| on_refresh_precis.call(()),
@@ -7935,10 +7973,22 @@ fn MainSurface(
 fn SessionHeaderCopy(
     title: String,
     subtitle: String,
+    allow_subtitle_scroll: bool,
     palette: Palette,
     on_refresh_title: EventHandler<MouseEvent>,
     on_refresh_subtitle: EventHandler<MouseEvent>,
 ) -> Element {
+    let subtitle_style = if allow_subtitle_scroll {
+        format!(
+            "font-size:12px; line-height:1.72; color:{}; white-space:pre-wrap; overflow-wrap:anywhere; min-width:0; flex:1; max-height:40vh; overflow:auto; padding-right:6px; scrollbar-gutter:stable;",
+            palette.muted
+        )
+    } else {
+        format!(
+            "font-size:12px; line-height:1.72; color:{}; white-space:pre-wrap; overflow-wrap:anywhere; min-width:0; flex:1; max-height:none; overflow:visible; padding-right:6px;",
+            palette.muted
+        )
+    };
     rsx! {
         div {
             style: "display:flex; flex-direction:column; gap:10px; min-width:280px; flex:1; min-height:0;",
@@ -7963,7 +8013,7 @@ fn SessionHeaderCopy(
             div {
                 style: "display:flex; align-items:flex-start; gap:8px; min-width:0; min-height:0;",
                 div {
-                    style: format!("font-size:12px; line-height:1.72; color:{}; white-space:pre-wrap; overflow-wrap:anywhere; min-width:0; flex:1; max-height:60vh; overflow:auto; padding-right:6px; scrollbar-gutter:stable;", palette.muted),
+                    style: "{subtitle_style}",
                     "{subtitle}"
                 }
                 RefreshInlineButton {
@@ -9115,6 +9165,7 @@ fn TerminalCanvas(
                 font_size: theme.font_size,
             });
             let mut cursor = 0u64;
+            let mut read_poll_ms = 120u64;
             loop {
                 tokio::select! {
                     event = eval.recv::<TerminalJsEvent>() => {
@@ -9122,6 +9173,7 @@ fn TerminalCanvas(
                             Ok(TerminalJsEvent::Ready) => {
                                 if let Ok((next_cursor, chunks)) = terminal_read_async(endpoint.clone(), session_path.clone(), 0).await {
                                     cursor = next_cursor;
+                                    read_poll_ms = if chunks.is_empty() { 140 } else { 60 };
                                     for chunk in chunks {
                                         if terminal_chunk_has_meaningful_output(&chunk.data) {
                                             terminal_has_meaningful_output.set(true);
@@ -9237,10 +9289,15 @@ fn TerminalCanvas(
                             }
                         }
                     }
-                    _ = sleep(Duration::from_millis(60)) => {
+                    _ = sleep(Duration::from_millis(read_poll_ms)) => {
                         match terminal_read_async(endpoint.clone(), session_path.clone(), cursor).await {
                             Ok((next_cursor, chunks)) => {
                                 cursor = next_cursor;
+                                read_poll_ms = if chunks.is_empty() {
+                                    (read_poll_ms + 20).min(220)
+                                } else {
+                                    60
+                                };
                                 for chunk in chunks {
                                     if terminal_chunk_has_meaningful_output(&chunk.data) {
                                         terminal_has_meaningful_output.set(true);
@@ -9441,11 +9498,11 @@ struct TerminalTheme {
 fn terminal_theme(ui_theme: UiTheme, palette: Palette, font_size: f32) -> TerminalTheme {
     match ui_theme {
         UiTheme::ZedLight => TerminalTheme {
-            background: palette.panel.to_string(),
+            background: "#f6f8fb".to_string(),
             foreground: palette.text.to_string(),
             cursor: palette.accent.to_string(),
             font_size: font_size.max(5.0),
-            selection: "rgba(107,165,255,0.16)".to_string(),
+            selection: "rgba(107,165,255,0.18)".to_string(),
             black: "#2f3a46".to_string(),
             red: "#d14d5a".to_string(),
             green: "#2f9d68".to_string(),
