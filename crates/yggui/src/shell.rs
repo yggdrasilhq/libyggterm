@@ -9367,8 +9367,22 @@ fn PreviewRunBlock(
     let user_run = run.tone == PreviewTone::User;
     let dark = palette_is_dark(palette);
     let row_justify = if user_run { "flex-end" } else { "flex-start" };
-    let width = if user_run { "min(72%, 720px)" } else { "min(100%, 880px)" };
     let serif_stack = "\"Source Serif 4\", \"Noto Serif\", \"Iowan Old Style\", Georgia, serif";
+    let column_style = if user_run {
+        format!(
+            "display:flex; flex-direction:column; gap:0; width:auto; max-width:min(72%, 720px); \
+             min-width:0; box-sizing:border-box; content-visibility:auto; contain:layout paint style; \
+             contain-intrinsic-size:760px 260px; font-family:{};",
+            serif_stack
+        )
+    } else {
+        format!(
+            "display:flex; flex-direction:column; gap:0; width:min(100%, 880px); min-width:0; \
+             box-sizing:border-box; content-visibility:auto; contain:layout paint style; \
+             contain-intrinsic-size:760px 260px; font-family:{};",
+            serif_stack
+        )
+    };
     let background = match user_run {
         true if dark => "rgba(52,56,64,0.96)",
         true => "rgba(241,243,246,0.98)",
@@ -9389,16 +9403,11 @@ fn PreviewRunBlock(
         div {
             style: format!("display:flex; justify-content:{}; width:100%;", row_justify),
             div {
-                style: format!(
-                    "display:flex; flex-direction:column; gap:0; width:{}; content-visibility:auto; \
-                     contain:layout paint style; contain-intrinsic-size:760px 260px; font-family:{};",
-                    width,
-                    serif_stack
-                ),
+                style: "{column_style}",
                 div {
                     style: format!(
                         "display:flex; flex-direction:column; gap:0; background:{}; border-radius:{}px; \
-                         box-shadow:{}; {}",
+                         box-shadow:{}; {} box-sizing:border-box; min-width:0; overflow:visible;",
                         background,
                         if user_run { 22 } else { 0 },
                         shadow,
@@ -9412,7 +9421,7 @@ fn PreviewRunBlock(
                         div {
                             key: "{entry.block_ix}",
                             style: format!(
-                                "width:100%; text-align:left; background:transparent; padding:{}; \
+                                "width:100%; min-width:0; box-sizing:border-box; text-align:left; background:transparent; padding:{}; \
                                  {} {}",
                                 if user_run { "13px 16px" } else { "10px 0 12px 0" },
                                 if entry_ix > 0 {
@@ -9496,7 +9505,7 @@ fn PreviewContent(lines: Vec<String>, palette: Palette) -> Element {
                     },
                     PreviewContentBlock::Paragraph(text) => rsx! {
                         div {
-                            style: "font-size:13px; line-height:1.72; white-space:pre-wrap;",
+                            style: "font-size:13px; line-height:1.72; white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word;",
                             "{text}"
                         }
                     },
@@ -9507,7 +9516,7 @@ fn PreviewContent(lines: Vec<String>, palette: Palette) -> Element {
                                 style: format!("width:6px; height:6px; border-radius:999px; background:{}; margin-top:8px; flex:0 0 auto;", palette.accent_soft),
                             }
                             div {
-                                style: "font-size:13px; line-height:1.72; white-space:pre-wrap;",
+                                style: "font-size:13px; line-height:1.72; white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word;",
                                 "{text}"
                             }
                         }
@@ -9520,7 +9529,7 @@ fn PreviewContent(lines: Vec<String>, palette: Palette) -> Element {
                                 "{number}."
                             }
                             div {
-                                style: "font-size:13px; line-height:1.72; white-space:pre-wrap;",
+                                style: "font-size:13px; line-height:1.72; white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word;",
                                 "{text}"
                             }
                         }
@@ -9541,7 +9550,7 @@ fn PreviewContent(lines: Vec<String>, palette: Palette) -> Element {
                             }
                             div {
                                 style: format!(
-                                    "font-size:13px; line-height:1.72; white-space:pre-wrap; color:{};",
+                                    "font-size:13px; line-height:1.72; white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word; color:{};",
                                     if done { palette.muted } else { palette.text }
                                 ),
                                 "{text}"
@@ -9555,7 +9564,7 @@ fn PreviewContent(lines: Vec<String>, palette: Palette) -> Element {
                                 style: format!("width:3px; border-radius:999px; background:{}; flex:0 0 auto;", palette.accent_soft),
                             }
                             div {
-                                style: format!("font-size:13px; line-height:1.72; white-space:pre-wrap; color:{};", palette.muted),
+                                style: format!("font-size:13px; line-height:1.72; white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word; color:{};", palette.muted),
                                 "{text}"
                             }
                         }
