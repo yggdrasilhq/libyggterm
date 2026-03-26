@@ -43,6 +43,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 use tao::event::Event as TaoEvent;
@@ -274,6 +275,8 @@ struct RenderSnapshot {
     shell_tint: String,
     shell_gradient: String,
 }
+
+type SharedSnapshot = Arc<RenderSnapshot>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum TreeSelectionMode {
@@ -6797,7 +6800,7 @@ fn app() -> Element {
         }
     });
     let _ = *async_render_epoch.read();
-    let snapshot = state.read().snapshot();
+    let snapshot: SharedSnapshot = Arc::new(state.read().snapshot());
     let inner = desktop.inner_size();
     let context_menu_window_size = (inner.width as f64, inner.height as f64);
     let titlebar_snapshot = snapshot.clone();
@@ -7241,7 +7244,7 @@ fn app() -> Element {
 
 #[component]
 fn Titlebar(
-    snapshot: RenderSnapshot,
+    snapshot: SharedSnapshot,
     hovered: Signal<Option<HoveredControl>>,
     on_toggle_sidebar: EventHandler<()>,
     on_search: EventHandler<String>,
@@ -7447,7 +7450,7 @@ fn ResizeHandle(style: String, direction: ResizeDirection) -> Element {
 
 #[component]
 fn Sidebar(
-    snapshot: RenderSnapshot,
+    snapshot: SharedSnapshot,
     on_start_session: EventHandler<MouseEvent>,
     on_start_terminal: EventHandler<MouseEvent>,
     on_create_paper: EventHandler<MouseEvent>,
@@ -7965,7 +7968,7 @@ fn machine_label_text(label: &str) -> Option<String> {
 }
 
 #[component]
-fn DragGhost(snapshot: RenderSnapshot) -> Element {
+fn DragGhost(snapshot: SharedSnapshot) -> Element {
     let Some((x, y)) = snapshot.drag_pointer else {
         return rsx! {};
     };
@@ -8216,7 +8219,7 @@ fn BellIcon() -> Element {
 #[component]
 fn MainSurface(
     state: Signal<ShellState>,
-    snapshot: RenderSnapshot,
+    snapshot: SharedSnapshot,
     terminal_mount_epoch: u64,
     on_expand_preview: EventHandler<()>,
     on_collapse_preview: EventHandler<()>,
@@ -9556,7 +9559,7 @@ fn truncate_preview_excerpt(text: &str, max_chars: usize) -> String {
 #[component]
 fn TerminalCanvas(
     session: ManagedSessionView,
-    snapshot: RenderSnapshot,
+    snapshot: SharedSnapshot,
     state: Signal<ShellState>,
     mount_epoch: u64,
 ) -> Element {
@@ -10684,7 +10687,7 @@ fn EmptyState(palette: Palette) -> Element {
 
 #[component]
 fn RightRail(
-    snapshot: RenderSnapshot,
+    snapshot: SharedSnapshot,
     on_endpoint_change: EventHandler<String>,
     on_api_key_change: EventHandler<String>,
     on_model_change: EventHandler<String>,
@@ -10742,8 +10745,8 @@ fn RightRail(
 }
 
 #[component]
-fn MetadataRailBody(snapshot: RenderSnapshot) -> Element {
-    let session = snapshot.active_session;
+fn MetadataRailBody(snapshot: SharedSnapshot) -> Element {
+    let session = snapshot.active_session.clone();
 
     rsx! {
         RailHeader { title: "Session Metadata".to_string(), color: snapshot.palette.text.to_string() }
@@ -10777,7 +10780,7 @@ fn MetadataRailBody(snapshot: RenderSnapshot) -> Element {
 
 #[component]
 fn SettingsRailBody(
-    snapshot: RenderSnapshot,
+    snapshot: SharedSnapshot,
     on_endpoint_change: EventHandler<String>,
     on_api_key_change: EventHandler<String>,
     on_model_change: EventHandler<String>,
@@ -10939,7 +10942,7 @@ fn SettingsRailBody(
 
 #[component]
 fn NotificationsRailBody(
-    snapshot: RenderSnapshot,
+    snapshot: SharedSnapshot,
     on_clear_notification: EventHandler<u64>,
     on_clear_notifications: EventHandler<MouseEvent>,
 ) -> Element {
@@ -10980,7 +10983,7 @@ fn NotificationsRailBody(
 
 #[component]
 fn ConnectRailBody(
-    snapshot: RenderSnapshot,
+    snapshot: SharedSnapshot,
     on_connect_ssh_custom: EventHandler<MouseEvent>,
     on_ssh_target_change: EventHandler<String>,
     on_ssh_prefix_change: EventHandler<String>,
@@ -11342,7 +11345,7 @@ fn DeleteConfirmOverlay(
 
 #[component]
 fn ThemeEditorOverlay(
-    snapshot: RenderSnapshot,
+    snapshot: SharedSnapshot,
     on_close: EventHandler<MouseEvent>,
     on_save: EventHandler<MouseEvent>,
     on_reset: EventHandler<MouseEvent>,
