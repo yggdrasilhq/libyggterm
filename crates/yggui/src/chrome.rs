@@ -78,6 +78,7 @@ pub fn WindowControlsStrip(
     on_hover_control: EventHandler<Option<HoveredChromeControl>>,
     on_toggle_maximized: EventHandler<()>,
     on_toggle_always_on_top: EventHandler<()>,
+    on_close_app: EventHandler<()>,
 ) -> Element {
     rsx! {
         div {
@@ -116,7 +117,7 @@ pub fn WindowControlsStrip(
                 hover_tone: HoveredChromeControl::Close,
                 palette: palette,
                 on_hover_control: on_hover_control,
-                on_press: move |_| window().close(),
+                on_press: move |_| on_close_app.call(()),
             }
         }
     }
