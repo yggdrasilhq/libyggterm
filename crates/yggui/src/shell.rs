@@ -13894,19 +13894,12 @@ fn TerminalCanvas(
     let terminal_placeholder = terminal_placeholder_text(&session);
     let terminal_shell_background = theme.background.clone();
     let terminal_shell_shadow = "none".to_string();
-    let terminal_shell_padding = if snapshot.fullscreen {
-        "0px".to_string()
-    } else {
-        "6px".to_string()
-    };
-    let terminal_shell_radius = if snapshot.fullscreen {
-        "0px".to_string()
-    } else {
-        "10px".to_string()
-    };
+    let terminal_frame = terminal_frame_style(snapshot.fullscreen);
+    let terminal_shell_padding = terminal_frame.padding.to_string();
+    let terminal_shell_radius = terminal_frame.shell_radius.to_string();
     let terminal_host_chrome = format!(
         "border-radius:{}; box-shadow:none !important; outline:none !important; background:{};",
-        if snapshot.fullscreen { "0px" } else { "8px" },
+        terminal_frame.host_radius,
         theme.background,
     );
     let resume_overlay_blur = overlay_backdrop_style("blur(1px)");
@@ -14546,6 +14539,28 @@ fn TerminalCanvas(
                     }
                 }
             }
+        }
+    }
+}
+
+struct TerminalFrameStyle {
+    padding: &'static str,
+    shell_radius: &'static str,
+    host_radius: &'static str,
+}
+
+fn terminal_frame_style(fullscreen: bool) -> TerminalFrameStyle {
+    if fullscreen {
+        TerminalFrameStyle {
+            padding: "0px",
+            shell_radius: "0px",
+            host_radius: "0px",
+        }
+    } else {
+        TerminalFrameStyle {
+            padding: "6px",
+            shell_radius: "10px",
+            host_radius: "8px",
         }
     }
 }
@@ -17512,6 +17527,22 @@ mod tests {
     }
 
     #[test]
+    fn terminal_frame_style_keeps_normal_padding_outside_distraction_free() {
+        let style = terminal_frame_style(false);
+        assert_eq!(style.padding, "6px");
+        assert_eq!(style.shell_radius, "10px");
+        assert_eq!(style.host_radius, "8px");
+    }
+
+    #[test]
+    fn terminal_frame_style_goes_edge_to_edge_in_distraction_free_mode() {
+        let style = terminal_frame_style(true);
+        assert_eq!(style.padding, "0px");
+        assert_eq!(style.shell_radius, "0px");
+        assert_eq!(style.host_radius, "0px");
+    }
+
+    #[test]
     fn workspace_rows_exclude_live_groups() {
         let live_group = BrowserRow {
             kind: BrowserRowKind::Group,
@@ -18094,6 +18125,8 @@ mod tests {
                 label: "raspberry".to_string(),
                 ssh_target: "pi@raspberry".to_string(),
                 prefix: None,
+                remote_binary_expr: None,
+                remote_deploy_state: RemoteDeployState::Ready,
                 health: RemoteMachineHealth::Healthy,
                 sessions: vec![RemoteScannedSession {
                     session_path: "remote-session://pi-raspberry/019caa6f".to_string(),
@@ -18143,6 +18176,8 @@ mod tests {
                 label: "jojo".to_string(),
                 ssh_target: "pi@jojo".to_string(),
                 prefix: None,
+                remote_binary_expr: None,
+                remote_deploy_state: RemoteDeployState::Ready,
                 health: RemoteMachineHealth::Healthy,
                 sessions: vec![
                     RemoteScannedSession {
@@ -18202,6 +18237,8 @@ mod tests {
                 label: "raspberry".to_string(),
                 ssh_target: "pi@raspberry".to_string(),
                 prefix: None,
+                remote_binary_expr: None,
+                remote_deploy_state: RemoteDeployState::Ready,
                 health: RemoteMachineHealth::Healthy,
                 sessions: vec![RemoteScannedSession {
                     session_path: "remote-session://pi-raspberry/019caa6f".to_string(),
@@ -18277,6 +18314,8 @@ mod tests {
                 label: "dev".to_string(),
                 ssh_target: "dev".to_string(),
                 prefix: None,
+                remote_binary_expr: None,
+                remote_deploy_state: RemoteDeployState::Ready,
                 health: RemoteMachineHealth::Healthy,
                 sessions: Vec::new(),
             }],
@@ -18355,6 +18394,8 @@ mod tests {
                 label: "jojo".to_string(),
                 ssh_target: "jojo".to_string(),
                 prefix: None,
+                remote_binary_expr: None,
+                remote_deploy_state: RemoteDeployState::Ready,
                 health: RemoteMachineHealth::Healthy,
                 sessions: vec![
                     RemoteScannedSession {
@@ -18414,6 +18455,8 @@ mod tests {
                 label: "jojo".to_string(),
                 ssh_target: "jojo".to_string(),
                 prefix: None,
+                remote_binary_expr: None,
+                remote_deploy_state: RemoteDeployState::Ready,
                 health: RemoteMachineHealth::Healthy,
                 sessions: vec![RemoteScannedSession {
                     session_path: "remote-session://jojo/1".to_string(),
@@ -18458,6 +18501,8 @@ mod tests {
                 label: "oc [ok]".to_string(),
                 ssh_target: "oc".to_string(),
                 prefix: None,
+                remote_binary_expr: None,
+                remote_deploy_state: RemoteDeployState::Ready,
                 health: RemoteMachineHealth::Healthy,
                 sessions: vec![],
             }],
@@ -18581,6 +18626,8 @@ mod tests {
                 label: "oc [ok]".to_string(),
                 ssh_target: "oc".to_string(),
                 prefix: None,
+                remote_binary_expr: None,
+                remote_deploy_state: RemoteDeployState::Ready,
                 health: RemoteMachineHealth::Healthy,
                 sessions: vec![RemoteScannedSession {
                     session_path: remote_path.clone(),
@@ -18661,6 +18708,8 @@ mod tests {
                 label: "oc [ok]".to_string(),
                 ssh_target: "oc".to_string(),
                 prefix: None,
+                remote_binary_expr: None,
+                remote_deploy_state: RemoteDeployState::Ready,
                 health: RemoteMachineHealth::Healthy,
                 sessions: vec![RemoteScannedSession {
                     session_path: "remote-session://oc/019cf672-8d68-70a1-bd8b-68487c4fc63d"
@@ -18753,6 +18802,8 @@ mod tests {
             label: "dev".to_string(),
             ssh_target: "dev".to_string(),
             prefix: None,
+            remote_binary_expr: None,
+            remote_deploy_state: RemoteDeployState::Ready,
             health: RemoteMachineHealth::Healthy,
             sessions: vec![RemoteScannedSession {
                 session_path: "remote-session://dev/019caa6f-b32c-7a73-b4d3-db83225663dc"
@@ -18831,6 +18882,8 @@ mod tests {
             label: "dev".to_string(),
             ssh_target: "dev".to_string(),
             prefix: None,
+            remote_binary_expr: None,
+            remote_deploy_state: RemoteDeployState::Ready,
             health: RemoteMachineHealth::Healthy,
             sessions: vec![],
         });
@@ -18854,6 +18907,8 @@ mod tests {
                 label: "jojo".to_string(),
                 ssh_target: "jojo".to_string(),
                 prefix: None,
+                remote_binary_expr: None,
+                remote_deploy_state: RemoteDeployState::Ready,
                 health: RemoteMachineHealth::Healthy,
                 sessions: vec![
                     RemoteScannedSession {
@@ -19123,6 +19178,8 @@ mod tests {
             label: "oc [ok]".to_string(),
             ssh_target: "oc".to_string(),
             prefix: None,
+            remote_binary_expr: None,
+            remote_deploy_state: RemoteDeployState::Ready,
             health: RemoteMachineHealth::Healthy,
             sessions: vec![RemoteScannedSession {
                 session_path: "remote-session://oc/1".to_string(),
@@ -19335,6 +19392,8 @@ mod tests {
             label: "dev".to_string(),
             ssh_target: "dev".to_string(),
             prefix: None,
+            remote_binary_expr: None,
+            remote_deploy_state: RemoteDeployState::Ready,
             health: RemoteMachineHealth::Offline,
             sessions: Vec::new(),
         }];
@@ -19365,6 +19424,8 @@ mod tests {
             label: "dev".to_string(),
             ssh_target: "dev".to_string(),
             prefix: None,
+            remote_binary_expr: None,
+            remote_deploy_state: RemoteDeployState::Ready,
             health: RemoteMachineHealth::Offline,
             sessions: Vec::new(),
         }];
@@ -19396,6 +19457,8 @@ mod tests {
             label: "dev".to_string(),
             ssh_target: "dev".to_string(),
             prefix: None,
+            remote_binary_expr: None,
+            remote_deploy_state: RemoteDeployState::Ready,
             health: RemoteMachineHealth::Healthy,
             sessions: Vec::new(),
         }];
