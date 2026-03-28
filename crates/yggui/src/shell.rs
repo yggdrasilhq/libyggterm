@@ -10748,7 +10748,7 @@ fn app() -> Element {
                             maximized: maximized,
                             fullscreen: fullscreen,
                             always_on_top: snapshot.always_on_top,
-                            show_fullscreen_button: false,
+                            show_fullscreen_button: true,
                             overlay: true,
                         }
                     }
@@ -13894,11 +13894,20 @@ fn TerminalCanvas(
     let terminal_placeholder = terminal_placeholder_text(&session);
     let terminal_shell_background = theme.background.clone();
     let terminal_shell_shadow = "none".to_string();
-    let terminal_shell_padding = "6px".to_string();
-    let terminal_shell_radius = "10px".to_string();
+    let terminal_shell_padding = if snapshot.fullscreen {
+        "0px".to_string()
+    } else {
+        "6px".to_string()
+    };
+    let terminal_shell_radius = if snapshot.fullscreen {
+        "0px".to_string()
+    } else {
+        "10px".to_string()
+    };
     let terminal_host_chrome = format!(
-        "border-radius:8px; box-shadow:none !important; outline:none !important; background:{};",
-        theme.background
+        "border-radius:{}; box-shadow:none !important; outline:none !important; background:{};",
+        if snapshot.fullscreen { "0px" } else { "8px" },
+        theme.background,
     );
     let resume_overlay_blur = overlay_backdrop_style("blur(1px)");
     let future_theme = theme.clone();
