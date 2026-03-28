@@ -7,8 +7,8 @@ pub mod drag_tree;
 pub mod drag_visuals;
 pub mod notifications;
 pub mod rails;
-mod terminal_themes;
 mod shell;
+mod terminal_themes;
 pub mod theme;
 mod window_icon;
 
