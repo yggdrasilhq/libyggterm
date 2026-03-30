@@ -797,9 +797,7 @@ impl ShellState {
         let active_title = active_session
             .as_ref()
             .and_then(|session| resolved_session_title(self, session));
-        let active_precis = active_session
-            .as_ref()
-            .and_then(|session| resolved_session_precis(self, session));
+        let active_precis = None;
         let active_summary = active_session
             .as_ref()
             .and_then(|session| resolved_session_summary(self, session));
@@ -5620,17 +5618,8 @@ fn resolved_session_title(shell: &ShellState, session: &ManagedSessionView) -> O
     None
 }
 
-fn resolved_session_precis(shell: &ShellState, session: &ManagedSessionView) -> Option<String> {
-    shell
-        .generated_precis
-        .get(&session.session_path)
-        .cloned()
-        .or_else(|| {
-            remote_generated_copy(&shell.server, &session.session_path)
-                .and_then(|(_, precis, _)| precis)
-        })
-        .or_else(|| preview_summary_metadata_value(session, "Precis"))
-        .filter(|precis| !looks_like_low_signal_generated_copy(precis))
+fn resolved_session_precis(_shell: &ShellState, _session: &ManagedSessionView) -> Option<String> {
+    None
 }
 
 fn resolved_session_summary(shell: &ShellState, session: &ManagedSessionView) -> Option<String> {
@@ -10867,7 +10856,7 @@ fn app() -> Element {
             maybe_spawn_background_copy_generation(state);
             return;
         }
-        spawn_summary_generation(state, session, summary_stale, summary_stale);
+        spawn_summary_generation(state, session, summary_stale, false);
         state.with_mut(|shell| shell.next_background_copy_scan_after_ms = current_millis());
         maybe_spawn_background_copy_generation(state);
     });
@@ -13990,11 +13979,6 @@ fn preview_summary_text(session: &ManagedSessionView) -> String {
     {
         return summary;
     }
-    if let Some(precis) = preview_summary_metadata_value(session, "Precis")
-        .filter(|value| !looks_like_low_signal_generated_copy(value))
-    {
-        return precis;
-    }
 
     let mut candidates = session
         .preview
@@ -14016,7 +14000,7 @@ fn preview_summary_text(session: &ManagedSessionView) -> String {
                 || entry.label == "Messages"
             {
                 None
-            } else if entry.label == "Summary" || entry.label == "Precis" {
+            } else if entry.label == "Summary" {
                 Some(value.to_string())
             } else {
                 Some(format!("{}: {}", entry.label, value))
@@ -14065,10 +14049,10 @@ fn preview_summary_text(session: &ManagedSessionView) -> String {
 }
 
 fn terminal_precis(session: &ManagedSessionView) -> String {
-    if let Some(precis) = preview_summary_metadata_value(session, "Precis")
+    if let Some(summary) = preview_summary_metadata_value(session, "Summary")
         .filter(|value| !looks_like_low_signal_generated_copy(value))
     {
-        return precis;
+        return summary;
     }
     let mut candidates = Vec::new();
     for block in &session.preview.blocks {
