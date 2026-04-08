@@ -6,9 +6,7 @@ authors.workspace = true
 license = "MPL-2.0"
 
 [dependencies]
-yggterm-core = { path = "../yggterm-core" }
-yggterm-platform = { path = "../yggterm-platform" }
-yggterm-server = { path = "../yggterm-server" }
+yggui-contract = { path = "../yggui-contract" }
 anyhow.workspace = true
 base64 = "0.22"
 cairo-rs = { version = "0.18.5", features = ["png"] }
