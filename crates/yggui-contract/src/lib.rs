@@ -304,3 +304,70 @@ pub mod side_rail_stamps {
     /// Marks the rail's content subtree.
     pub const CONTENT: &str = "data-yggui-side-rail-content";
 }
+
+/// The document split gutter.
+///
+/// An app that declares both a multiline editor and a markdown body gets the
+/// SPLIT view: editor one side, live preview the other. The bar between them is
+/// a real, draggable gutter, and these are the attributes it carries so the
+/// host, the app, and an agent driving yggui all name the same element.
+///
+/// The ratio is the fraction of the surface given to the FIRST half, so 0.5 is
+/// dead centre — which is the default, because a split that opens off-centre
+/// makes the user's first action "fix the layout".
+pub mod document_split_stamps {
+    /// Marks the draggable gutter element.
+    pub const GUTTER: &str = "data-yggui-doc-split-gutter";
+    /// The current ratio, stringified, so an agent can read it without a probe.
+    pub const RATIO: &str = "data-yggui-doc-split-ratio";
+    /// Marks each half; value is `first` or `second`.
+    pub const HALF: &str = "data-yggui-doc-split-half";
+}
+
+/// The centred default for a document split.
+pub const DOCUMENT_SPLIT_DEFAULT_RATIO: f32 = 0.5;
+
+/// The narrowest either half may become, as a fraction.
+///
+/// A gutter that can be dragged to the very edge lets the user lose a pane with
+/// no obvious way back, so both sides clamp — and they clamp *here*, once,
+/// because a host and an app that disagree about the limit produce a gutter
+/// that snaps back under the pointer.
+pub const DOCUMENT_SPLIT_MIN_RATIO: f32 = 0.15;
+
+/// Clamp a proposed split ratio into the usable band.
+///
+/// Non-finite input collapses to the centred default rather than propagating a
+/// NaN into a CSS length, where it would silently blank a pane.
+pub fn clamp_document_split_ratio(ratio: f32) -> f32 {
+    if !ratio.is_finite() {
+        return DOCUMENT_SPLIT_DEFAULT_RATIO;
+    }
+    ratio.clamp(DOCUMENT_SPLIT_MIN_RATIO, 1.0 - DOCUMENT_SPLIT_MIN_RATIO)
+}
+
+#[cfg(test)]
+mod document_split_locks {
+    use super::*;
+
+    #[test]
+    fn the_default_is_actually_centred() {
+        assert_eq!(DOCUMENT_SPLIT_DEFAULT_RATIO, 0.5);
+        assert_eq!(clamp_document_split_ratio(0.5), 0.5);
+    }
+
+    #[test]
+    fn neither_half_can_be_dragged_away_entirely() {
+        assert_eq!(clamp_document_split_ratio(0.0), DOCUMENT_SPLIT_MIN_RATIO);
+        assert_eq!(clamp_document_split_ratio(1.0), 1.0 - DOCUMENT_SPLIT_MIN_RATIO);
+        assert_eq!(clamp_document_split_ratio(-4.0), DOCUMENT_SPLIT_MIN_RATIO);
+    }
+
+    /// A NaN reaching a CSS length blanks the pane silently, which is the worst
+    /// kind of failure: nothing errors and the user's document disappears.
+    #[test]
+    fn a_non_finite_ratio_falls_back_to_centre_not_into_the_css() {
+        assert_eq!(clamp_document_split_ratio(f32::NAN), 0.5);
+        assert_eq!(clamp_document_split_ratio(f32::INFINITY), 0.5);
+    }
+}
