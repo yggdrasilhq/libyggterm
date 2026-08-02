@@ -458,23 +458,17 @@ fn WindowControlGlyph(icon: ChromeControlIcon) -> Element {
     }
 }
 
-pub fn search_field_shell_style(dark_surface: bool) -> String {
-    format!(
-        "position:relative; display:flex; align-items:center; width:100%; min-width:0; height:26px; padding:0 8px; \
-         min-height:26px; max-height:26px; flex:1 1 auto; border-radius:10px; background:{}; box-sizing:border-box; box-shadow:{}; \
-         transition:{};",
-        if dark_surface {
-            "rgba(9,13,17,0.94)"
-        } else {
-            "rgba(255,255,255,0.96)"
-        },
-        if dark_surface {
-            "inset 0 0 0 1px rgba(214,229,242,0.22), 0 1px 0 rgba(255,255,255,0.05)"
-        } else {
-            "inset 0 0 0 1px rgba(198,212,226,0.82), 0 1px 0 rgba(255,255,255,0.38)"
-        },
-        standard_transition(&["background-color", "box-shadow"])
-    )
+pub fn search_field_shell_style(_dark_surface: bool) -> String {
+    // Box only. The fill, hairline, focus ring and their transitions belong to
+    // the HOST's field stylesheet — the consuming element wears
+    // `data-yggui-field` — because an inline fill out-specifies a stylesheet
+    // and would leave this the one flat, inert field in the window. The
+    // parameter stays so existing callers keep compiling; the skin no longer
+    // depends on it.
+    "position:relative; display:flex; align-items:center; width:100%; min-width:0; height:26px; \
+     padding:0 8px; min-height:26px; max-height:26px; flex:1 1 auto; border-radius:10px; \
+     box-sizing:border-box;"
+        .to_string()
 }
 
 pub fn search_input_style(text_color: &str, _dark_surface: bool) -> String {

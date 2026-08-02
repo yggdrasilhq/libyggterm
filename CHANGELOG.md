@@ -3,6 +3,16 @@
 Consumers pin this library by **tag**, so a tag is the release unit. Entries
 are written from the git record, not from memory.
 
+## v0.3.1 — 2026-08-02
+
+- **`search_field_shell_style` goes box-only.** It used to emit an inline
+  `background`, hairline `box-shadow` and `transition`; an inline fill
+  out-specifies a host stylesheet, so the titlebar search field stayed flat and
+  inert while every other field in the host learned hover, focus and a themed
+  fill. The function now emits layout only, and the host skins the element
+  through its field stylesheet (`data-yggui-field`). The `dark_surface`
+  parameter is kept for API stability and no longer read.
+
 ## v0.3.0 — 2026-08-02
 
 - **`emd-renderer` joins the library, under MPL-2.0.** emd (extended markdown)
