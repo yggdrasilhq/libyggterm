@@ -35,11 +35,15 @@ their trees; the licence of this work as distributed is MPL-2.0.
 cargo build --workspace
 ```
 
-⚠ **Standalone builds here use upstream `dioxus` and `wry`.** yggterm consumes
-this library through a `[patch.crates-io]` that redirects those to vendored
-forks in its own tree; Cargo applies patches at the consuming workspace root,
-including over git dependencies. A change that is green here can still need
-checking inside yggterm. See `THIRD-PARTY-NOTICES.md`.
+⚠ **Standalone builds here resolve `dioxus` against upstream.** yggterm
+consumes this library through a `[patch.crates-io]` redirecting
+`dioxus-desktop`, `dioxus-interpreter-js` and `wry` to vendored forks in its own
+tree, and Cargo applies patches at the consuming workspace root — including over
+git dependencies. `yggui` no longer names those crates directly, but `dioxus`
+with the `desktop` feature still pulls them transitively, so the patched
+versions differ from what is built here (`webkit2gtk` 2.0.1 standalone vs 2.0.2
+under yggterm). A change that is green here can still need checking inside
+yggterm. See `THIRD-PARTY-NOTICES.md`.
 
 ## Consuming it
 
