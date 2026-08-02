@@ -411,11 +411,8 @@ pub fn reorder_row_tree(
     // A drop that changes nothing must be `None`, never `Some(unchanged)`: the
     // caller decides from that whether to write anything at all, and a write
     // per settled drag would rewrite the store on every mouse-up.
-    let unchanged_order = order.len() == rows.len()
-        && order
-            .iter()
-            .zip(rows.iter())
-            .all(|(id, row)| id == &row.id);
+    let unchanged_order =
+        order.len() == rows.len() && order.iter().zip(rows.iter()).all(|(id, row)| id == &row.id);
     if unchanged_order && new_parent == moved_row.parent {
         return None;
     }
@@ -1014,14 +1011,28 @@ mod tests {
             None
         );
         assert_eq!(
-            drag.hover("notes", "f1", "f1", DragDropPlacement::Into, true, 1_000 + ROW_DRAG_SPRING_MS - 1)
-                .spring_open,
+            drag.hover(
+                "notes",
+                "f1",
+                "f1",
+                DragDropPlacement::Into,
+                true,
+                1_000 + ROW_DRAG_SPRING_MS - 1
+            )
+            .spring_open,
             None,
             "crossing a folder on the way somewhere else must not disturb it"
         );
         assert_eq!(
-            drag.hover("notes", "f1", "f1", DragDropPlacement::Into, true, 1_000 + ROW_DRAG_SPRING_MS)
-                .spring_open,
+            drag.hover(
+                "notes",
+                "f1",
+                "f1",
+                DragDropPlacement::Into,
+                true,
+                1_000 + ROW_DRAG_SPRING_MS
+            )
+            .spring_open,
             Some("f1".to_string())
         );
         // Once per group per gesture: a folder the user shut again mid-drag
@@ -1045,8 +1056,15 @@ mod tests {
             drag.maybe_begin((200.0, 100.0));
             drag.hover("notes", "f1", "f1", placement, collapsed, now);
             assert_eq!(
-                drag.hover("notes", "f1", "f1", placement, collapsed, now + ROW_DRAG_SPRING_MS * 4)
-                    .spring_open,
+                drag.hover(
+                    "notes",
+                    "f1",
+                    "f1",
+                    placement,
+                    collapsed,
+                    now + ROW_DRAG_SPRING_MS * 4
+                )
+                .spring_open,
                 None,
                 "collapsed={collapsed} placement={placement:?}"
             );
@@ -1062,19 +1080,33 @@ mod tests {
         drag.hover("notes", "f1", "f1", DragDropPlacement::Into, true, 0);
         drag.hover("notes", "f2", "f2", DragDropPlacement::Into, true, 100);
         assert_eq!(
-            drag.hover("notes", "f1", "f1", DragDropPlacement::Into, true, ROW_DRAG_SPRING_MS + 50)
-                .spring_open,
+            drag.hover(
+                "notes",
+                "f1",
+                "f1",
+                DragDropPlacement::Into,
+                true,
+                ROW_DRAG_SPRING_MS + 50
+            )
+            .spring_open,
             None
         );
     }
 
     #[test]
     fn a_gesture_resolves_against_the_lists_rows() {
-        let rows: Vec<RowTreeRow> = ["a", "b", "c"].iter().map(|id| RowTreeRow::leaf(*id)).collect();
+        let rows: Vec<RowTreeRow> = ["a", "b", "c"]
+            .iter()
+            .map(|id| RowTreeRow::leaf(*id))
+            .collect();
         let mut drag = RowDragGesture::arm("notes", "c", "C", (0.0, 0.0));
         assert_eq!(drag.resolve(&rows), None, "an armed press resolves nothing");
         drag.maybe_begin((0.0, DRAG_BEGIN_THRESHOLD_PX));
-        assert_eq!(drag.resolve(&rows), None, "…and neither does a drag with no target");
+        assert_eq!(
+            drag.resolve(&rows),
+            None,
+            "…and neither does a drag with no target"
+        );
         drag.hover("notes", "a", "a", DragDropPlacement::Before, false, 0);
         assert_eq!(
             drag.resolve(&rows).map(|drop| drop.order),

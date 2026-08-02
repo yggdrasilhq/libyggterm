@@ -3,6 +3,54 @@
 Consumers pin this library by **tag**, so a tag is the release unit. Entries
 are written from the git record, not from memory.
 
+## v0.4.1 — 2026-08-03
+
+- **The library builds for web and Android now, and this is what was stopping
+  it.** Seven declared dependencies — `base64`, `include_dir`, `png`, `libc`,
+  `tokio`, `tao`, `time` — had **no reference in any source file**, left behind
+  by earlier extractions, and several of them cannot build for a wasm or
+  Android target at all. They are gone. `chrome` (the only module that touches
+  `dioxus::desktop`) moves behind a `desktop-shell` feature, on by default, and
+  `web` / `mobile` features join it. Proven: `cargo check -p yggui
+  --no-default-features --features web --target wasm32-unknown-unknown`.
+
+  A dependency nothing imports is not free in a library apps must link — it is
+  what stops an app consuming the library at all.
+
+- **`yggui::chat_input` — the composer.** `YggChatInputBox`,
+  `ChatContextOption`, `ComposerSendShortcut`, `CHAT_INPUT_CSS`. One rounded box
+  with both controls inside it — context at the upper left, send at the lower
+  right — so the box stays one shape at any height, plus a searchable context
+  menu that opens upward because the composer sits at the foot of the page. The
+  send shortcut is a PROP: Enter and Shift+Enter are exact opposites and both
+  conventions are defensible, so hardcoding either makes the component unusable
+  for the other half of its consumers. The hint printed beside the button names
+  the key that actually sends, and a test holds those two together.
+
+  A transcript surface without a composer is a reader. This is the other half
+  of `conversation`.
+
+- **`yggui::otp` — the six-cell login code entry.** `OtpCodeEntry`,
+  `complete_otp`, `digits_for_otp`, `YGGUI_OTP_CODE_LEN`, `YGGUI_OTP_CSS`,
+  `install_otp_paste_bridge_script`, `otp_paste_from_native_script`. It exists
+  as a shared component because pasting a code is genuinely hard on Android —
+  the long-press paste menu is suppressed on a near-invisible input and
+  `navigator.clipboard.readText()` is blocked in a WebView — so the widget
+  ships with a document-level paste listener and a native-bridge button rather
+  than each app rediscovering that. A pasted `"Your code is 481920 — do not
+  share"` yields `481920`, and a full-length paste lands at cell ONE whichever
+  cell had focus.
+
+- **`ConversationTokens::from_css_variables` + `CONVERSATION_THEME_CSS`.** An
+  app offering a **System** theme has delegated the answer to
+  `prefers-color-scheme`, which Rust cannot see — so `is_dark` is a question it
+  genuinely cannot answer, and the design language must not require it. The
+  same tokens are now addressable as CSS custom properties, with a sheet
+  carrying both themes. A test asserts every referenced variable is defined in
+  the light root AND both dark arms, because a variable the sheet never sets
+  resolves to nothing and drops the property — an invisible hairline with no
+  error anywhere.
+
 ## v0.4.0 — 2026-08-03
 
 - **`yggui::conversation` — the agent-transcript design language, as a shared

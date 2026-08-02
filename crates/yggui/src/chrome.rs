@@ -56,7 +56,11 @@ fn titlebar_cluster_outer_style(edge: SidebarEdge, inset_px: i32) -> String {
         edge.css_near(),
         edge.css_far(),
         edge.css_justify(),
-        if edge == SidebarEdge::Left { inset_px } else { 0 },
+        if edge == SidebarEdge::Left {
+            inset_px
+        } else {
+            0
+        },
     )
 }
 

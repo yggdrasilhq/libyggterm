@@ -214,8 +214,12 @@ mod stamp_contract_locks {
     fn every_contract_stamp_is_actually_written_by_the_rail() {
         let rails = product();
         for name in [
-            s::RAIL, s::VISIBLE, s::AUTO_HIDE,
-            s::AUTOHIDE_REVEALED, s::AUTOHIDE_PIN, s::CONTENT,
+            s::RAIL,
+            s::VISIBLE,
+            s::AUTO_HIDE,
+            s::AUTOHIDE_REVEALED,
+            s::AUTOHIDE_PIN,
+            s::CONTENT,
         ] {
             assert!(
                 rails.contains(&format!("\"{name}\":")),
