@@ -1,0 +1,75 @@
+# The property this workflow exists to defend: libyggterm builds ON ITS OWN,
+# against upstream dependencies, with no help from yggterm's tree.
+#
+# That property rotted silently once already. While these crates lived inside
+# yggterm, `yggui` declared dioxus-desktop, wry and webkit2gtk and used none of
+# them; they resolved only because yggterm's [patch.crates-io] redirects wry to
+# a vendored 0.55 fork. Extracted, upstream dioxus-desktop 0.7.9 wants
+# wry ^0.53.5 and so webkit2gtk =2.0.1 against the =2.0.2 that was pinned — no
+# resolution exists. The library nobody could build was the one whose whole
+# purpose is being linked by other people, and nothing caught it because nothing
+# ever built it alone.
+#
+# ⛔ Do not add a [patch] section, a vendor directory, or a path dependency on a
+# sibling yggterm checkout to make this pass. Those would restore exactly the
+# blindness this job exists to remove.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  standalone:
+    name: builds standalone against upstream
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libwebkit2gtk-4.1-dev libgtk-3-dev libsoup-3.0-dev \
+            libjavascriptcoregtk-4.1-dev pkg-config
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      # No --locked: Cargo.lock is deliberately not committed for a library, so
+      # resolution against current upstream is part of what is being tested.
+      - name: cargo check
+        run: cargo check --workspace --all-targets
+
+      - name: cargo test
+        run: cargo test --workspace
+
+      - name: cargo fmt
+        run: cargo fmt --all -- --check
+        continue-on-error: true
+
+      - name: Licence guard — every .rs carries the MPL Exhibit A header
+        run: |
+          missing=0
+          while IFS= read -r f; do
+            if ! head -3 "$f" | grep -q 'Mozilla Public'; then
+              echo "::error file=$f::missing MPL-2.0 Exhibit A header"
+              missing=1
+            fi
+          done < <(find crates -name '*.rs')
+          exit $missing
+
+      - name: Licence guard — Exhibit B must never appear in source
+        # Plain MPL-2.0 is GPL-compatible by design. The "Incompatible With
+        # Secondary Licenses" notice would forbid yggterm (GPL-3.0-or-later)
+        # from linking this library, which is the entire point of the licence.
+        run: |
+          if grep -rn 'Incompatible With Secondary Licenses' crates/ 2>/dev/null; then
+            echo "::error::Exhibit B found in source — it would break GPL consumers"
+            exit 1
+          fi
