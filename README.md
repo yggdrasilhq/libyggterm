@@ -12,6 +12,7 @@ the pilot app; `yedit` is the second.
 |---|---|
 | `yggui` | The reusable surface components: chrome, rails, drag-tree, motion, notifications, theme |
 | `yggui-contract` | The wire contract shared by an app and its host |
+| `emd-renderer` | emd (extended markdown): the document model and parser every document surface shares. Pure — no UI stack. Spec: [`docs/spec-emd-renderer.md`](docs/spec-emd-renderer.md) |
 
 ## Licence
 
@@ -28,6 +29,11 @@ That notice would break exactly the combination this licence exists to permit.
 Extracted from yggterm on 2026-08-02 and relicensed MPL-2.0 at extraction on
 sole copyright. Commits before that date carry yggterm's GPL declaration in
 their trees; the licence of this work as distributed is MPL-2.0.
+
+The rule that decides what lives here: **a library apps must LINK is MPL; an
+application is GPL.** `emd-renderer` moved in on 2026-08-02 under that rule —
+it is the document engine of the whole app pipeline (yedit and ztlkasten's
+document surfaces, breezed, jyas-webapp), not a part of the terminal.
 
 ## Building
 

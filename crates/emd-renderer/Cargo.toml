@@ -1,0 +1,13 @@
+[package]
+name = "emd-renderer"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+# Stated, never inherited: this crate is MPL-2.0 like the rest of libyggterm,
+# and it arrived here from a GPL-3.0-or-later workspace. A `license.workspace`
+# here would have been correct by accident; the explicit string is the record.
+license = "MPL-2.0"
+description = "emd (extended markdown) — the markdown-superset document model and parser shared by Yggdrasil document surfaces: yedit renders the plain subset today, ztlkasten the full vault grammar next. Spec: docs/spec-emd-renderer.md."
+
+[dependencies]
+pulldown-cmark = { version = "0.12", default-features = false }

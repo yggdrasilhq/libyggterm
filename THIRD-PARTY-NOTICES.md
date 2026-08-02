@@ -10,6 +10,7 @@ permissive licences compatible with MPL-2.0 and with GPL-3.0-or-later consumers.
 | wry, tao | Apache-2.0 OR MIT |
 | webkit2gtk (Rust bindings) | MIT |
 | png | MIT OR Apache-2.0 |
+| pulldown-cmark (`emd-renderer`'s only dependency) | MIT |
 
 `webkit2gtk` bindings link the system WebKitGTK library (LGPL-2.1+/BSD), which
 is dynamically linked and not distributed with this source.
