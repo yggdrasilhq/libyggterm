@@ -5,6 +5,7 @@
 #![recursion_limit = "256"]
 
 pub mod chrome;
+pub mod conversation;
 pub mod drag_tree;
 pub mod drag_visuals;
 pub mod motion;
@@ -15,6 +16,12 @@ pub mod theme;
 pub use chrome::{
     ChromeControlIcon, ChromePalette, HoveredChromeControl, TitlebarChrome, WindowControlsStrip,
     search_field_shell_style, search_input_style,
+};
+pub use conversation::{
+    AssistantTurn, CHANGED_FILE_CHIP_LIMIT, CONVERSATION_COLUMN_PX, CONVERSATION_CSS,
+    ChangedFileChips, ConversationColumn, ConversationEmptyState, ConversationTokens, DiffStat,
+    QuietButton, SystemTurn, TurnAction, TurnDivider, UserTurn, WORK_GROUP_COLLAPSED_ROWS,
+    WorkGroup, WorkMark, WorkMarkGlyph, WorkRow, WorkingIndicator, changed_file_label,
 };
 pub use drag_tree::{
     DRAG_BEGIN_THRESHOLD_PX, DragDropPlacement, DragDropTarget, ROW_DRAG_CLICK_SUPPRESS_MS,
