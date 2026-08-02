@@ -279,3 +279,28 @@ mod chrome_orientation_tests {
         assert_eq!(SidebarEdge::Right.css_justify(), "flex-end");
     }
 }
+
+/// The side-rail DOM stamps.
+///
+/// `yggui` writes these attributes; a host samples them from its geometry eval
+/// to decide whether a revealed rail should RESIZE the page or TRANSLATE it.
+/// They are the contract between the two, and before libyggterm was extracted
+/// the host locked them by reading `yggui/src/rails.rs` off disk — a check that
+/// could not survive the crate living in another repository.
+///
+/// They live here so both sides name the same constant: a rename breaks the
+/// host at compile time instead of silently changing what its eval samples.
+pub mod side_rail_stamps {
+    /// Marks an element as a side rail.
+    pub const RAIL: &str = "data-yggui-side-rail";
+    /// Whether the rail is currently visible.
+    pub const VISIBLE: &str = "data-yggui-side-rail-visible";
+    /// Whether the rail is in auto-hide mode at all.
+    pub const AUTO_HIDE: &str = "data-yggui-side-rail-auto-hide";
+    /// Whether an auto-hiding rail is currently revealed.
+    pub const AUTOHIDE_REVEALED: &str = "data-yggui-side-rail-autohide-revealed";
+    /// Whether a revealed rail is pinned — the one that picks resize vs translate.
+    pub const AUTOHIDE_PIN: &str = "data-yggui-side-rail-autohide-pin";
+    /// Marks the rail's content subtree.
+    pub const CONTENT: &str = "data-yggui-side-rail-content";
+}

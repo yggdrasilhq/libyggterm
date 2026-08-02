@@ -192,3 +192,35 @@ pub fn RailSectionTitle(title: String, muted_color: String) -> Element {
         }
     }
 }
+
+#[cfg(test)]
+mod stamp_contract_locks {
+    use yggui_contract::side_rail_stamps as s;
+
+    /// Product source only — a stamp quoted inside a test module must not
+    /// satisfy this lock.
+    fn product() -> String {
+        let src = include_str!("rails.rs");
+        match src.find("\n#[cfg(test)]") {
+            Some(i) => src[..i].to_string(),
+            None => src.to_string(),
+        }
+    }
+
+    /// The host imports these constants and samples the attributes they name.
+    /// If a stamp is renamed here without renaming the constant, the host keeps
+    /// compiling and silently samples an attribute nothing writes any more.
+    #[test]
+    fn every_contract_stamp_is_actually_written_by_the_rail() {
+        let rails = product();
+        for name in [
+            s::RAIL, s::VISIBLE, s::AUTO_HIDE,
+            s::AUTOHIDE_REVEALED, s::AUTOHIDE_PIN, s::CONTENT,
+        ] {
+            assert!(
+                rails.contains(&format!("\"{name}\":")),
+                "the rail stopped stamping a contract attribute: {name}"
+            );
+        }
+    }
+}
