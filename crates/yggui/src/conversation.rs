@@ -134,6 +134,13 @@ pub struct ConversationTokens {
     pub chip_hairline: &'static str,
     /// The tint a hoverable row takes.
     pub row_hover: &'static str,
+    /// The composer's fill. A step ABOVE the ask card rather than equal to it:
+    /// the box you write into has to read as the live object on a page whose
+    /// other cards are a record of what was already said.
+    pub composer_surface: &'static str,
+    /// Ink on the filled send button, which is `accent` — so this is the one
+    /// colour that must contrast with the accent rather than with the page.
+    pub send_glyph: &'static str,
     /// The diff stat's pair. `removed` doubles as the failed-call ink: both
     /// mean "this went away", and a third red in one row reads as a third
     /// meaning. Neither is the status vocabulary's `RED`, which is reserved for
@@ -150,7 +157,126 @@ pub struct ConversationTokens {
     pub column_px: u32,
 }
 
+/// The light/dark values as CSS, for a host whose theme is resolved by the
+/// STYLESHEET rather than by Rust.
+///
+/// Not every app can answer `is_dark` in Rust, and the ones that cannot are not
+/// doing anything wrong: an app offering a **System** theme setting has
+/// delegated the answer to `prefers-color-scheme`, which only CSS can see. Such
+/// a host takes [`ConversationTokens::from_css_variables`] and includes this
+/// sheet, and gets light, dark AND system for free — the same values, chosen a
+/// layer down.
+///
+/// The dark arm is written twice on purpose: once under `prefers-color-scheme`
+/// for System, and once under an explicit `.dark` / `[data-theme="dark"]` root
+/// so an app-level override still wins over the OS.
+pub const CONVERSATION_THEME_CSS: &str = r#"
+:root {
+  --yggui-conv-meta: #8b96a2;
+  --yggui-conv-hairline: rgba(20,32,44,0.10);
+  --yggui-conv-ask-surface: #eef2f7;
+  --yggui-conv-ask-hairline: rgba(20,32,44,0.09);
+  --yggui-conv-ask-shadow: 0 8px 20px rgba(90,116,140,0.10);
+  --yggui-conv-work-surface: rgba(20,32,44,0.028);
+  --yggui-conv-work-hairline: rgba(20,32,44,0.08);
+  --yggui-conv-work-ink: #43525f;
+  --yggui-conv-well-surface: rgba(20,32,44,0.045);
+  --yggui-conv-chip-surface: rgba(255,255,255,0.86);
+  --yggui-conv-chip-hairline: rgba(20,32,44,0.10);
+  --yggui-conv-row-hover: rgba(20,32,44,0.045);
+  --yggui-conv-composer-surface: #ffffff;
+  --yggui-conv-send-glyph: #ffffff;
+  --yggui-conv-added: #2f7d55;
+  --yggui-conv-removed: #b4525f;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not([data-theme="light"]) {
+    --yggui-conv-meta: #8595a5;
+    --yggui-conv-hairline: rgba(190,214,238,0.12);
+    --yggui-conv-ask-surface: rgba(255,255,255,0.082);
+    --yggui-conv-ask-hairline: rgba(190,214,238,0.19);
+    --yggui-conv-ask-shadow: 0 10px 26px rgba(0,0,0,0.28);
+    --yggui-conv-work-surface: rgba(255,255,255,0.032);
+    --yggui-conv-work-hairline: rgba(190,214,238,0.10);
+    --yggui-conv-work-ink: #b7c5d4;
+    --yggui-conv-well-surface: rgba(0,0,0,0.24);
+    --yggui-conv-chip-surface: rgba(255,255,255,0.07);
+    --yggui-conv-chip-hairline: rgba(190,214,238,0.12);
+    --yggui-conv-row-hover: rgba(255,255,255,0.055);
+    --yggui-conv-composer-surface: #1d242c;
+    --yggui-conv-send-glyph: #0e1418;
+    --yggui-conv-added: #5fbf88;
+    --yggui-conv-removed: #e08594;
+  }
+}
+:root.dark, :root[data-theme="dark"] {
+  --yggui-conv-meta: #8595a5;
+  --yggui-conv-hairline: rgba(190,214,238,0.12);
+  --yggui-conv-ask-surface: rgba(255,255,255,0.082);
+  --yggui-conv-ask-hairline: rgba(190,214,238,0.19);
+  --yggui-conv-ask-shadow: 0 10px 26px rgba(0,0,0,0.28);
+  --yggui-conv-work-surface: rgba(255,255,255,0.032);
+  --yggui-conv-work-hairline: rgba(190,214,238,0.10);
+  --yggui-conv-work-ink: #b7c5d4;
+  --yggui-conv-well-surface: rgba(0,0,0,0.24);
+  --yggui-conv-chip-surface: rgba(255,255,255,0.07);
+  --yggui-conv-chip-hairline: rgba(190,214,238,0.12);
+  --yggui-conv-row-hover: rgba(255,255,255,0.055);
+  --yggui-conv-composer-surface: #1d242c;
+  --yggui-conv-send-glyph: #0e1418;
+  --yggui-conv-added: #5fbf88;
+  --yggui-conv-removed: #e08594;
+}
+"#;
+
 impl ConversationTokens {
+    /// The same design language, addressed through CSS custom properties.
+    ///
+    /// For a host whose theme is decided in the stylesheet — anything offering
+    /// a **System** setting, because `prefers-color-scheme` is not visible from
+    /// Rust. Pair it with [`CONVERSATION_THEME_CSS`] (or supply the same
+    /// variable names yourself, which is how an app keeps its own brand tint
+    /// while inheriting every other decision here).
+    ///
+    /// `ink`, `muted` and `accent` are still the host's, and may themselves be
+    /// `var(--…)` — they are only ever interpolated into a style string.
+    ///
+    /// ⚠ `is_dark` reads `false` on these tokens and MUST NOT be used to decide
+    /// anything: the answer genuinely is not known in Rust here. Nothing in this
+    /// module branches on it — it is carried for the host's own `data-` stamps.
+    pub fn from_css_variables(
+        ink: &'static str,
+        muted: &'static str,
+        accent: &'static str,
+    ) -> Self {
+        Self {
+            is_dark: false,
+            ink,
+            muted,
+            accent,
+            meta: "var(--yggui-conv-meta)",
+            hairline: "var(--yggui-conv-hairline)",
+            ask_surface: "var(--yggui-conv-ask-surface)",
+            ask_hairline: "var(--yggui-conv-ask-hairline)",
+            ask_shadow: "var(--yggui-conv-ask-shadow)",
+            work_surface: "var(--yggui-conv-work-surface)",
+            work_hairline: "var(--yggui-conv-work-hairline)",
+            work_ink: "var(--yggui-conv-work-ink)",
+            well_surface: "var(--yggui-conv-well-surface)",
+            chip_surface: "var(--yggui-conv-chip-surface)",
+            chip_hairline: "var(--yggui-conv-chip-hairline)",
+            row_hover: "var(--yggui-conv-row-hover)",
+            composer_surface: "var(--yggui-conv-composer-surface)",
+            send_glyph: "var(--yggui-conv-send-glyph)",
+            added: "var(--yggui-conv-added)",
+            removed: "var(--yggui-conv-removed)",
+            prose_font: PROSE_FONT,
+            ui_font: UI_FONT,
+            mono_font: MONO_FONT,
+            column_px: CONVERSATION_COLUMN_PX,
+        }
+    }
+
     /// Derive the surface from a host palette.
     ///
     /// `ink`, `muted` and `accent` are the host's; every surface, hairline and
@@ -180,6 +306,8 @@ impl ConversationTokens {
                 chip_surface: "rgba(255,255,255,0.07)",
                 chip_hairline: "rgba(190,214,238,0.12)",
                 row_hover: "rgba(255,255,255,0.055)",
+                composer_surface: "#1d242c",
+                send_glyph: "#0e1418",
                 added: "#5fbf88",
                 removed: "#e08594",
                 prose_font: PROSE_FONT,
@@ -205,6 +333,8 @@ impl ConversationTokens {
                 chip_surface: "rgba(255,255,255,0.86)",
                 chip_hairline: "rgba(20,32,44,0.10)",
                 row_hover: "rgba(20,32,44,0.045)",
+                composer_surface: "#ffffff",
+                send_glyph: "#ffffff",
                 added: "#2f7d55",
                 removed: "#b4525f",
                 prose_font: PROSE_FONT,
@@ -249,9 +379,15 @@ impl WorkMark {
         match self {
             WorkMark::Command => "M3.2 4.4 6 7.2 3.2 10M7.4 10.4h4.6",
             WorkMark::FileChange => "M4 11.6h2.2l5-5a1.2 1.2 0 0 0-1.7-1.7l-5 5V11.6Z",
-            WorkMark::FileRead => "M1.8 7.5S3.9 3.9 7.5 3.9s5.7 3.6 5.7 3.6-2.1 3.6-5.7 3.6S1.8 7.5 1.8 7.5Z",
-            WorkMark::Search => "M6.8 10.4a3.6 3.6 0 1 0 0-7.2 3.6 3.6 0 0 0 0 7.2ZM9.6 9.6l2.6 2.6",
-            WorkMark::Thinking => "M3 8.6a2 2 0 0 1 1.2-3.7 2.6 2.6 0 0 1 5-.5 2 2 0 0 1 .4 3.9M5 11.4h5",
+            WorkMark::FileRead => {
+                "M1.8 7.5S3.9 3.9 7.5 3.9s5.7 3.6 5.7 3.6-2.1 3.6-5.7 3.6S1.8 7.5 1.8 7.5Z"
+            }
+            WorkMark::Search => {
+                "M6.8 10.4a3.6 3.6 0 1 0 0-7.2 3.6 3.6 0 0 0 0 7.2ZM9.6 9.6l2.6 2.6"
+            }
+            WorkMark::Thinking => {
+                "M3 8.6a2 2 0 0 1 1.2-3.7 2.6 2.6 0 0 1 5-.5 2 2 0 0 1 .4 3.9M5 11.4h5"
+            }
             WorkMark::Generic => {
                 "M10.6 3.4a2.8 2.8 0 0 0-3.5 3.5l-3.6 3.6 1.4 1.4 3.6-3.6a2.8 2.8 0 0 0 3.5-3.5L10.1 6.4 8.6 4.9Z"
             }
@@ -606,7 +742,11 @@ pub fn WorkRow(
     /// nothing to show, which then draws as a plain line.
     expanded_body: Option<Element>,
 ) -> Element {
-    let label_ink = if failed { tokens.removed } else { tokens.work_ink };
+    let label_ink = if failed {
+        tokens.removed
+    } else {
+        tokens.work_ink
+    };
     let tooltip = if headline.trim().is_empty() {
         label.clone()
     } else {
@@ -883,6 +1023,51 @@ mod tests {
             // is not the host ink is what stops a future edit reaching for a
             // third red.
             assert_ne!(tokens.removed, tokens.ink);
+        }
+    }
+
+    /// The CSS arm and the Rust arm must cover the SAME token set. A variable
+    /// the sheet never defines resolves to nothing and the property is simply
+    /// dropped — an invisible hairline or a transparent card, with no error
+    /// anywhere. This is the only thing that keeps the two arms in step.
+    #[test]
+    fn every_css_variable_token_is_defined_by_the_theme_sheet() {
+        let css = ConversationTokens::from_css_variables("#111", "#666", "#2f7cf6");
+        let referenced = [
+            css.meta,
+            css.hairline,
+            css.ask_surface,
+            css.ask_hairline,
+            css.ask_shadow,
+            css.work_surface,
+            css.work_hairline,
+            css.work_ink,
+            css.well_surface,
+            css.chip_surface,
+            css.chip_hairline,
+            css.row_hover,
+            css.composer_surface,
+            css.send_glyph,
+            css.added,
+            css.removed,
+        ];
+        for value in referenced {
+            let name = value
+                .trim_start_matches("var(")
+                .trim_end_matches(')')
+                .trim();
+            assert!(value.starts_with("var(--"), "{value} must be a variable");
+            assert!(
+                CONVERSATION_THEME_CSS.contains(&format!("{name}:")),
+                "{name} is referenced but never defined by CONVERSATION_THEME_CSS"
+            );
+            // Both the light default and BOTH dark arms must set it, or a
+            // theme switch leaves one token behind on the other theme's value.
+            assert_eq!(
+                CONVERSATION_THEME_CSS.matches(&format!("{name}:")).count(),
+                3,
+                "{name} must be set in the light root and both dark arms"
+            );
         }
     }
 

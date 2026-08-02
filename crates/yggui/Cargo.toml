@@ -5,18 +5,30 @@ edition.workspace = true
 authors.workspace = true
 license = "MPL-2.0"
 
+# ⛔ Keep this list HONEST and keep it SHORT. Seven declared dependencies
+# (`base64`, `include_dir`, `png`, `libc`, `tokio`, `tao`, `time`) had no
+# reference in any source file — left behind by earlier extractions — and every
+# one of them was a reason this crate could not be built for a wasm or Android
+# target. A dependency nothing imports is not free here: it is what stops an app
+# consuming the library at all.
 [dependencies]
 yggui-contract = { path = "../yggui-contract" }
+dioxus = { version = "=0.7.9" }
 anyhow.workspace = true
-base64 = "0.22"
-dioxus = { version = "=0.7.9", features = ["desktop"] }
-include_dir = "0.7"
 once_cell = "1"
-png = "0.18"
-libc = "0.2"
 serde.workspace = true
 serde_json.workspace = true
-tokio = { version = "1", features = ["macros", "rt", "sync", "time"] }
-tao = "0.35.0"
-time = { version = "0.3", features = ["formatting", "parsing"] }
 tracing.workspace = true
+
+# The renderer is the CONSUMER's choice, not the library's.
+#
+# `chrome` drives real window controls through `dioxus::desktop`, so it is the
+# one module that needs a platform. Everything else — the conversation surface,
+# the rails, the drag engine, the theme, the toasts — is plain `rsx!` and
+# compiles wherever Dioxus does. A host that wants only the design language on
+# web or Android takes `default-features = false`.
+[features]
+default = ["desktop-shell"]
+desktop-shell = ["dioxus/desktop"]
+web = ["dioxus/web"]
+mobile = ["dioxus/mobile"]

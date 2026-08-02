@@ -3,6 +3,9 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 use dioxus::prelude::*;
+// Linux-only: the sole use is behind `cfg(target_os = "linux")`, and importing
+// it unconditionally warns on every other target this library now builds for.
+#[cfg(target_os = "linux")]
 use std::env;
 
 pub const TOAST_CSS: &str = r#"
@@ -413,7 +416,14 @@ mod tests {
                 "{anchor:?} drops or adds a style key relative to TopCenter"
             );
         }
-        for key in ["top", "bottom", "left", "right", "transform", "flex-direction"] {
+        for key in [
+            "top",
+            "bottom",
+            "left",
+            "right",
+            "transform",
+            "flex-direction",
+        ] {
             assert!(
                 top.contains(key),
                 "the positioning key `{key}` must be named by every anchor, not left to inherit"
@@ -433,7 +443,9 @@ mod tests {
         );
         for anchor in [ToastAnchor::BottomLeft, ToastAnchor::BottomRight] {
             assert!(
-                anchor.stack_style().contains("flex-direction:column-reverse;"),
+                anchor
+                    .stack_style()
+                    .contains("flex-direction:column-reverse;"),
                 "{anchor:?} must grow upward from its edge"
             );
         }

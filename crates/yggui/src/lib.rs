@@ -4,24 +4,33 @@
 
 #![recursion_limit = "256"]
 
+pub mod chat_input;
+/// Real window controls, which need a real window. The ONE module bound to a
+/// platform; everything else here is plain `rsx!` and travels anywhere Dioxus
+/// does.
+#[cfg(feature = "desktop-shell")]
 pub mod chrome;
 pub mod conversation;
 pub mod drag_tree;
 pub mod drag_visuals;
 pub mod motion;
 pub mod notifications;
+pub mod otp;
 pub mod rails;
 pub mod theme;
 
+pub use chat_input::{CHAT_INPUT_CSS, ChatContextOption, ComposerSendShortcut, YggChatInputBox};
+#[cfg(feature = "desktop-shell")]
 pub use chrome::{
     ChromeControlIcon, ChromePalette, HoveredChromeControl, TitlebarChrome, WindowControlsStrip,
     search_field_shell_style, search_input_style,
 };
 pub use conversation::{
     AssistantTurn, CHANGED_FILE_CHIP_LIMIT, CONVERSATION_COLUMN_PX, CONVERSATION_CSS,
-    ChangedFileChips, ConversationColumn, ConversationEmptyState, ConversationTokens, DiffStat,
-    QuietButton, SystemTurn, TurnAction, TurnDivider, UserTurn, WORK_GROUP_COLLAPSED_ROWS,
-    WorkGroup, WorkMark, WorkMarkGlyph, WorkRow, WorkingIndicator, changed_file_label,
+    CONVERSATION_THEME_CSS, ChangedFileChips, ConversationColumn, ConversationEmptyState,
+    ConversationTokens, DiffStat, QuietButton, SystemTurn, TurnAction, TurnDivider, UserTurn,
+    WORK_GROUP_COLLAPSED_ROWS, WorkGroup, WorkMark, WorkMarkGlyph, WorkRow, WorkingIndicator,
+    changed_file_label,
 };
 pub use drag_tree::{
     DRAG_BEGIN_THRESHOLD_PX, DragDropPlacement, DragDropTarget, ROW_DRAG_CLICK_SUPPRESS_MS,
@@ -40,6 +49,10 @@ pub use motion::{
 };
 pub use notifications::{
     TOAST_CSS, ToastAnchor, ToastCard, ToastItem, ToastPalette, ToastTone, ToastViewport,
+};
+pub use otp::{
+    OtpCodeEntry, YGGUI_OTP_CODE_LEN, YGGUI_OTP_CSS, complete_otp, digits_for_otp,
+    install_otp_paste_bridge_script, otp_paste_from_native_script,
 };
 pub use rails::{RailHeader, RailScrollBody, RailSectionTitle, SideRailReveal, SideRailShell};
 pub use theme::{
