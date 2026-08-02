@@ -3,6 +3,39 @@
 Consumers pin this library by **tag**, so a tag is the release unit. Entries
 are written from the git record, not from memory.
 
+## v0.4.0 — 2026-08-03
+
+- **`yggui::conversation` — the agent-transcript design language, as a shared
+  component set.** `ConversationColumn`, `UserTurn`, `AssistantTurn`,
+  `SystemTurn`, `WorkGroup`, `WorkRow`, `DiffStat`, `ChangedFileChips`,
+  `TurnDivider`, `WorkingIndicator`, `ConversationEmptyState` and
+  `QuietButton`, all reading from one `ConversationTokens` derived from the
+  host's own palette.
+
+  The module owns the SHAPE of a conversation — the 720px reading column, the
+  asymmetry between what a person asked (a bounded card) and what the machine
+  answered (the page itself), the quiet seam consecutive tool calls collect
+  into, the metadata type scale — and deliberately not the message BODY, which
+  each host hands in as an `Element` from its own content pipeline. That is the
+  seam that actually needs sharing: one design language over two different
+  content models, with neither importing the other.
+
+  **Platform-neutral by construction.** No `dioxus::desktop`, no `tao`, no
+  filesystem, so it compiles for web, desktop and mobile alike — which is the
+  point, because the first two consumers are a desktop terminal and a
+  web+Android chat app.
+
+  Two invariants are locked and mutation-proven: a work row's style emits the
+  same property-key set in every state (Dioxus never clears a key a later
+  render omits, and these rows are recycled by a virtual window, so a failed
+  row would otherwise keep its ink on an unrelated call), and the hover
+  stylesheet's custom-property names match the ones the column emits.
+
+- **`scripts/gallery-shot.sh` + the `conversation_gallery` example.** Renders
+  every component in both themes under a private headless compositor and writes
+  a PNG. A component library that can only be reviewed by rebuilding a host
+  application is a component library nobody reviews.
+
 ## v0.3.1 — 2026-08-02
 
 - **`search_field_shell_style` goes box-only.** It used to emit an inline
