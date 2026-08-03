@@ -703,21 +703,30 @@ pub fn WorkGroup(
         div {
             "data-yggui-conv-work-group": "1",
             "data-yggui-conv-work-count": "{count}",
-            // The run's work sits on the SAME left edge as the answer above
-            // it (`run_inset_px`). `width:auto` rather than `100%`: the column
-            // stretches its children, so a percentage width plus a margin
-            // overflows by exactly the inset.
+            // ⭐ THE SEAM IS A SPINE, NOT A CARD.
+            //
+            // A real agent transcript is mostly work: 96 tool calls against 37
+            // prose turns in the session this was tuned on. Ninety-six bordered,
+            // filled cards out-shout the handful of paragraphs the reader came
+            // for — the card said "look at me" ninety-six times. So the run
+            // keeps only a hairline down its left edge, which reads as a
+            // timeline and lets the eye skip the whole seam in one movement.
+            //
+            // The rule sits ON the shared left edge (`run_inset_px`), so the
+            // answer's live rule and its work's spine are the same line.
             style: format!(
-                "display:flex; flex-direction:column; gap:2px; width:auto; min-width:0; \
-                 margin-left:{}px; box-sizing:border-box; padding:8px 9px; \
-                 border-radius:12px; background:{}; border:1px solid {};",
-                tokens.run_inset_px, tokens.work_surface, tokens.work_hairline,
+                "display:flex; flex-direction:column; gap:1px; width:auto; min-width:0; \
+                 margin-left:{}px; box-sizing:border-box; padding:2px 0 2px 12px; \
+                 border-radius:0; background:transparent; border:0; \
+                 border-left:1px solid {};",
+                tokens.run_inset_px, tokens.work_hairline,
             ),
             div {
                 style: format!(
                     "display:flex; align-items:center; justify-content:space-between; gap:10px; \
-                     padding:1px 5px 5px 5px; min-width:0; font-family:{}; font-size:9.5px; \
-                     font-weight:640; letter-spacing:0.16em; text-transform:uppercase; color:{};",
+                     padding:0 2px 4px 2px; min-width:0; font-family:{}; font-size:10.5px; \
+                     font-weight:620; letter-spacing:0.08em; text-transform:uppercase; \
+                     font-variant-numeric:tabular-nums; color:{};",
                     tokens.ui_font, tokens.meta,
                 ),
                 span {
