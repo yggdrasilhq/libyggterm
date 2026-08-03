@@ -11,6 +11,8 @@ pub mod chat_input;
 #[cfg(feature = "desktop-shell")]
 pub mod chrome;
 pub mod conversation;
+/// The four-way scroll control, shared by every surface that scrolls.
+pub mod dpad;
 pub mod drag_tree;
 pub mod drag_visuals;
 pub mod motion;
@@ -35,6 +37,7 @@ pub use conversation::{
     WORK_GROUP_COLLAPSED_ROWS, WorkGroup, WorkMark, WorkMarkGlyph, WorkRow, WorkingIndicator,
     changed_file_label,
 };
+pub use dpad::{DPAD_CSS, DpadAction, DpadPalette, DpadPlacement, ScrollDpad};
 pub use drag_tree::{
     DRAG_BEGIN_THRESHOLD_PX, DragDropPlacement, DragDropTarget, ROW_DRAG_CLICK_SUPPRESS_MS,
     ROW_DRAG_SPRING_MS, RowDragGesture, RowDragHover, RowDropTarget, RowTreeDrop, RowTreeRow,

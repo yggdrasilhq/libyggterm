@@ -3,6 +3,21 @@
 Consumers pin this library by **tag**, so a tag is the release unit. Entries
 are written from the git record, not from memory.
 
+## v0.6.1 — 2026-08-03
+
+- **`yggui::dpad` — one four-way scroll control, for every surface that
+  scrolls.** `ScrollDpad`, `DpadAction`, `DpadPalette`, `DpadPlacement`,
+  `DPAD_CSS`. A terminal, an agent transcript and a document reader share one
+  problem — content taller than the viewport and a keyboard route nobody can
+  see — and yggterm had two answers to it in one file. Only one was any good:
+  the terminal's 3×3 pad on a glass panel, against a squashed 3×2 on the
+  transcript that put "go to bottom" in the hole where a D-pad's centre belongs.
+
+  The geometry is the component's, because a D-pad is recognised by its SHAPE
+  before a glyph is read, and a test refuses to let anything occupy the middle
+  cell. The host keeps what the actions MEAN — a terminal's "bottom" is the
+  prompt, a transcript's is the newest turn — plus placement and brand.
+
 ## v0.6.0 — 2026-08-03
 
 **Breaking:** a transcript's headings are no longer the document's, and
