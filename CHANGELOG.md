@@ -3,6 +3,25 @@
 Consumers pin this library by **tag**, so a tag is the release unit. Entries
 are written from the git record, not from memory.
 
+## v0.8.0 — 2026-08-04
+
+**Breaking:** `WORK_GROUP_COLLAPSED_ROWS` is now `0`, so a host reading it draws
+no work rows until the reader expands.
+
+- **The ask card stops looking like a UI panel.** No drop shadow and no border:
+  a shadow makes a message read as chrome floating over the page rather than as
+  something a person said, and a hairline on a fill that is already distinct is
+  a second edge doing the first one's job. The fill loses its blue cast
+  (`#eef2f7` → `#f1f2f4`), the card widens to 88%/680px so a three-line question
+  stops wrapping to five, and the **timestamp moves outside** — it was adding a
+  row of chrome, and a tail of dead space, to every question.
+
+- **A work run collapses to ONE line.** `WORK_GROUP_COLLAPSED_ROWS` goes from 6
+  to 0, which is t3code's `Worked for 24m 1s ›`. Six satisfied nobody: too many
+  to skip, too few to be the run, and on a transcript that is 96 tool calls
+  against 37 prose turns it still put six lines of machinery between every pair
+  of paragraphs.
+
 ## v0.7.0 — 2026-08-03
 
 **Breaking:** `ProseBody` gains a `weight` field; a struct literal must name it.
