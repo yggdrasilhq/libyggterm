@@ -96,7 +96,16 @@ pub const CONVERSATION_RUN_INSET_PX: u32 = 14;
 pub const CHANGED_FILE_CHIP_LIMIT: usize = 4;
 
 /// How many rows a work group shows before it offers "show more".
-pub const WORK_GROUP_COLLAPSED_ROWS: usize = 6;
+///
+/// **Zero.** A run collapses to its header line and nothing else, which is
+/// t3code's `Worked for 24m 1s ›` and the reference the user named. Six was a
+/// compromise that satisfied nobody: too many to skip past, too few to be the
+/// whole run, and on a transcript that is 96 tool calls against 37 prose turns
+/// it still put six lines of machinery between every pair of paragraphs.
+///
+/// The reader's question here is "did it do anything unusual", not "what was
+/// step 7". One line answers the first; the second is a click away.
+pub const WORK_GROUP_COLLAPSED_ROWS: usize = 0;
 
 /// Every colour, face and measure the conversation surface draws with.
 ///
@@ -185,7 +194,7 @@ pub const CONVERSATION_THEME_CSS: &str = r#"
 :root {
   --yggui-conv-meta: #8b96a2;
   --yggui-conv-hairline: rgba(20,32,44,0.10);
-  --yggui-conv-ask-surface: #eef2f7;
+  --yggui-conv-ask-surface: #f1f2f4;
   --yggui-conv-ask-hairline: rgba(20,32,44,0.09);
   --yggui-conv-ask-shadow: 0 8px 20px rgba(90,116,140,0.10);
   --yggui-conv-work-surface: rgba(20,32,44,0.028);
@@ -204,7 +213,7 @@ pub const CONVERSATION_THEME_CSS: &str = r#"
   :root:not(.light):not([data-theme="light"]) {
     --yggui-conv-meta: #8595a5;
     --yggui-conv-hairline: rgba(190,214,238,0.12);
-    --yggui-conv-ask-surface: rgba(255,255,255,0.082);
+    --yggui-conv-ask-surface: rgba(255,255,255,0.06);
     --yggui-conv-ask-hairline: rgba(190,214,238,0.19);
     --yggui-conv-ask-shadow: 0 10px 26px rgba(0,0,0,0.28);
     --yggui-conv-work-surface: rgba(255,255,255,0.032);
@@ -223,7 +232,7 @@ pub const CONVERSATION_THEME_CSS: &str = r#"
 :root.dark, :root[data-theme="dark"] {
   --yggui-conv-meta: #8595a5;
   --yggui-conv-hairline: rgba(190,214,238,0.12);
-  --yggui-conv-ask-surface: rgba(255,255,255,0.082);
+  --yggui-conv-ask-surface: rgba(255,255,255,0.06);
   --yggui-conv-ask-hairline: rgba(190,214,238,0.19);
   --yggui-conv-ask-shadow: 0 10px 26px rgba(0,0,0,0.28);
   --yggui-conv-work-surface: rgba(255,255,255,0.032);
@@ -305,7 +314,7 @@ impl ConversationTokens {
                 accent,
                 meta: "#8595a5",
                 hairline: "rgba(190,214,238,0.12)",
-                ask_surface: "rgba(255,255,255,0.082)",
+                ask_surface: "rgba(255,255,255,0.06)",
                 ask_hairline: "rgba(190,214,238,0.19)",
                 ask_shadow: "0 10px 26px rgba(0,0,0,0.28)",
                 work_surface: "rgba(255,255,255,0.032)",
@@ -330,7 +339,7 @@ impl ConversationTokens {
                 accent,
                 meta: "#8b96a2",
                 hairline: "rgba(20,32,44,0.10)",
-                ask_surface: "#eef2f7",
+                ask_surface: "#f1f2f4",
                 ask_hairline: "rgba(20,32,44,0.09)",
                 ask_shadow: "0 8px 20px rgba(90,116,140,0.10)",
                 work_surface: "rgba(20,32,44,0.028)",
@@ -487,16 +496,26 @@ pub fn UserTurn(
         div {
             class: "yggui-conv-turn",
             "data-yggui-conv-turn": "user",
-            style: "display:flex; justify-content:flex-end; width:100%; min-width:0;",
+            style: "display:flex; flex-direction:column; align-items:flex-end; \
+                    width:100%; min-width:0; gap:4px;",
             div {
+                // ⚠ NO SHADOW AND NO BORDER. Both were here and both were
+                // wrong: a drop shadow makes a message read as a UI PANEL
+                // floating over the page rather than as something someone said,
+                // and a hairline on top of a fill that is already distinct is a
+                // second edge doing the first one's job. The fill alone carries
+                // it — measured against t3code's, which is the reference the
+                // user asked for.
+                //
+                // Wider, too. A 78% cap made a three-line question wrap into
+                // five, and the ask is the one block on the page whose shape
+                // the reader already knows.
                 style: format!(
-                    "display:flex; flex-direction:column; gap:8px; min-width:0; \
-                     max-width:min(78%, 560px); box-sizing:border-box; padding:12px 16px; \
-                     border-radius:16px; background:{}; border:1px solid {}; \
-                     box-shadow:{}; color:{}; {} text-wrap:pretty;",
+                    "display:flex; flex-direction:column; gap:6px; min-width:0; \
+                     max-width:min(88%, 680px); box-sizing:border-box; padding:14px 18px; \
+                     border-radius:18px; background:{}; border:none; box-shadow:none; \
+                     color:{}; {} text-wrap:pretty;",
                     tokens.ask_surface,
-                    tokens.ask_hairline,
-                    tokens.ask_shadow,
                     tokens.ink,
                     ProseBody::CONVERSATION_ASK.style(),
                 ),
@@ -504,8 +523,12 @@ pub fn UserTurn(
                     style: "min-width:0; overflow-wrap:anywhere;",
                     {children}
                 }
-                TurnFooter { tokens, timestamp, actions, align: "flex-end" }
             }
+            // Outside the card. A timestamp inside it adds a row of chrome to
+            // the one block on the page that should read as something a person
+            // said — and it is the reason the bubble had a tail of dead space
+            // under every question.
+            TurnFooter { tokens, timestamp, actions, align: "flex-end" }
         }
     }
 }
