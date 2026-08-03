@@ -101,6 +101,11 @@ pub struct ProseBody {
     pub size_px: Option<f32>,
     pub line_height: Option<f32>,
     pub tracking: Option<&'static str>,
+    /// Body weight. A variable face holds any value, so this is a real dial
+    /// rather than a jump to semibold: 420 against 400 thickens a stem by a
+    /// fraction of a pixel at 14px, which is the difference between body copy
+    /// that reads solid and body copy that reads washed out. `None` inherits.
+    pub weight: Option<u16>,
 }
 
 impl ProseBody {
@@ -110,6 +115,7 @@ impl ProseBody {
         size_px: None,
         line_height: None,
         tracking: None,
+        weight: None,
     };
 
     /// The machine's answer in a transcript: t3code's chat body, measured off
@@ -123,6 +129,7 @@ impl ProseBody {
         size_px: Some(14.0),
         line_height: Some(1.625),
         tracking: None,
+        weight: Some(420),
     };
 
     /// The person's ask. The SAME body as the answer.
@@ -136,6 +143,7 @@ impl ProseBody {
         size_px: Some(14.0),
         line_height: Some(1.625),
         tracking: None,
+        weight: Some(420),
     };
 
     /// A rendered markdown document.
@@ -144,6 +152,7 @@ impl ProseBody {
         size_px: Some(16.0),
         line_height: Some(1.7),
         tracking: Some("0.002em"),
+        weight: Some(420),
     };
 
     /// Markdown in a contributed rail pane: the caller's face and size, with
@@ -153,18 +162,22 @@ impl ProseBody {
         size_px: None,
         line_height: Some(1.55),
         tracking: None,
+        weight: None,
     };
 
-    /// The four properties as CSS. Always the same four keys.
+    /// The five properties as CSS. Always the same five keys.
     pub fn style(&self) -> String {
         format!(
-            "font-family:{}; font-size:{}; line-height:{}; letter-spacing:{};",
+            "font-family:{}; font-size:{}; line-height:{}; letter-spacing:{}; font-weight:{};",
             self.font.unwrap_or("inherit"),
             self.size_px.map(css_px).unwrap_or_else(inherit),
             self.line_height
                 .map(|value| value.to_string())
                 .unwrap_or_else(inherit),
             self.tracking.unwrap_or("inherit"),
+            self.weight
+                .map(|value| value.to_string())
+                .unwrap_or_else(inherit),
         )
     }
 }
@@ -394,9 +407,23 @@ impl ProseTokens {
     }
 
     /// The wrapper a rendered document sits in.
+    ///
+    /// `-webkit-font-smoothing: subpixel-antialiased` is deliberate and it is
+    /// the OPPOSITE of the usual reflex. `antialiased` is the fashionable
+    /// setting and it makes stems visibly THINNER — on a 14px body over a light
+    /// surface that reads as washed out, which is what "a little bit of
+    /// hinting, glyphs slightly thicker" was describing. Subpixel rendering
+    /// keeps the hinted stem weight the font was drawn with.
+    ///
+    /// `geometricPrecision` is likewise avoided: it disables hinting outright
+    /// in favour of unrounded outlines, which is right for large display type
+    /// and wrong for body copy at a size where a stem is one or two pixels.
     pub fn root_style(&self) -> String {
         format!(
-            "{} text-rendering:optimizeLegibility; font-feature-settings:'kern' 1, 'liga' 1;",
+            "{} text-rendering:optimizeLegibility; \
+             -webkit-font-smoothing:subpixel-antialiased; \
+             font-synthesis:none; font-optical-sizing:auto; \
+             font-feature-settings:'kern' 1, 'liga' 1;",
             self.body.style(),
         )
     }
@@ -609,7 +636,7 @@ mod tests {
             names
         };
         let expected = keys(ProseBody::DOCUMENT);
-        assert_eq!(expected.len(), 4);
+        assert_eq!(expected.len(), 5);
         for body in [
             ProseBody::INHERIT,
             ProseBody::RAIL,
