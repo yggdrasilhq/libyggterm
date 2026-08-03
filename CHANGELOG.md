@@ -3,6 +3,35 @@
 Consumers pin this library by **tag**, so a tag is the release unit. Entries
 are written from the git record, not from memory.
 
+## v0.6.0 — 2026-08-03
+
+**Breaking:** a transcript's headings are no longer the document's, and
+`ProseBody::CONVERSATION_ANSWER` is no longer a serif. A host that pinned to the
+old look has to say so itself.
+
+- **The chat surface takes t3code's type system, measured rather than felt.**
+  Body at 14px/1.625 in `DM Sans` (`CHAT_SANS_STACK`), both sides of the
+  conversation at ONE size; headings at weight 600 with 20px above and 8px
+  below; blocks 10px apart, lists indented 20px with 4px between items. Sources:
+  their `apps/web/src/index.css` `.chat-markdown` rules and
+  `ChatMarkdown.tsx:1600` (`text-sm leading-relaxed`).
+
+  The serif answer was this library's own call, asked for and then withdrawn by
+  the user once the two surfaces sat side by side: *"their design language of
+  the chat interface is superior and I have changed my mind."* A transcript is
+  not an article — it is threaded with paths, commands and tool output, and a
+  serif fights every one of them. `PROSE_SERIF_STACK` remains exported for a
+  host that genuinely wants an article face.
+
+- **`Inter Variable` is spliced into the chat stack ahead of the generics.**
+  `DM Sans` is not installed on the fleet's desktop host (`fc-match "DM Sans"` →
+  Noto Sans), and a face nobody chose is worse than a second choice that was.
+
+- **Headings are no longer shared across surfaces**, and that is now the
+  documented rule: a document's headings open a chapter, a transcript's label a
+  paragraph inside a turn that is already a boundary. Code treatment, table
+  rules and the mono face stay shared, and a test holds each half.
+
 ## v0.5.0 — 2026-08-03
 
 **Breaking:** `ConversationTokens` loses `prose_font`, `ui_font`, `mono_font`

@@ -24,18 +24,18 @@
 //!   line-height 1.7 (user-directed 2026-07-18 "readability like The New York
 //!   Times", refined 2026-07-23 to sans).
 //! - [`ProseTokens::conversation`] — an agent transcript. Its body type is
-//!   INHERITED, because the turn above it already decided and the two sides of
-//!   a conversation are deliberately unequal: the person's ask is sans at 15px,
-//!   the machine's answer is serif at 16px, and ONE markdown renderer serves
-//!   both. Those two decisions are [`ProseBody::CONVERSATION_ASK`] and
-//!   [`ProseBody::CONVERSATION_ANSWER`], here rather than in the components, so
-//!   this file is the only place a type decision is made.
+//!   INHERITED, because the turn above it already decided; both sides are the
+//!   chat sans at 14px/1.625, from [`ProseBody::CONVERSATION_ASK`] and
+//!   [`ProseBody::CONVERSATION_ANSWER`], which live here rather than in the
+//!   components so this file is the only place a type decision is made.
 //! - [`ProseTokens::rail`] — markdown inside a 300px contributed pane. It keeps
 //!   the interface face at the rail's own size; reading typography belongs to
 //!   document-scale surfaces only.
 //!
-//! Everything below the body — headings, code, lists, tables, quotes, rules —
-//! is shared by all three. A heading is a heading.
+//! Code, tables, quotes and rules are shared by all three. **Headings are not**:
+//! a document's are an article's, a transcript's are paragraph labels inside a
+//! turn that is already a boundary. That distinction was learned the expensive
+//! way — the transcript wore the article scale and read as shouting.
 //!
 //! ⚠ Every `*_style` helper emits a FIXED property-key set and varies only
 //! values, including `inherit` where a surface declines to decide. Dioxus
@@ -43,8 +43,26 @@
 //! omits, so a branch that drops one leaves the previous branch's value
 //! painted.
 
-/// The face an answer is set in. Serif is the machine's voice in a transcript:
-/// one face, one meaning, never changed for decoration.
+/// The chat face — both sides of a transcript.
+///
+/// This was a serif for one release, on the reasoning that the machine's answer
+/// deserved a reading face of its own. The user asked for that and then
+/// withdrew it after seeing t3code's chat surface beside ours (2026-08-03):
+/// *"their design language of the chat interface is superior and I have changed
+/// my mind"*. A transcript is not an article — it is a conversation with code,
+/// paths and tool output threaded through it, and a serif fights every one of
+/// those.
+///
+/// `DM Sans` is t3code's own first choice. `Inter Variable` is spliced in ahead
+/// of the generic fallbacks because it is the fleet's interface face and IS
+/// installed, whereas an unresolved `DM Sans` otherwise falls through to Noto
+/// Sans — a face nobody chose. Verified with `fc-match` on the live host.
+pub const CHAT_SANS_STACK: &str = "\"DM Sans Variable\", \"DM Sans\", \"Inter Variable\", \"Inter\", \
+     -apple-system, BlinkMacSystemFont, \"Segoe UI\", system-ui, sans-serif";
+
+/// The serif that used to set the machine's answer. Kept because a host may
+/// still want an article face for a document surface; nothing in the
+/// conversation presets reads it any more.
 pub const PROSE_SERIF_STACK: &str =
     "\"Source Serif 4\", \"Noto Serif\", \"Iowan Old Style\", Georgia, serif";
 
@@ -97,22 +115,29 @@ impl ProseBody {
         tracking: None,
     };
 
-    /// The machine's answer in a transcript. A hair of negative tracking: a
-    /// serif at 16px sets a touch loose on a screen, and the answer is the one
-    /// block on the page long enough for that to accumulate.
+    /// The machine's answer in a transcript: t3code's chat body, measured off
+    /// `ChatMarkdown.tsx` (`text-sm leading-relaxed`) rather than felt.
+    ///
+    /// 14px, not 16. A transcript is dense with paths, commands and tool
+    /// output, and a full reading size makes an ordinary turn look like an
+    /// essay — which is exactly how ours read next to theirs.
     pub const CONVERSATION_ANSWER: Self = Self {
-        font: Some(PROSE_SERIF_STACK),
-        size_px: Some(16.0),
-        line_height: Some(1.72),
-        tracking: Some("-0.003em"),
+        font: Some(CHAT_SANS_STACK),
+        size_px: Some(14.0),
+        line_height: Some(1.625),
+        tracking: None,
     };
 
-    /// The person's ask. 15px rather than a full step below the answer — an ask
-    /// is quieter than what it gets back, not smaller print.
+    /// The person's ask. The SAME body as the answer.
+    ///
+    /// It used to be a step smaller, which is a messenger idiom: it makes the
+    /// question look like a caption on the answer. t3code sets both sides at
+    /// one size and lets the card carry the difference, and it reads as one
+    /// conversation instead of two voices at two volumes.
     pub const CONVERSATION_ASK: Self = Self {
-        font: Some(UI_SANS_STACK),
-        size_px: Some(15.0),
-        line_height: Some(1.6),
+        font: Some(CHAT_SANS_STACK),
+        size_px: Some(14.0),
+        line_height: Some(1.625),
         tracking: None,
     };
 
@@ -307,11 +332,56 @@ impl ProseTokens {
     }
 
     /// An agent transcript. Inherits its body from the turn that wraps it, so
-    /// the same renderer draws the person's sans ask and the machine's serif
-    /// answer without either re-deciding.
+    /// one renderer draws both sides without either re-deciding.
+    ///
+    /// ⚠ Its scale below body copy is NOT the document's, and that is the one
+    /// place this module walks back its own "a heading is a heading". A
+    /// document's headings are an article's — heavy, with a lot of air, because
+    /// they are the only structure a long page has. A transcript already has
+    /// structure: every turn is a boundary, and an `## Heading` inside one
+    /// answer is a paragraph label, not a chapter. Ours drew it at 22.7px/780
+    /// with 34px above, which is why the surface read as shouting next to
+    /// t3code's 18px/600 with 20px above. Measured from their `index.css`.
     pub const fn conversation() -> Self {
         Self {
             body: ProseBody::INHERIT,
+            headings: [
+                ProseHeading {
+                    size_em: 1.4286,
+                    weight: 600,
+                    tracking: "0",
+                    space_above_px: 20,
+                    space_below_px: 8,
+                },
+                ProseHeading {
+                    size_em: 1.2857,
+                    weight: 600,
+                    tracking: "0",
+                    space_above_px: 20,
+                    space_below_px: 8,
+                },
+                ProseHeading {
+                    size_em: 1.1429,
+                    weight: 600,
+                    tracking: "0",
+                    space_above_px: 20,
+                    space_below_px: 8,
+                },
+                ProseHeading {
+                    size_em: 1.0,
+                    weight: 600,
+                    tracking: "0",
+                    space_above_px: 20,
+                    space_below_px: 8,
+                },
+            ],
+            // `0.65rem` between blocks, `1.25rem` of list indent and `0.25rem`
+            // between items — t3code's `.chat-markdown` rhythm.
+            paragraph_gap_px: 10,
+            block_gap_px: 10,
+            rule_gap_px: 16,
+            list_indent_px: 20,
+            list_item_gap_px: 4,
             ..SHARED
         }
     }
@@ -568,21 +638,72 @@ mod tests {
         }
     }
 
-    /// The rhythm is shared even though the body is not — a heading is a
-    /// heading, whichever surface it lands on.
+    /// A transcript's headings are QUIETER than a document's, at every level.
+    ///
+    /// The document keeps the article scale it was given (h1 800 → h4 720, lots
+    /// of air). The transcript takes t3code's: one weight, 600, and a fifth of
+    /// the space above. A turn is already a boundary, so a heading inside one
+    /// is labelling a paragraph, not opening a chapter.
     #[test]
-    fn the_scale_below_body_copy_is_identical_across_surfaces() {
+    fn a_transcripts_headings_are_quieter_than_a_documents() {
         let document = ProseTokens::document();
         let conversation = ProseTokens::conversation();
-        assert_eq!(document.headings, conversation.headings);
+        for (doc, chat) in document.headings.iter().zip(conversation.headings.iter()) {
+            assert!(chat.weight < doc.weight, "{chat:?} vs {doc:?}");
+            assert!(chat.size_em <= doc.size_em, "{chat:?} vs {doc:?}");
+            assert!(
+                chat.space_above_px <= doc.space_above_px,
+                "{chat:?} vs {doc:?}"
+            );
+        }
+        assert!(conversation.headings.iter().all(|h| h.weight == 600));
+    }
+
+    /// What is shared is the TREATMENT of code and tables, not the space around
+    /// them.
+    ///
+    /// A transcript sets its blocks 10px apart and a document 14px — that is
+    /// rhythm, and it belongs to the surface. The face, the reduced em and the
+    /// table's quiet rules belong to markdown itself, and drift between them is
+    /// the drift this module exists to stop.
+    #[test]
+    fn code_and_tables_wear_one_treatment_across_surfaces() {
+        let document = ProseTokens::document();
+        let conversation = ProseTokens::conversation();
         assert_eq!(
-            document.heading_style(2, &ink()),
-            conversation.heading_style(2, &ink())
+            document.inline_code_style(&ink()),
+            conversation.inline_code_style(&ink())
         );
+        assert_eq!(document.table_style(), conversation.table_style());
         assert_eq!(
-            document.paragraph_style(&ink()),
-            conversation.paragraph_style(&ink())
+            document.table_cell_style(&ink()),
+            conversation.table_cell_style(&ink())
         );
+        assert_eq!(document.mono_font, conversation.mono_font);
+        assert_eq!(document.code_block_em, conversation.code_block_em);
+    }
+
+    /// ★ NO SERIF IN A TRANSCRIPT (user, 2026-08-03, reversing an earlier ask).
+    ///
+    /// Both sides of the conversation wear the chat sans at one size. A serif
+    /// answer, and an ask a step smaller than it, are the two things that made
+    /// this surface read wrong beside t3code's.
+    #[test]
+    fn both_sides_of_a_transcript_wear_one_face_at_one_size() {
+        let ask = ProseBody::CONVERSATION_ASK;
+        let answer = ProseBody::CONVERSATION_ANSWER;
+        assert_eq!(ask.font, answer.font);
+        assert_eq!(ask.size_px, answer.size_px);
+        assert_eq!(ask.line_height, answer.line_height);
+        assert_eq!(answer.size_px, Some(14.0));
+        for body in [ask, answer] {
+            let face = body.font.expect("the chat body names its face");
+            assert!(!face.contains("serif") || face.contains("sans-serif"), "{face}");
+            assert!(face.contains("DM Sans"), "{face}");
+            // The fleet's own face has to be reachable, or an absent DM Sans
+            // falls through to whatever fontconfig picks.
+            assert!(face.contains("Inter"), "{face}");
+        }
     }
 
     /// A heading past h4 reuses h4 rather than falling off the table.
