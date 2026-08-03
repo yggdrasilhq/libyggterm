@@ -480,9 +480,32 @@ pub fn ConversationColumn(
 /// the one cue that survives at a glance when the answer below it has no card
 /// at all. The bottom-right corner is flattened — the card points back at the
 /// person who wrote it.
+/// How tall a clamped ask card stands before its fade, in px.
+///
+/// Roughly a dozen lines at the chat scale — enough to recognise what was asked
+/// and decide whether to open it.
+pub const ASK_CLAMP_PX: u32 = 300;
+
 #[component]
 pub fn UserTurn(
     tokens: ConversationTokens,
+    /// Clamp this ask to [`ASK_CLAMP_PX`] with a "Show more" control.
+    ///
+    /// ⚠ The HOST decides, because only the host can see how much content it is
+    /// handing in — `children` is an opaque `Element` here, and a component that
+    /// guessed would either clamp two-line questions or fail to clamp the case
+    /// this exists for.
+    ///
+    /// That case: a Codex rollout's FIRST user turn is the whole instruction
+    /// scaffold — hundreds of bullets across a dozen sections. Wrapped in a card
+    /// it becomes a screen-filling slab, and because the virtual window is
+    /// block-granular it cannot be partly scrolled: passing its top jumps the
+    /// reader over the entire thing to the first answer. Live report: *"it is
+    /// impossible to semi scroll the end of the user chat bubble and see the
+    /// assistant message."* A card is the wrong shape past a dozen lines; this
+    /// gives that content a lid.
+    #[props(default = false)]
+    collapsible: bool,
     /// Already formatted by the host. This module never parses or localises a
     /// time — a component that formats dates is a component with a locale bug.
     #[props(default = String::new())]
@@ -492,10 +515,13 @@ pub fn UserTurn(
     actions: Vec<TurnAction>,
     children: Element,
 ) -> Element {
+    let mut expanded = use_signal(|| false);
+    let clamped = collapsible && !expanded();
     rsx! {
         div {
             class: "yggui-conv-turn",
             "data-yggui-conv-turn": "user",
+            "data-yggui-conv-ask-clamped": if clamped { "1" } else { "0" },
             style: "display:flex; flex-direction:column; align-items:flex-end; \
                     width:100%; min-width:0; gap:4px;",
             div {
@@ -520,8 +546,30 @@ pub fn UserTurn(
                     ProseBody::CONVERSATION_ASK.style(),
                 ),
                 div {
-                    style: "min-width:0; overflow-wrap:anywhere;",
+                    style: if clamped {
+                        format!(
+                            "min-width:0; overflow-wrap:anywhere; position:relative; \
+                             max-height:{ASK_CLAMP_PX}px; overflow:hidden; \
+                             -webkit-mask-image:linear-gradient(to bottom, #000 72%, transparent 100%); \
+                             mask-image:linear-gradient(to bottom, #000 72%, transparent 100%);"
+                        )
+                    } else {
+                        "min-width:0; overflow-wrap:anywhere;".to_string()
+                    },
                     {children}
+                }
+                if collapsible {
+                    div {
+                        style: "display:flex; justify-content:flex-start; padding-top:2px;",
+                        QuietButton {
+                            tokens,
+                            label: if clamped { "Show more".to_string() } else { "Show less".to_string() },
+                            on_activate: move |_| {
+                                let next = !expanded();
+                                expanded.set(next);
+                            },
+                        }
+                    }
                 }
             }
             // Outside the card. A timestamp inside it adds a row of chrome to
