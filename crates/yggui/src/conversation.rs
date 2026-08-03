@@ -41,6 +41,8 @@
 
 use dioxus::prelude::*;
 
+use crate::prose::{PROSE_COLUMN_PX, ProseBody, ProseTokens};
+
 /// Hover-reveal and row-hover behaviour, which inline styles cannot express.
 ///
 /// Emitted once by [`ConversationColumn`]; a host that composes the pieces
@@ -81,13 +83,9 @@ pub const CONVERSATION_CSS: &str = r#"
 }
 "#;
 
-/// The reading column's width, in CSS pixels.
-///
-/// 720 is a measure of roughly 78 characters at the prose size, which is the
-/// upper end of comfortable. It is a token rather than a literal because the
-/// user card, the work card and the divider all have to agree with it — three
-/// call sites spelling 720 is how a column starts drifting.
-pub const CONVERSATION_COLUMN_PX: u32 = 720;
+/// The reading column's width, in CSS pixels. The measure belongs to the type
+/// system, not to this surface — see [`PROSE_COLUMN_PX`].
+pub const CONVERSATION_COLUMN_PX: u32 = PROSE_COLUMN_PX;
 
 /// The assistant run's left inset. Shared by the answer and its work so the
 /// machine's side of the page has exactly one left edge; see
@@ -152,14 +150,11 @@ pub struct ConversationTokens {
     /// a dead runtime.
     pub added: &'static str,
     pub removed: &'static str,
-    /// The answer's face.
-    pub prose_font: &'static str,
-    /// The person's face, and every label and control.
-    pub ui_font: &'static str,
-    /// The machine's face.
-    pub mono_font: &'static str,
-    /// The reading column, in px.
-    pub column_px: u32,
+    /// Every face, size and rhythm — the type system, which the host's markdown
+    /// renderer reads from the SAME value. See [`crate::prose`]: a transcript
+    /// whose turns and whose paragraphs answer to two different type owners is
+    /// a transcript that disagrees with itself, and it did.
+    pub prose: ProseTokens,
     /// The assistant run's left inset, in px — ONE left edge for the machine's
     /// side of the conversation.
     ///
@@ -286,10 +281,7 @@ impl ConversationTokens {
             send_glyph: "var(--yggui-conv-send-glyph)",
             added: "var(--yggui-conv-added)",
             removed: "var(--yggui-conv-removed)",
-            prose_font: PROSE_FONT,
-            ui_font: UI_FONT,
-            mono_font: MONO_FONT,
-            column_px: CONVERSATION_COLUMN_PX,
+            prose: ProseTokens::conversation(),
             run_inset_px: CONVERSATION_RUN_INSET_PX,
         }
     }
@@ -327,11 +319,8 @@ impl ConversationTokens {
                 send_glyph: "#0e1418",
                 added: "#5fbf88",
                 removed: "#e08594",
-                prose_font: PROSE_FONT,
-                ui_font: UI_FONT,
-                mono_font: MONO_FONT,
-                column_px: CONVERSATION_COLUMN_PX,
-            run_inset_px: CONVERSATION_RUN_INSET_PX,
+                prose: ProseTokens::conversation(),
+                run_inset_px: CONVERSATION_RUN_INSET_PX,
             }
         } else {
             Self {
@@ -355,11 +344,8 @@ impl ConversationTokens {
                 send_glyph: "#ffffff",
                 added: "#2f7d55",
                 removed: "#b4525f",
-                prose_font: PROSE_FONT,
-                ui_font: UI_FONT,
-                mono_font: MONO_FONT,
-                column_px: CONVERSATION_COLUMN_PX,
-            run_inset_px: CONVERSATION_RUN_INSET_PX,
+                prose: ProseTokens::conversation(),
+                run_inset_px: CONVERSATION_RUN_INSET_PX,
             }
         }
     }
@@ -374,9 +360,6 @@ impl ConversationTokens {
     }
 }
 
-const PROSE_FONT: &str = "\"Source Serif 4\", \"Noto Serif\", \"Iowan Old Style\", Georgia, serif";
-const UI_FONT: &str = "\"Inter Variable\", \"Inter\", system-ui, sans-serif";
-const MONO_FONT: &str = "\"JetBrains Mono\", \"Iosevka Term\", ui-monospace, monospace";
 
 /// What a work row DID, which is what its mark draws.
 ///
@@ -428,7 +411,7 @@ fn work_row_style(tokens: &ConversationTokens, failed: bool, has_body: bool) -> 
          text-align:left; cursor:{}; color:{}; font-family:{}; font-size:11px; line-height:1.55;",
         if has_body { "pointer" } else { "default" },
         if failed { tokens.removed } else { tokens.meta },
-        tokens.mono_font,
+        tokens.prose.mono_font,
     )
 }
 
@@ -467,8 +450,8 @@ pub fn ConversationColumn(
                  width:min({}px, 100%); margin:0 auto; min-width:0; box-sizing:border-box; \
                  padding:4px 0 56px 0; font-family:{}; color:{};",
                 tokens.css_variables(),
-                tokens.column_px,
-                tokens.ui_font,
+                tokens.prose.column_px,
+                tokens.prose.ui_font,
                 tokens.ink,
             ),
             style { {CONVERSATION_CSS} }
@@ -510,13 +493,12 @@ pub fn UserTurn(
                     "display:flex; flex-direction:column; gap:8px; min-width:0; \
                      max-width:min(78%, 560px); box-sizing:border-box; padding:12px 16px; \
                      border-radius:16px; background:{}; border:1px solid {}; \
-                     box-shadow:{}; color:{}; font-family:{}; font-size:15px; line-height:1.6; \
-                     text-wrap:pretty;",
+                     box-shadow:{}; color:{}; {} text-wrap:pretty;",
                     tokens.ask_surface,
                     tokens.ask_hairline,
                     tokens.ask_shadow,
                     tokens.ink,
-                    tokens.ui_font,
+                    ProseBody::CONVERSATION_ASK.style(),
                 ),
                 div {
                     style: "min-width:0; overflow-wrap:anywhere;",
@@ -573,10 +555,10 @@ pub fn AssistantTurn(
             ),
             div {
                 style: format!(
-                    "min-width:0; overflow-wrap:anywhere; color:{}; font-family:{}; \
-                     font-size:16px; line-height:1.72; letter-spacing:-0.003em; text-wrap:pretty; \
+                    "min-width:0; overflow-wrap:anywhere; color:{}; {} text-wrap:pretty; \
                      font-feature-settings:'kern' 1, 'liga' 1;",
-                    tokens.ink, tokens.prose_font,
+                    tokens.ink,
+                    ProseBody::CONVERSATION_ANSWER.style(),
                 ),
                 {children}
             }
@@ -596,7 +578,7 @@ pub fn SystemTurn(tokens: ConversationTokens, children: Element) -> Element {
                 "display:flex; justify-content:center; width:100%; min-width:0; \
                  color:{}; font-family:{}; font-size:12.5px; line-height:1.6; \
                  text-align:center; padding:0 24px; box-sizing:border-box;",
-                tokens.meta, tokens.ui_font,
+                tokens.meta, tokens.prose.ui_font,
             ),
             div { style: "min-width:0; overflow-wrap:anywhere; max-width:100%;", {children} }
         }
@@ -622,7 +604,7 @@ fn TurnFooter(
                 "display:flex; align-items:center; justify-content:{align}; gap:10px; \
                  min-width:0; font-family:{}; font-size:11px; letter-spacing:0.01em; \
                  font-variant-numeric:tabular-nums; color:{};",
-                tokens.ui_font, tokens.meta,
+                tokens.prose.ui_font, tokens.meta,
             ),
             if !actions.is_empty() {
                 div {
@@ -666,7 +648,7 @@ pub fn QuietButton(
                 "border:none; background:transparent; color:{}; font-family:{}; font-size:10px; \
                  font-weight:600; letter-spacing:0.06em; padding:2px 7px; border-radius:6px; \
                  cursor:pointer; white-space:nowrap;",
-                tokens.meta, tokens.ui_font,
+                tokens.meta, tokens.prose.ui_font,
             ),
             onclick: move |_| on_activate.call(()),
             "{label}"
@@ -727,7 +709,7 @@ pub fn WorkGroup(
                      padding:0 2px 4px 2px; min-width:0; font-family:{}; font-size:10.5px; \
                      font-weight:620; letter-spacing:0.08em; text-transform:uppercase; \
                      font-variant-numeric:tabular-nums; color:{};",
-                    tokens.ui_font, tokens.meta,
+                    tokens.prose.ui_font, tokens.meta,
                 ),
                 span {
                     style: "min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;",
@@ -838,7 +820,7 @@ pub fn WorkRow(
                          padding:9px 11px; border-radius:9px; background:{}; color:{}; \
                          font-family:{}; font-size:11px; line-height:1.62; \
                          white-space:pre-wrap; overflow-wrap:anywhere;",
-                        tokens.well_surface, tokens.ink, tokens.mono_font,
+                        tokens.well_surface, tokens.ink, tokens.prose.mono_font,
                     ),
                     {body}
                 }
@@ -860,7 +842,7 @@ pub fn DiffStat(
             style: format!(
                 "flex:0 0 auto; display:inline-flex; gap:6px; font-family:{}; font-size:11px; \
                  font-weight:700; font-variant-numeric:tabular-nums;",
-                tokens.mono_font,
+                tokens.prose.mono_font,
             ),
             span { style: format!("color:{};", tokens.added), "+{added_lines}" }
             span { style: format!("color:{};", tokens.removed), "−{removed_lines}" }
@@ -889,7 +871,7 @@ pub fn ChangedFileChips(tokens: ConversationTokens, files: Vec<String>) -> Eleme
                         "max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; \
                          padding:2px 7px; border-radius:6px; background:{}; border:1px solid {}; \
                          color:{}; font-family:{}; font-size:10px;",
-                        tokens.chip_surface, tokens.chip_hairline, tokens.meta, tokens.mono_font,
+                        tokens.chip_surface, tokens.chip_hairline, tokens.meta, tokens.prose.mono_font,
                     ),
                     {changed_file_label(path)}
                 }
@@ -898,7 +880,7 @@ pub fn ChangedFileChips(tokens: ConversationTokens, files: Vec<String>) -> Eleme
                 span {
                     style: format!(
                         "padding:2px 4px; color:{}; font-family:{}; font-size:10px;",
-                        tokens.meta, tokens.mono_font,
+                        tokens.meta, tokens.prose.mono_font,
                     ),
                     "+{overflow}"
                 }
@@ -957,7 +939,7 @@ pub fn TurnDivider(tokens: ConversationTokens, label: String) -> Element {
                     "flex:0 0 auto; padding:3px 10px; border-radius:999px; border:1px solid {}; \
                      color:{}; font-family:{}; font-size:9.5px; font-weight:640; \
                      letter-spacing:0.16em; text-transform:uppercase; white-space:nowrap;",
-                    tokens.hairline, tokens.meta, tokens.ui_font,
+                    tokens.hairline, tokens.meta, tokens.prose.ui_font,
                 ),
                 "{label}"
             }
@@ -982,7 +964,7 @@ pub fn WorkingIndicator(
             style: format!(
                 "display:flex; align-items:center; gap:9px; min-width:0; padding:0 2px; \
                  color:{}; font-family:{}; font-size:11.5px; letter-spacing:0.02em;",
-                tokens.meta, tokens.ui_font,
+                tokens.meta, tokens.prose.ui_font,
             ),
             span {
                 style: "display:inline-flex; align-items:center; gap:4px;",
@@ -1020,7 +1002,7 @@ pub fn ConversationEmptyState(
             div {
                 style: format!(
                     "color:{}; font-family:{}; font-size:15px; line-height:1.5;",
-                    tokens.ink, tokens.prose_font,
+                    tokens.ink, tokens.prose.prose_font,
                 ),
                 "{headline}"
             }
@@ -1028,7 +1010,7 @@ pub fn ConversationEmptyState(
                 div {
                     style: format!(
                         "max-width:420px; color:{}; font-family:{}; font-size:12px; line-height:1.6;",
-                        tokens.meta, tokens.ui_font,
+                        tokens.meta, tokens.prose.ui_font,
                     ),
                     "{detail}"
                 }

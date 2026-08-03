@@ -16,6 +16,9 @@ pub mod drag_visuals;
 pub mod motion;
 pub mod notifications;
 pub mod otp;
+/// The type system every rendered-markdown surface reads. One owner for faces,
+/// scale and rhythm, so a host adapter spells no literal.
+pub mod prose;
 pub mod rails;
 pub mod theme;
 
@@ -53,6 +56,10 @@ pub use notifications::{
 pub use otp::{
     OtpCodeEntry, YGGUI_OTP_CODE_LEN, YGGUI_OTP_CSS, complete_otp, digits_for_otp,
     install_otp_paste_bridge_script, otp_paste_from_native_script,
+};
+pub use prose::{
+    MONO_STACK, PROSE_COLUMN_PX, PROSE_SERIF_STACK, ProseBody, ProseHeading, ProseInk, ProseTokens,
+    READING_SANS_STACK, UI_SANS_STACK,
 };
 pub use rails::{RailHeader, RailScrollBody, RailSectionTitle, SideRailReveal, SideRailShell};
 pub use theme::{

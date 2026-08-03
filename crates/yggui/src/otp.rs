@@ -196,7 +196,7 @@ pub fn OtpCodeEntry(
 
     let cell_style = format!(
         "background:{}; border:1px solid {}; color:{}; font-family:{};",
-        tokens.composer_surface, tokens.ask_hairline, tokens.ink, tokens.ui_font,
+        tokens.composer_surface, tokens.ask_hairline, tokens.ink, tokens.prose.ui_font,
     );
 
     let apply = move |next: Vec<String>| {
@@ -280,7 +280,7 @@ pub fn OtpCodeEntry(
                     r#type: "button",
                     style: format!(
                         "border:1px solid {}; background:transparent; color:{}; font-family:{};",
-                        tokens.hairline, tokens.ink, tokens.ui_font,
+                        tokens.hairline, tokens.ink, tokens.prose.ui_font,
                     ),
                     onclick: move |_| {
                         spawn(async move {
