@@ -3,6 +3,58 @@
 Consumers pin this library by **tag**, so a tag is the release unit. Entries
 are written from the git record, not from memory.
 
+## v0.5.0 — 2026-08-03
+
+**Breaking:** `ConversationTokens` loses `prose_font`, `ui_font`, `mono_font`
+and `column_px`, and gains `prose: ProseTokens`. A consumer renames
+`tokens.ui_font` to `tokens.prose.ui_font`; nothing else moves.
+
+- **`yggui::prose` — the type system every rendered-markdown surface reads.**
+  `emd-renderer` answers what a document IS; it has no opinion about faces, and
+  so every host had to invent one. Three of them did, separately: a terminal's
+  Web View, a document reader and a chat app each spelled their own heading
+  scale, code face and paragraph rhythm. That is not a shared design language,
+  it is three languages that happen to agree for a while — the Web View was
+  drawing code in `ui-monospace` while `ConversationTokens` beside it named
+  JetBrains Mono, and neither knew about the other.
+
+  `ProseTokens` now owns every face, size and rhythm; `ProseInk` carries the
+  five colours a host is expected to override, and nothing else is a host's to
+  decide. `ProseTokens::document()`, `::conversation()` and `::rail()` name the
+  three surfaces; the rhythm below body copy is identical across all three,
+  because a heading is a heading.
+
+- **A surface that inherits must SAY `inherit`.** `ProseBody`'s fields are
+  optional and `None` means inherit, not unset. A transcript sits inside a turn
+  that has already chosen the face and size — the person's ask is sans at 15px,
+  the machine's answer serif at 16px/1.72 — and a markdown root that re-chooses
+  silently wins over it. That shipped: answers rendered at line-height 1.55 for
+  as long as the reading surface shared a `compact` flag with a 300px rail pane.
+  `ProseBody::CONVERSATION_ASK` and `::CONVERSATION_ANSWER` are now the tokens
+  the turns themselves apply, so every type decision in the library is in one
+  file.
+
+- Every `*_style` helper emits a FIXED property-key set and varies only values,
+  `inherit` included — held by a test, because Dioxus never clears a style key a
+  later render omits.
+
+## v0.4.3 — 2026-08-03
+
+- **The conversation type scale**, measured against t3code rather than felt: the
+  answer at 16px/1.72 with a hair of negative tracking, the ask at 15px rather
+  than a full step below it, the footer at 11px so a timestamp reads as a number
+  and not as a label.
+
+## v0.4.2 — 2026-08-03
+
+- **`MdInline::Image` is a typed node**, not a `🖼` glyph plus a link. A host
+  that CAN display an image (a transcript full of pasted screenshots) had no way
+  to tell one from a link to one. The crate stays platform-neutral and never
+  assumes a `src` is fetchable — the host decides how to draw it.
+- **The work seam is a spine, not ninety-six cards.** A run of consecutive tool
+  calls collects under one hairline rule rather than each row carrying its own
+  boxed surface.
+
 ## v0.4.1 — 2026-08-03
 
 - **The library builds for web and Android now, and this is what was stopping

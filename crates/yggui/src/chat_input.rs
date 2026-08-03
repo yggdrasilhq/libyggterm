@@ -173,8 +173,8 @@ pub fn YggChatInputBox(
                 "{} position:relative; display:flex; flex-direction:column; gap:6px; \
                  width:min({}px, 100%); margin:0 auto; min-width:0; font-family:{};",
                 composer_variables(&tokens),
-                tokens.column_px,
-                tokens.ui_font,
+                tokens.prose.column_px,
+                tokens.prose.ui_font,
             ),
             style { {CHAT_INPUT_CSS} }
             if menu_open() && context_available {
@@ -323,7 +323,7 @@ fn ContextMenu(
                     "box-sizing:border-box; width:100%; margin-bottom:4px; padding:7px 10px; \
                      border-radius:9px; border:1px solid {}; background:transparent; color:{}; \
                      font-family:{}; font-size:12.5px; outline:none;",
-                    tokens.hairline, tokens.ink, tokens.ui_font,
+                    tokens.hairline, tokens.ink, tokens.prose.ui_font,
                 ),
                 oninput: move |evt| on_filter.call(evt.value()),
                 onkeydown: move |evt| {
@@ -352,7 +352,7 @@ fn ContextMenu(
                          border:none; border-radius:9px; background:transparent; color:{}; \
                          font-family:{}; font-size:13px; text-align:left; cursor:pointer; \
                          overflow:hidden; text-overflow:ellipsis; white-space:nowrap;",
-                        tokens.ink, tokens.ui_font,
+                        tokens.ink, tokens.prose.ui_font,
                     ),
                     onclick: move |_| on_pick.call(option.key.clone()),
                     "{option.label}"
