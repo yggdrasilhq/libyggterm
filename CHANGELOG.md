@@ -3,6 +3,27 @@
 Consumers pin this library by **tag**, so a tag is the release unit. Entries
 are written from the git record, not from memory.
 
+## v0.9.0 — 2026-08-04
+
+- **`yggui::pill_toolbar` — a floating bar that costs no layout.** `PillToolbar`,
+  `PillToolbarPalette`, `PillStep`, `PILL_TOOLBAR_CSS`. Find in the centre, the
+  match stepper and its `3/17` counter beside the field, the light switch at the
+  far right.
+
+  A docked header takes a permanent strip off the top of every page, and on a
+  phone that strip is a meaningful fraction of the screen. This floats over the
+  content instead — the shape the user asked for after Uber's, and for their
+  reason: on a small screen space is the scarce resource.
+
+  The arrangement is argued, not arbitrary. Search is central because it is why
+  the bar exists; the stepper is adjacent because "next match" continues typing
+  and the hand should not travel; the theme toggle is far from both because it
+  is pressed once a session and a mis-hit costs a theme flip mid-read.
+
+  ⚠ **It owns shape, material and arrangement — and no state.** It does not
+  search, count matches, or know which theme is on; all three already have
+  owners in the host. A test refuses `use_signal`.
+
 ## v0.8.1 — 2026-08-04
 
 - **A long ask gets a lid.** `UserTurn` takes `collapsible`, clamping the card to

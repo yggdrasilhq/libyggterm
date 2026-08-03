@@ -18,6 +18,10 @@ pub mod drag_visuals;
 pub mod motion;
 pub mod notifications;
 pub mod otp;
+/// The floating pill toolbar — find, step, and the light switch, costing no
+/// layout. Built for the reading surfaces and for mobile, where a docked strip
+/// is a meaningful fraction of the screen.
+pub mod pill_toolbar;
 /// The type system every rendered-markdown surface reads. One owner for faces,
 /// scale and rhythm, so a host adapter spells no literal.
 pub mod prose;
@@ -60,6 +64,7 @@ pub use otp::{
     OtpCodeEntry, YGGUI_OTP_CODE_LEN, YGGUI_OTP_CSS, complete_otp, digits_for_otp,
     install_otp_paste_bridge_script, otp_paste_from_native_script,
 };
+pub use pill_toolbar::{PILL_TOOLBAR_CSS, PillStep, PillToolbar, PillToolbarPalette};
 pub use prose::{
     MONO_STACK, PROSE_COLUMN_PX, PROSE_SERIF_STACK, ProseBody, ProseHeading, ProseInk, ProseTokens,
     READING_SANS_STACK, UI_SANS_STACK,
