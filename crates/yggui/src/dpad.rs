@@ -162,14 +162,20 @@ pub fn ScrollDpad(
     /// pads apart.
     #[props(default = String::new())]
     surface_id: String,
-    /// Start hidden, for a host that reveals the pad on a condition only it
-    /// can evaluate — the terminal shows it once the viewport is far enough
-    /// from the prompt. The host then drives `opacity` / `pointer-events`
-    /// itself, which is why this is an INLINE state rather than a class: an
-    /// inline style is what a host's script can override, and a stylesheet rule
-    /// would silently win over it.
-    #[props(default = false)]
-    start_hidden: bool,
+    /// Whether the pad is on screen right now.
+    ///
+    /// A pad that is always visible is clutter on a surface already at its
+    /// bottom, so the host decides — and only the host CAN decide, because
+    /// "how far is the reader from the end" is measured in rows on a terminal
+    /// and in pixels on a transcript. It fades rather than unmounts, so the
+    /// control does not jump into existence under a pointer already moving
+    /// toward it.
+    ///
+    /// The state is an INLINE style, not a class: a host whose reveal runs in
+    /// its own script sets `opacity` directly, and a stylesheet rule would
+    /// silently win over it.
+    #[props(default = true)]
+    visible: bool,
     #[props(default = DpadPlacement::TopRight)] placement: DpadPlacement,
     on_action: EventHandler<DpadAction>,
 ) -> Element {
@@ -192,7 +198,7 @@ pub fn ScrollDpad(
         div {
             "data-yggui-dpad": "1",
             "data-yggui-dpad-surface": "{surface_id}",
-            "data-yggui-dpad-visible": if start_hidden { "false" } else { "true" },
+            "data-yggui-dpad-visible": if visible { "true" } else { "false" },
             style: format!(
                 "{} display:grid; grid-template-columns:repeat(3, {KEY_PX}px); \
                  grid-template-rows:repeat(3, {KEY_PX}px); gap:4px; padding:6px; \
@@ -201,8 +207,8 @@ pub fn ScrollDpad(
                  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.10), 0 12px 28px rgba(0,0,0,0.22); \
                  opacity:{}; pointer-events:{}; transition:opacity 120ms ease;",
                 placement.anchor_css(),
-                if start_hidden { "0" } else { "1" },
-                if start_hidden { "none" } else { "auto" },
+                if visible { "1" } else { "0" },
+                if visible { "auto" } else { "none" },
             ),
             // A press belongs to the pad, never to what is behind it.
             onmousedown: |evt| {

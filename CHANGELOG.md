@@ -3,6 +3,14 @@
 Consumers pin this library by **tag**, so a tag is the release unit. Entries
 are written from the git record, not from memory.
 
+## v0.6.3 — 2026-08-03
+
+- **`ScrollDpad` takes `visible` instead of `start_hidden`.** The pad is a
+  reveal, not a fixture: it is clutter on a surface already at its bottom. Only
+  the host can decide, because "how far is the reader from the end" is rows on a
+  terminal and pixels on a transcript — so the component fades on a bool and
+  owns nothing about when.
+
 ## v0.6.2 — 2026-08-03
 
 - **`DpadPlacement::Inline` and `start_hidden`**, so a host that already owns an
