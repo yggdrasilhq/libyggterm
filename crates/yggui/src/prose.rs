@@ -43,30 +43,27 @@
 //! omits, so a branch that drops one leaves the previous branch's value
 //! painted.
 
-/// The chat face — both sides of a transcript.
-///
-/// This was a serif for one release, on the reasoning that the machine's answer
-/// deserved a reading face of its own. The user asked for that and then
-/// withdrew it after seeing t3code's chat surface beside ours (2026-08-03):
-/// *"their design language of the chat interface is superior and I have changed
-/// my mind"*. A transcript is not an article — it is a conversation with code,
-/// paths and tool output threaded through it, and a serif fights every one of
-/// those.
-///
-/// `DM Sans` is t3code's own first choice. `Inter Variable` is spliced in ahead
-/// of the generic fallbacks because it is the fleet's interface face and IS
-/// installed, whereas an unresolved `DM Sans` otherwise falls through to Noto
-/// Sans — a face nobody chose. Verified with `fc-match` on the live host.
-pub const CHAT_SANS_STACK: &str = "\"DM Sans Variable\", \"DM Sans\", \"Inter Variable\", \"Inter\", \
-     -apple-system, BlinkMacSystemFont, \"Segoe UI\", system-ui, sans-serif";
-
 /// The serif that used to set the machine's answer. Kept because a host may
 /// still want an article face for a document surface; nothing in the
 /// conversation presets reads it any more.
 pub const PROSE_SERIF_STACK: &str =
     "\"Source Serif 4\", \"Noto Serif\", \"Iowan Old Style\", Georgia, serif";
 
-/// The interface face — labels, controls, and the person's own words.
+/// The interface face — labels, controls, the person's own words, AND both
+/// sides of a transcript.
+///
+/// The chat surface reached this the long way round. It was a serif, which the
+/// user asked for and then withdrew on seeing t3code's chat beside ours; it was
+/// then DM Sans, t3code's own first choice, which they rejected on sight once
+/// it was actually installed and rendering (*"I don't like DM Sans. I liked our
+/// previous Noto Sans or Inter variable"*). What they had been looking at in
+/// between was this stack, reached as a FALLBACK while DM Sans was missing from
+/// the host — so the face they liked was already ours.
+///
+/// It stays one constant rather than two identical ones: a chat face and an
+/// interface face that hold the same value are a duplicate waiting to drift.
+/// What was worth keeping from t3code is the SCALE — 14px, 1.625, weight-600
+/// headings — and that is [`ProseBody::CONVERSATION_ANSWER`], not this.
 pub const UI_SANS_STACK: &str = "\"Inter Variable\", \"Inter\", system-ui, sans-serif";
 
 /// The document reader's face. Deliberately NOT [`UI_SANS_STACK`]: a rendered
@@ -122,7 +119,7 @@ impl ProseBody {
     /// output, and a full reading size makes an ordinary turn look like an
     /// essay — which is exactly how ours read next to theirs.
     pub const CONVERSATION_ANSWER: Self = Self {
-        font: Some(CHAT_SANS_STACK),
+        font: Some(UI_SANS_STACK),
         size_px: Some(14.0),
         line_height: Some(1.625),
         tracking: None,
@@ -135,7 +132,7 @@ impl ProseBody {
     /// one size and lets the card carry the difference, and it reads as one
     /// conversation instead of two voices at two volumes.
     pub const CONVERSATION_ASK: Self = Self {
-        font: Some(CHAT_SANS_STACK),
+        font: Some(UI_SANS_STACK),
         size_px: Some(14.0),
         line_height: Some(1.625),
         tracking: None,
@@ -699,10 +696,13 @@ mod tests {
         for body in [ask, answer] {
             let face = body.font.expect("the chat body names its face");
             assert!(!face.contains("serif") || face.contains("sans-serif"), "{face}");
-            assert!(face.contains("DM Sans"), "{face}");
-            // The fleet's own face has to be reachable, or an absent DM Sans
-            // falls through to whatever fontconfig picks.
-            assert!(face.contains("Inter"), "{face}");
+            // The interface face, and the SAME constant the rest of the shell
+            // uses — the chat face was briefly its own stack led by DM Sans,
+            // which the user rejected on sight once it was installed and
+            // actually rendering.
+            assert_eq!(face, UI_SANS_STACK);
+            assert!(face.contains("Inter Variable"), "{face}");
+            assert!(!face.contains("DM Sans"), "{face}");
         }
     }
 

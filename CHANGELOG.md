@@ -3,6 +3,21 @@
 Consumers pin this library by **tag**, so a tag is the release unit. Entries
 are written from the git record, not from memory.
 
+## v0.6.4 — 2026-08-03
+
+**Breaking:** `CHAT_SANS_STACK` is gone. The conversation body reads
+`UI_SANS_STACK`, which is the same value it was falling back to anyway.
+
+- **The chat face is Inter, not DM Sans.** v0.6.0 took t3code's face along with
+  their scale; the host did not have DM Sans, so what shipped and what the user
+  approved was the FALLBACK — this stack. Installing DM Sans made the surface
+  change under them and they rejected it on sight: *"I don't like DM Sans. I
+  liked our previous Noto Sans or Inter variable."*
+
+  What was worth taking from t3code was the SCALE — 14px/1.625, weight-600
+  headings, the tighter block rhythm — and that is unchanged. Two constants
+  holding one value would only drift, so there is now one.
+
 ## v0.6.3 — 2026-08-03
 
 - **`ScrollDpad` takes `visible` instead of `start_hidden`.** The pad is a
