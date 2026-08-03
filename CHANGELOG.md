@@ -3,6 +3,25 @@
 Consumers pin this library by **tag**, so a tag is the release unit. Entries
 are written from the git record, not from memory.
 
+## v0.7.0 — 2026-08-03
+
+**Breaking:** `ProseBody` gains a `weight` field; a struct literal must name it.
+
+- **Body copy gets its hinting back, and a hair more weight.** `root_style` now
+  asks for `-webkit-font-smoothing: subpixel-antialiased`, which is the opposite
+  of the usual reflex — `antialiased` is fashionable and makes stems visibly
+  THINNER, which at 14px over a light surface reads as washed out. Subpixel
+  rendering keeps the hinted stem weight the face was drawn with.
+  `geometricPrecision` is avoided for the same reason: it trades hinting for
+  unrounded outlines, right for display type and wrong where a stem is one or
+  two pixels. Body weight goes to **420** — a variable face holds it exactly, so
+  this is a dial rather than a jump to semibold.
+
+- **The D-pad's glass goes to 90% transparent** (`rgba(22,27,34,0.10)`, blur
+  14px), with its glyphs a step larger and lighter — 16px at weight 640 rather
+  than 15px at 800, which was heavy enough to read as a solid block at a
+  distance.
+
 ## v0.6.4 — 2026-08-03
 
 **Breaking:** `CHAT_SANS_STACK` is gone. The conversation body reads

@@ -182,7 +182,7 @@ pub fn ScrollDpad(
     let key_style = format!(
         "display:flex; align-items:center; justify-content:center; width:{KEY_PX}px; \
          height:{KEY_PX}px; border:none; border-radius:7px; background:rgba(255,255,255,0.16); \
-         color:{}; font-size:15px; font-weight:800; line-height:1; padding:0; cursor:pointer; \
+         color:{}; font-size:16px; font-weight:640; line-height:1; padding:0; cursor:pointer; \
          box-shadow:inset 0 0 0 1px rgba(255,255,255,0.20);",
         palette.ink,
     );
@@ -190,8 +190,8 @@ pub fn ScrollDpad(
     // it is what makes the four keys read as one control rather than as four.
     let centre_style = format!(
         "display:flex; align-items:center; justify-content:center; width:{KEY_PX}px; \
-         height:{KEY_PX}px; border-radius:7px; color:{}; font-size:13px; font-weight:800; \
-         opacity:0.7;",
+         height:{KEY_PX}px; border-radius:7px; color:{}; font-size:13px; font-weight:640; \
+         opacity:0.55;",
         palette.muted,
     );
     rsx! {
@@ -202,9 +202,9 @@ pub fn ScrollDpad(
             style: format!(
                 "{} display:grid; grid-template-columns:repeat(3, {KEY_PX}px); \
                  grid-template-rows:repeat(3, {KEY_PX}px); gap:4px; padding:6px; \
-                 border-radius:8px; background:rgba(22,27,34,0.58); \
-                 backdrop-filter:blur(12px) saturate(130%); \
-                 box-shadow:inset 0 0 0 1px rgba(255,255,255,0.10), 0 12px 28px rgba(0,0,0,0.22); \
+                 border-radius:8px; background:rgba(22,27,34,0.10); \
+                 backdrop-filter:blur(14px) saturate(130%); \
+                 box-shadow:inset 0 0 0 1px rgba(255,255,255,0.10), 0 12px 28px rgba(0,0,0,0.14); \
                  opacity:{}; pointer-events:{}; transition:opacity 120ms ease;",
                 placement.anchor_css(),
                 if visible { "1" } else { "0" },
