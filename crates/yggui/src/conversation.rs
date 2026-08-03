@@ -89,6 +89,11 @@ pub const CONVERSATION_CSS: &str = r#"
 /// call sites spelling 720 is how a column starts drifting.
 pub const CONVERSATION_COLUMN_PX: u32 = 720;
 
+/// The assistant run's left inset. Shared by the answer and its work so the
+/// machine's side of the page has exactly one left edge; see
+/// [`ConversationTokens::run_inset_px`].
+pub const CONVERSATION_RUN_INSET_PX: u32 = 14;
+
 /// How many changed-file chips a work row draws before it counts the rest.
 pub const CHANGED_FILE_CHIP_LIMIT: usize = 4;
 
@@ -155,6 +160,17 @@ pub struct ConversationTokens {
     pub mono_font: &'static str,
     /// The reading column, in px.
     pub column_px: u32,
+    /// The assistant run's left inset, in px — ONE left edge for the machine's
+    /// side of the conversation.
+    ///
+    /// The answer needs it to hold the live rule without the text sliding
+    /// sideways when streaming ends, and its WORK has to sit on the same line,
+    /// or the column's left margin jogs on every prose↔work alternation. A real
+    /// transcript alternates on the order of a hundred times, so a 14px
+    /// disagreement between two components reads as a ragged edge down the
+    /// whole page — measured on the live host at prose x=643 against work
+    /// x=630 before this was a shared number.
+    pub run_inset_px: u32,
 }
 
 /// The light/dark values as CSS, for a host whose theme is resolved by the
@@ -274,6 +290,7 @@ impl ConversationTokens {
             ui_font: UI_FONT,
             mono_font: MONO_FONT,
             column_px: CONVERSATION_COLUMN_PX,
+            run_inset_px: CONVERSATION_RUN_INSET_PX,
         }
     }
 
@@ -314,6 +331,7 @@ impl ConversationTokens {
                 ui_font: UI_FONT,
                 mono_font: MONO_FONT,
                 column_px: CONVERSATION_COLUMN_PX,
+            run_inset_px: CONVERSATION_RUN_INSET_PX,
             }
         } else {
             Self {
@@ -341,6 +359,7 @@ impl ConversationTokens {
                 ui_font: UI_FONT,
                 mono_font: MONO_FONT,
                 column_px: CONVERSATION_COLUMN_PX,
+            run_inset_px: CONVERSATION_RUN_INSET_PX,
             }
         }
     }
@@ -548,7 +567,8 @@ pub fn AssistantTurn(
             // by decoration.
             style: format!(
                 "display:flex; flex-direction:column; gap:8px; width:100%; min-width:0; \
-                 box-sizing:border-box; padding:0 2px 0 14px; border-left:2px solid {};",
+                 box-sizing:border-box; padding:0 2px 0 {}px; border-left:2px solid {};",
+                tokens.run_inset_px,
                 if streaming { tokens.accent } else { "transparent" },
             ),
             div {
@@ -683,11 +703,15 @@ pub fn WorkGroup(
         div {
             "data-yggui-conv-work-group": "1",
             "data-yggui-conv-work-count": "{count}",
+            // The run's work sits on the SAME left edge as the answer above
+            // it (`run_inset_px`). `width:auto` rather than `100%`: the column
+            // stretches its children, so a percentage width plus a margin
+            // overflows by exactly the inset.
             style: format!(
-                "display:flex; flex-direction:column; gap:2px; width:100%; min-width:0; \
-                 box-sizing:border-box; padding:8px 9px; border-radius:12px; \
-                 background:{}; border:1px solid {};",
-                tokens.work_surface, tokens.work_hairline,
+                "display:flex; flex-direction:column; gap:2px; width:auto; min-width:0; \
+                 margin-left:{}px; box-sizing:border-box; padding:8px 9px; \
+                 border-radius:12px; background:{}; border:1px solid {};",
+                tokens.run_inset_px, tokens.work_surface, tokens.work_hairline,
             ),
             div {
                 style: format!(
