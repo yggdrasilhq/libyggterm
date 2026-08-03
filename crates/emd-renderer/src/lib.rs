@@ -39,6 +39,17 @@ pub enum MdInline {
         href: String,
         children: Vec<MdInline>,
     },
+    /// An image, kept as its own node rather than degraded to a link.
+    ///
+    /// It used to become `🖼 ` + a `Link`, which is lossy in the one place it
+    /// matters: a host that CAN display the image (a transcript full of pasted
+    /// screenshots) had no way to tell an image from a link to one. The node is
+    /// typed and the HOST decides how to draw it — this crate stays
+    /// platform-neutral and never assumes a `src` is fetchable.
+    Image {
+        src: String,
+        alt: Vec<MdInline>,
+    },
     HardBreak,
 }
 
@@ -227,13 +238,12 @@ pub fn parse_markdown_blocks(source: &str) -> Vec<MdBlock> {
                 inline_stack.push((4, dest_url.to_string(), std::mem::take(&mut inline)));
             }
             Event::End(TagEnd::Image) => {
-                if let Some((_, href, saved)) = inline_stack.pop() {
-                    let mut children = std::mem::replace(&mut inline, saved);
-                    if children.is_empty() {
-                        children.push(MdInline::Text("image".to_string()));
+                if let Some((_, src, saved)) = inline_stack.pop() {
+                    let mut alt = std::mem::replace(&mut inline, saved);
+                    if alt.is_empty() {
+                        alt.push(MdInline::Text("image".to_string()));
                     }
-                    inline.push(MdInline::Text("🖼 ".to_string()));
-                    inline.push(MdInline::Link { href, children });
+                    inline.push(MdInline::Image { src, alt });
                 }
             }
             Event::Text(text) => {
