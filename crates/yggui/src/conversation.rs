@@ -508,9 +508,9 @@ pub fn UserTurn(
             div {
                 style: format!(
                     "display:flex; flex-direction:column; gap:8px; min-width:0; \
-                     max-width:min(78%, 560px); box-sizing:border-box; padding:13px 17px; \
-                     border-radius:18px 18px 5px 18px; background:{}; border:1px solid {}; \
-                     box-shadow:{}; color:{}; font-family:{}; font-size:14px; line-height:1.62; \
+                     max-width:min(78%, 560px); box-sizing:border-box; padding:12px 16px; \
+                     border-radius:16px; background:{}; border:1px solid {}; \
+                     box-shadow:{}; color:{}; font-family:{}; font-size:15px; line-height:1.6; \
                      text-wrap:pretty;",
                     tokens.ask_surface,
                     tokens.ask_hairline,
@@ -574,7 +574,7 @@ pub fn AssistantTurn(
             div {
                 style: format!(
                     "min-width:0; overflow-wrap:anywhere; color:{}; font-family:{}; \
-                     font-size:15.5px; line-height:1.68; text-wrap:pretty; \
+                     font-size:16px; line-height:1.72; letter-spacing:-0.003em; text-wrap:pretty; \
                      font-feature-settings:'kern' 1, 'liga' 1;",
                     tokens.ink, tokens.prose_font,
                 ),
@@ -620,7 +620,7 @@ fn TurnFooter(
             "data-yggui-conv-turn-footer": "1",
             style: format!(
                 "display:flex; align-items:center; justify-content:{align}; gap:10px; \
-                 min-width:0; font-family:{}; font-size:10px; letter-spacing:0.06em; \
+                 min-width:0; font-family:{}; font-size:11px; letter-spacing:0.01em; \
                  font-variant-numeric:tabular-nums; color:{};",
                 tokens.ui_font, tokens.meta,
             ),
