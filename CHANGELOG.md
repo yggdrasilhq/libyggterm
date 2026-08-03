@@ -3,6 +3,23 @@
 Consumers pin this library by **tag**, so a tag is the release unit. Entries
 are written from the git record, not from memory.
 
+## v0.8.1 — 2026-08-04
+
+- **A long ask gets a lid.** `UserTurn` takes `collapsible`, clamping the card to
+  `ASK_CLAMP_PX` with a fade and a "Show more".
+
+  The case it exists for: a Codex rollout's FIRST user turn is the entire
+  instruction scaffold — hundreds of bullets across a dozen sections — and
+  wrapped in a card it becomes a screen-filling slab. Worse, the virtual window
+  is block-granular, so that one block cannot be partly scrolled: passing its
+  top jumps the reader over the whole thing to the first answer. Reported
+  exactly that way: *"it is impossible to semi scroll the end of the user chat
+  bubble and see the assistant message."*
+
+  The HOST decides, because `children` is an opaque `Element` here and a
+  component that guessed would clamp two-line questions or miss the case this
+  is for.
+
 ## v0.8.0 — 2026-08-04
 
 **Breaking:** `WORK_GROUP_COLLAPSED_ROWS` is now `0`, so a host reading it draws
