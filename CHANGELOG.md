@@ -3,6 +3,15 @@
 Consumers pin this library by **tag**, so a tag is the release unit. Entries
 are written from the git record, not from memory.
 
+## v0.6.2 — 2026-08-03
+
+- **`DpadPlacement::Inline` and `start_hidden`**, so a host that already owns an
+  element around the pad keeps it. The terminal reveals its pad from the xterm
+  buffer position — a condition only the terminal can evaluate — by setting
+  inline `opacity` on a node it looks up by id. That node stays the host's, the
+  pad inside it is the shared one, and the hidden state is an INLINE style
+  rather than a class precisely so the host's script can override it.
+
 ## v0.6.1 — 2026-08-03
 
 - **`yggui::dpad` — one four-way scroll control, for every surface that

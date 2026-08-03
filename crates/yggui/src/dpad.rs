@@ -98,13 +98,22 @@ pub enum DpadPlacement {
     #[default]
     TopRight,
     BottomRight,
+    /// The pad positions nothing and lets a wrapper place it.
+    ///
+    /// For a host that already owns an element around this one — because its
+    /// own scripting addresses that element by id, or stamps state onto it. The
+    /// terminal reveals its pad from the xterm buffer position, by setting
+    /// inline opacity on a node it looks up by id, and that node has to stay
+    /// the host's.
+    Inline,
 }
 
 impl DpadPlacement {
     fn anchor_css(self) -> &'static str {
         match self {
-            Self::TopRight => "top:12px; right:12px;",
-            Self::BottomRight => "bottom:14px; right:14px;",
+            Self::TopRight => "position:absolute; top:12px; right:12px; z-index:8;",
+            Self::BottomRight => "position:absolute; bottom:14px; right:14px; z-index:8;",
+            Self::Inline => "",
         }
     }
 }
@@ -128,18 +137,8 @@ impl DpadPalette {
     }
 }
 
-/// Hover-reveal, which an inline style cannot express. A host that wants the
-/// pad always visible passes `hover_reveal: false` and can skip this sheet.
+/// The key hover, which an inline style cannot express.
 pub const DPAD_CSS: &str = r#"
-[data-yggui-dpad][data-yggui-dpad-hover-reveal="1"] {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 120ms ease;
-}
-[data-yggui-dpad][data-yggui-dpad-hover-reveal="1"][data-yggui-dpad-visible="true"] {
-  opacity: 1;
-  pointer-events: auto;
-}
 [data-yggui-dpad] button {
   transition: background-color 120ms ease;
 }
@@ -163,10 +162,14 @@ pub fn ScrollDpad(
     /// pads apart.
     #[props(default = String::new())]
     surface_id: String,
-    /// Start hidden and reveal on the host's own hover signal (it flips
-    /// `data-yggui-dpad-visible`). `false` keeps it always on screen.
-    #[props(default = true)]
-    hover_reveal: bool,
+    /// Start hidden, for a host that reveals the pad on a condition only it
+    /// can evaluate — the terminal shows it once the viewport is far enough
+    /// from the prompt. The host then drives `opacity` / `pointer-events`
+    /// itself, which is why this is an INLINE state rather than a class: an
+    /// inline style is what a host's script can override, and a stylesheet rule
+    /// would silently win over it.
+    #[props(default = false)]
+    start_hidden: bool,
     #[props(default = DpadPlacement::TopRight)] placement: DpadPlacement,
     on_action: EventHandler<DpadAction>,
 ) -> Element {
@@ -189,16 +192,17 @@ pub fn ScrollDpad(
         div {
             "data-yggui-dpad": "1",
             "data-yggui-dpad-surface": "{surface_id}",
-            "data-yggui-dpad-hover-reveal": if hover_reveal { "1" } else { "0" },
-            "data-yggui-dpad-visible": if hover_reveal { "false" } else { "true" },
+            "data-yggui-dpad-visible": if start_hidden { "false" } else { "true" },
             style: format!(
-                "position:absolute; {} z-index:8; display:grid; \
-                 grid-template-columns:repeat(3, {KEY_PX}px); \
+                "{} display:grid; grid-template-columns:repeat(3, {KEY_PX}px); \
                  grid-template-rows:repeat(3, {KEY_PX}px); gap:4px; padding:6px; \
                  border-radius:8px; background:rgba(22,27,34,0.58); \
                  backdrop-filter:blur(12px) saturate(130%); \
-                 box-shadow:inset 0 0 0 1px rgba(255,255,255,0.10), 0 12px 28px rgba(0,0,0,0.22);",
+                 box-shadow:inset 0 0 0 1px rgba(255,255,255,0.10), 0 12px 28px rgba(0,0,0,0.22); \
+                 opacity:{}; pointer-events:{}; transition:opacity 120ms ease;",
                 placement.anchor_css(),
+                if start_hidden { "0" } else { "1" },
+                if start_hidden { "none" } else { "auto" },
             ),
             // A press belongs to the pad, never to what is behind it.
             onmousedown: |evt| {
