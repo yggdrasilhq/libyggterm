@@ -47,6 +47,17 @@ pub struct ToastItem {
     /// cost of the message. Opaque to this crate: the host decides what the
     /// string addresses and what "go there" means.
     pub source: Option<String>,
+    /// The floating toast has been dismissed. The notification itself is NOT
+    /// gone — it stays in the panel, with its history and its progress.
+    ///
+    /// ⛔ THESE ARE TWO DIFFERENT ACTS AND CONFLATING THEM DESTROYS DATA.
+    /// The X on a toast means "stop covering my screen"; the X in the panel
+    /// means "I am done with this, forget it". Both were wired to a delete,
+    /// which lost the user an agent's completion notice mid-flight on
+    /// 2026-08-06: they dismissed the popup and the record went with it. Their
+    /// words — *"Close in popup does not mean close in notification panel.
+    /// That info loss was a disaster."*
+    pub toast_dismissed: bool,
 }
 
 /// Where the toast stack sits over the app.
@@ -213,6 +224,10 @@ pub fn ToastViewport(
         .into_iter()
         .rev()
         .filter(|notification| {
+            // Dismissed means dismissed HERE, on the glass. The panel keeps it.
+            if notification.toast_dismissed {
+                return false;
+            }
             notification.persistent
                 || now_ms.saturating_sub(notification.created_at_ms) <= max_age_ms
         })
@@ -276,6 +291,22 @@ pub fn ToastCard(
     /// before — a card that cannot take you anywhere must not pretend it can,
     /// so the pointer only changes when there is somewhere to go.
     on_activate: Option<EventHandler<String>>,
+    /// Draw the "when + where" footer. True where notifications are KEPT and
+    /// read later (the panel); false on a floating toast, which is its own
+    /// timestamp and need not announce that it is from "just now".
+    #[props(default = false)]
+    meta: bool,
+    /// Clock for the relative timestamp, passed in so a render stays a pure
+    /// function of its inputs and a test can pin it.
+    #[props(default = 0)]
+    now_ms: u64,
+    /// The session's DISPLAY name, resolved by the host at render time.
+    ///
+    /// ⛔ Deliberately NOT stored beside `source` on the item: a row's title
+    /// changes (a generated one routinely does), and a name copied into a
+    /// notification would then disagree with the row it points at. The path is
+    /// the identity; this is only how it is spelled right now.
+    source_label: Option<String>,
 ) -> Element {
     let background = if palette.is_dark {
         "rgba(8,12,16,0.97)"
@@ -392,7 +423,47 @@ pub fn ToastCard(
                     tone: item.tone,
                 }
             }
+            if meta {
+                div {
+                    style: format!(
+                        "display:flex; align-items:baseline; justify-content:space-between; gap:8px; \
+                         font-size:10px; line-height:1.4; color:{}; opacity:0.72;",
+                        body_fg
+                    ),
+                    span { "{relative_time_label(item.created_at_ms, now_ms)}" }
+                    if let Some(label) = source_label.as_ref() {
+                        span {
+                            style: "overflow:hidden; text-overflow:ellipsis; white-space:nowrap; \
+                                    max-width:62%; text-align:right; font-weight:600;",
+                            "{label}"
+                        }
+                    }
+                }
+            }
         }
+    }
+}
+
+/// "When did this happen", the way a person would say it.
+///
+/// The user asked for "timestamps (intelligent)", and the intelligence is that
+/// precision stops being useful fast: nine seconds ago is "just now", an hour
+/// ago does not need its seconds, and days back wants a round number rather
+/// than a subtraction the reader performs themselves.
+///
+/// A clock that has gone backwards (an NTP step, a restored snapshot) reads
+/// "just now" rather than a negative age — `saturating_sub` guarantees it,
+/// because an impossible timestamp is worse than an imprecise one.
+pub fn relative_time_label(created_at_ms: u64, now_ms: u64) -> String {
+    let secs = now_ms.saturating_sub(created_at_ms) / 1_000;
+    match secs {
+        0..=44 => "just now".to_string(),
+        45..=89 => "a minute ago".to_string(),
+        90..=3_599 => format!("{}m ago", (secs + 30) / 60),
+        3_600..=7_199 => "an hour ago".to_string(),
+        7_200..=86_399 => format!("{}h ago", (secs + 1_800) / 3_600),
+        86_400..=172_799 => "yesterday".to_string(),
+        _ => format!("{}d ago", (secs + 43_200) / 86_400),
     }
 }
 
@@ -481,6 +552,50 @@ mod tests {
             !source.contains("item.persistent || item.progress.is_some()"),
             "persistence is about DISMISSAL and progress is about COMPLETION; \
              drawing a bar for the former is what made every bar fake"
+        );
+    }
+
+    /// ⛔⛔ DISMISSING A TOAST IS NOT DELETING A NOTIFICATION.
+    ///
+    /// The user lost an agent's completion notice on 2026-08-06 by closing its
+    /// popup: both X's were wired to the same delete, so "stop covering my
+    /// screen" and "forget this happened" were one action. *"That info loss was
+    /// a disaster."* The viewport must therefore filter on the flag rather than
+    /// rely on the host removing the item, or the two surfaces disagree again
+    /// the moment someone adds a third caller.
+    #[test]
+    fn a_dismissed_toast_leaves_the_viewport_but_not_the_history() {
+        let source = production_source();
+        assert!(
+            source.contains("pub toast_dismissed: bool,"),
+            "the two acts need two states; one boolean is what keeps them apart"
+        );
+        assert!(
+            source.contains("if notification.toast_dismissed {"),
+            "the VIEWPORT must skip a dismissed toast itself — if it only ever \
+             stopped showing what the host deleted, dismissing would have to \
+             delete, which is the bug"
+        );
+    }
+
+    /// Relative time is what a person would say, and it must never go backwards.
+    #[test]
+    fn relative_time_reads_the_way_a_person_would_say_it() {
+        let now = 1_000_000_000_u64;
+        let ago = |secs: u64| relative_time_label(now - secs * 1_000, now);
+        assert_eq!(ago(0), "just now");
+        assert_eq!(ago(30), "just now");
+        assert_eq!(ago(60), "a minute ago");
+        assert_eq!(ago(120), "2m ago");
+        assert_eq!(ago(3_600), "an hour ago");
+        assert_eq!(ago(7_200), "2h ago");
+        assert_eq!(ago(90_000), "yesterday");
+        assert_eq!(ago(3 * 86_400), "3d ago");
+        // ⚠ A clock that stepped backwards must not produce a negative age.
+        assert_eq!(
+            relative_time_label(now + 60_000, now),
+            "just now",
+            "an impossible timestamp is worse than an imprecise one"
         );
     }
 
