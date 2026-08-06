@@ -204,6 +204,10 @@ pub fn ToastViewport(
     max_visible: usize,
     now_ms: u64,
     on_clear: EventHandler<u64>,
+    /// Forwarded to every card. The floating toast and the notifications panel
+    /// draw the SAME `ToastCard`, so wiring this only on the panel would give
+    /// one notification two behaviours depending on where it was read.
+    on_activate: Option<EventHandler<String>>,
 ) -> Element {
     let visible = items
         .into_iter()
@@ -249,6 +253,7 @@ pub fn ToastViewport(
                             item: notification.clone(),
                             palette: palette,
                             on_clear: move |_| on_clear.call(notification.id),
+                            on_activate: on_activate,
                         }
                     }
                 }
