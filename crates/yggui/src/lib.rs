@@ -26,6 +26,9 @@ pub mod pill_toolbar;
 /// scale and rhythm, so a host adapter spells no literal.
 pub mod prose;
 pub mod rails;
+/// One primary action that remembers, plus a caret to the rest — the answer to
+/// a surface that grew one button per thing it can start.
+pub mod split_button;
 pub mod theme;
 
 pub use chat_input::{CHAT_INPUT_CSS, ChatContextOption, ComposerSendShortcut, YggChatInputBox};
