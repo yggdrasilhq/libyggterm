@@ -39,6 +39,14 @@ pub struct ToastItem {
     pub job_key: Option<String>,
     pub progress: Option<f32>,
     pub persistent: bool,
+    /// Where this notification CAME FROM, if anywhere the user can be taken.
+    ///
+    /// A notification is a pointer at something that happened somewhere. Left
+    /// without this, the reader is told a job finished and then has to go find
+    /// the row themselves — which for a fleet-sized session list is the whole
+    /// cost of the message. Opaque to this crate: the host decides what the
+    /// string addresses and what "go there" means.
+    pub source: Option<String>,
 }
 
 /// Where the toast stack sits over the app.
@@ -254,6 +262,15 @@ pub fn ToastCard(
     item: ToastItem,
     palette: ToastPalette,
     on_clear: EventHandler<MouseEvent>,
+    /// Called with `item.source` when the card BODY is pressed. The close
+    /// button is not the body and never fires this — that is the one
+    /// distinction the user asked for: *"clicking the notification (other than
+    /// the X) should take me to the important place."*
+    ///
+    /// Absent, or absent `item.source`, and the card is inert exactly as
+    /// before — a card that cannot take you anywhere must not pretend it can,
+    /// so the pointer only changes when there is somewhere to go.
+    on_activate: Option<EventHandler<String>>,
 ) -> Element {
     let background = if palette.is_dark {
         "rgba(8,12,16,0.97)"
@@ -269,6 +286,7 @@ pub fn ToastCard(
     let body_fg = contrast_text_for_layer(background, shell_background, false);
     let (tone_accent, close_fg) =
         toast_tone_colors(item.tone, palette, background, shell_background);
+    let activatable = on_activate.is_some() && item.source.is_some();
     let blur_style = if linux_x11_safe_mode() {
         "backdrop-filter:none; -webkit-backdrop-filter:none;"
     } else {
@@ -278,7 +296,7 @@ pub fn ToastCard(
         div {
             style: format!(
                 "display:flex; flex-direction:column; gap:7px; padding:12px 12px 11px 12px; border-radius:14px; \
-                 background:{}; {} box-shadow:{};",
+                 background:{}; {} box-shadow:{}; cursor:{};",
                 background,
                 blur_style
                 ,
@@ -286,8 +304,21 @@ pub fn ToastCard(
                     "0 22px 44px rgba(0,0,0,0.32), inset 0 0 0 1px rgba(214,229,242,0.18)"
                 } else {
                     "0 18px 38px rgba(49,67,82,0.12), inset 0 0 0 1px rgba(255,255,255,0.88)"
-                }
+                },
+                // ⚠ `cursor` is emitted on EVERY branch, never conditionally
+                // added. A style key that appears in one render and not the
+                // next is not cleared by the diff on this stack
+                // ([[spec-sidebar-auto-hide-hover-overlay]]), so a card that
+                // stopped being actionable would keep the hand pointer.
+                if activatable { "pointer" } else { "default" }
             ),
+            onclick: move |_| {
+                if let (Some(handler), Some(source)) =
+                    (on_activate.as_ref(), item.source.as_ref())
+                {
+                    handler.call(source.clone());
+                }
+            },
             div {
                 style: "display:flex; align-items:center; justify-content:space-between; gap:8px;",
                 div {
@@ -317,7 +348,14 @@ pub fn ToastCard(
                         },
                         close_fg
                     ),
-                    onclick: move |evt| on_clear.call(evt),
+                    // ⛔ The X sits INSIDE the body that now navigates, so it
+                    // must stop the event or dismissing a notification would
+                    // also jump the user to the row they were dismissing —
+                    // the one outcome they explicitly excluded.
+                    onclick: move |evt: MouseEvent| {
+                        evt.stop_propagation();
+                        on_clear.call(evt);
+                    },
                     "×"
                 }
             }
@@ -329,9 +367,23 @@ pub fn ToastCard(
                 ),
                 "{item.message}"
             }
-            if item.persistent || item.progress.is_some() {
+            // ⛔ A BAR MEANS "THIS FAR ALONG", AND NOTHING ELSE.
+            //
+            // This used to read `item.persistent || item.progress.is_some()`,
+            // so every PERSISTENT toast drew a bar whether or not anything was
+            // measuring it — and with no value to draw, the bar below fell back
+            // to a static 44% fill. Persistent toasts are the common kind, so
+            // the overwhelming majority of bars a user ever saw were that fake
+            // one: permanently half-full, never moving, indistinguishable from
+            // a job wedged at 44%. The user's report, 2026-08-06: *"I have only
+            // seen half filled progressbars in yggterm in my entire life.
+            // Nothing else."* They were right, and it was every one of them.
+            //
+            // Persistence is about DISMISSAL; progress is about COMPLETION.
+            // They were never the same question.
+            if let Some(progress) = item.progress {
                 ToastProgressBar {
-                    progress: item.progress,
+                    progress,
                     tone: item.tone,
                 }
             }
@@ -339,9 +391,21 @@ pub fn ToastCard(
     }
 }
 
+/// A determinate progress bar. `progress` is a fraction in `0.0..=1.0`.
+///
+/// ⛔ It takes an `f32`, NOT an `Option<f32>`, on purpose. The optional version
+/// had an `else` arm that drew a static 44%-wide fill for "unknown", which is
+/// not an indeterminate indicator — it is a lie that reads as a stalled job,
+/// and it was almost every bar anyone saw. A caller with nothing to report must
+/// draw no bar; making that unrepresentable here is what keeps it fixed.
+///
+/// ⚠ If a genuine indeterminate state is ever wanted it must ANIMATE to be
+/// honest, and an always-on CSS animation is a known idle-CPU cost on this
+/// stack ([[finding-status-dot-blink-idle-cpu]]) — so it needs its own design
+/// pass, not a resurrection of the static fill.
 #[component]
-fn ToastProgressBar(progress: Option<f32>, tone: ToastTone) -> Element {
-    let clamped = progress.map(|value| value.clamp(0.0, 1.0));
+fn ToastProgressBar(progress: f32, tone: ToastTone) -> Element {
+    let clamped = progress.clamp(0.0, 1.0);
     let accent = match tone {
         ToastTone::Info => "#72bef7",
         ToastTone::Success => "#2f9e62",
@@ -352,21 +416,12 @@ fn ToastProgressBar(progress: Option<f32>, tone: ToastTone) -> Element {
         div {
             style: "position:relative; width:100%; height:8px; border-radius:999px; overflow:hidden; \
                     background:rgba(191,206,221,0.3); box-shadow:inset 0 0 0 1px rgba(255,255,255,0.24);",
-            if let Some(progress) = clamped {
-                div {
-                    style: format!(
-                        "height:100%; width:{:.2}%; border-radius:999px; background:{}; transition:width 180ms ease;",
-                        progress * 100.0,
-                        accent
-                    )
-                }
-            } else {
-                div {
-                    style: format!(
-                        "position:absolute; inset:0 auto 0 0; width:44%; border-radius:999px; background:{};",
-                        accent
-                    )
-                }
+            div {
+                style: format!(
+                    "height:100%; width:{:.2}%; border-radius:999px; background:{}; transition:width 180ms ease;",
+                    clamped * 100.0,
+                    accent
+                )
             }
         }
     }
@@ -391,6 +446,89 @@ pub fn toast_tone_colors(
 mod tests {
     use super::*;
     use std::collections::BTreeSet;
+
+    /// ⛔ THE HALF-FILLED BAR. `ToastProgressBar` used to take an
+    /// `Option<f32>` and, given `None`, draw a **static 44% fill** — and the
+    /// caller drew it for every PERSISTENT toast, not just measured ones.
+    /// Persistent is the common kind, so nearly every bar a user ever saw was
+    /// that one: stuck at 44%, never moving. Reported 2026-08-06: *"I have only
+    /// seen half filled progressbars in yggterm in my entire life."*
+    ///
+    /// This is a SOURCE lock rather than a render assertion because the defect
+    /// was the type allowing the state at all. If someone reintroduces an
+    /// optional progress or a hardcoded fill width, this fails.
+    #[test]
+    fn a_progress_bar_can_only_be_drawn_from_a_real_fraction() {
+        // ⚠ CODE ONLY, comments stripped. `include_str!` pulls in this test and
+        // the doc comments that EXPLAIN the old bug — both quote the very
+        // strings being banned, so a raw search fails on its own prose. It did,
+        // twice, before this line existed.
+        let source = production_source();
+        assert!(
+            source.contains("fn ToastProgressBar(progress: f32, tone: ToastTone)"),
+            "the bar must take a REAL fraction; an Option is what let `None` render as a lie"
+        );
+        assert!(
+            !source.contains("width:44%"),
+            "the static 44% fill is the bug — a bar with nothing to report must not be drawn"
+        );
+        assert!(
+            !source.contains("item.persistent || item.progress.is_some()"),
+            "persistence is about DISMISSAL and progress is about COMPLETION; \
+             drawing a bar for the former is what made every bar fake"
+        );
+    }
+
+    /// The X lives inside the card body, and the body now navigates. Without a
+    /// stopped event, dismissing a notification would ALSO jump the user to the
+    /// row they were dismissing — the one outcome the request excluded.
+    #[test]
+    fn the_close_button_does_not_also_activate_the_card() {
+        let source = production_source();
+        let close_arm = source
+            .split("onclick: move |evt: MouseEvent| {")
+            .nth(1)
+            .expect("the close button's handler");
+        assert!(
+            close_arm.contains("evt.stop_propagation();"),
+            "the X must stop the event before the body's activate handler sees it"
+        );
+    }
+
+    /// A card that cannot take you anywhere must not offer a hand pointer, and
+    /// `cursor` must be emitted on BOTH branches — a style key dropped between
+    /// renders is never cleared on this stack.
+    #[test]
+    fn only_a_card_with_somewhere_to_go_is_activatable() {
+        let source = production_source();
+        assert!(
+            source.contains("let activatable = on_activate.is_some() && item.source.is_some();"),
+            "a handler with no source, or a source with no handler, is not actionable"
+        );
+        assert!(
+            source.contains(r#"if activatable { "pointer" } else { "default" }"#),
+            "cursor must be emitted on every branch, never conditionally added"
+        );
+    }
+
+    /// The PRODUCTION half of this file, comments stripped.
+    ///
+    /// A source lock that searches the whole file searches itself: the doc
+    /// comments explaining a banned pattern quote it, and the assertions
+    /// naming it are code. Both matched, and the lock failed on its own text
+    /// twice before this existed. So: cut the test module off, then drop
+    /// comments.
+    fn production_source() -> String {
+        let whole = include_str!("notifications.rs");
+        let code = whole.split("#[cfg(test)]").next().unwrap_or(whole);
+        code.lines()
+            .map(|line| match line.find("//") {
+                Some(at) => &line[..at],
+                None => line,
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
+    }
 
     fn style_keys(style: &str) -> BTreeSet<String> {
         style
