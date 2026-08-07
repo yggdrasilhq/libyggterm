@@ -14,6 +14,16 @@ the pilot app; `yedit` is the second.
 | `yggui-contract` | The wire contract shared by an app and its host |
 | `emd-renderer` | emd (extended markdown): the document model and parser every document surface shares. Pure — no UI stack. Spec: [`docs/spec-emd-renderer.md`](docs/spec-emd-renderer.md) |
 
+## Which kind of app are you writing?
+
+Two different products live here and they are not interchangeable: `yggui` is
+for an app that owns **its own window**, the widget schema is for an app that
+lives **inside a host's viewport**, and an app that wants both is one core with
+two front-ends. Which one you need, and the three tiers a host can paint your
+content by, are settled in **[`docs/spec-app-architecture.md`](docs/spec-app-architecture.md)** —
+read it before the build recipe, because it decides what the recipe is.
+
+
 ## Licence
 
 MPL-2.0. This is a deliberate choice: apps that link libyggterm must be free to
