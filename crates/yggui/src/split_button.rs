@@ -49,8 +49,19 @@ pub struct SplitButtonPalette {
     pub ink: String,
     /// Ink for secondary text: the menu's per-item detail line.
     pub muted: String,
-    /// Fill for a neutral button and for the menu surface.
+    /// Fill for a neutral button. **A tint is legitimate here** — the button
+    /// sits on a page whose own background is behind it.
     pub surface: String,
+    /// Fill for the floating menu, and it is a SEPARATE field on purpose.
+    ///
+    /// ⛔ **This must be OPAQUE.** The menu is a panel that floats over content
+    /// the component knows nothing about, so whatever is behind it shows
+    /// through any alpha. It shared `surface` until 2026-08-08, and the
+    /// consequence was a see-through menu on yggterm's start page: the host was
+    /// passing `rgba(255,255,255,0.18)` — exactly right as a tint for a button
+    /// on an opaque page, and never right for an overlay. One token was doing
+    /// two jobs, and only one of them tolerated transparency.
+    pub menu_surface: String,
     /// The hairline around the menu and between the two hit targets.
     pub hairline: String,
     /// The tint a menu item takes when hovered.
@@ -67,6 +78,7 @@ impl SplitButtonPalette {
         ink: impl Into<String>,
         muted: impl Into<String>,
         surface: impl Into<String>,
+        menu_surface: impl Into<String>,
         hairline: impl Into<String>,
         hover: impl Into<String>,
         accent: impl Into<String>,
@@ -76,12 +88,29 @@ impl SplitButtonPalette {
             ink: ink.into(),
             muted: muted.into(),
             surface: surface.into(),
+            menu_surface: menu_surface.into(),
             hairline: hairline.into(),
             hover: hover.into(),
             accent: accent.into(),
             on_accent: on_accent.into(),
         }
     }
+}
+
+/// The floating menu's own box.
+///
+/// A function rather than an inline `format!` so a lock can read it: the field
+/// this draws from is the whole difference between a menu you can read and a
+/// menu you can see through, and that difference is invisible in a diff of a
+/// long style string.
+fn menu_surface_style(palette: &SplitButtonPalette) -> String {
+    format!(
+        "position:absolute; top:calc(100% + 6px); left:0; z-index:40; \
+         min-width:max(100%, 232px); padding:5px; border-radius:10px; \
+         background:{}; box-shadow:inset 0 0 0 1px {}, 0 14px 34px rgba(0,0,0,0.22); \
+         display:flex; flex-direction:column; gap:1px;",
+        palette.menu_surface, palette.hairline,
+    )
 }
 
 /// One member of the family.
@@ -289,13 +318,7 @@ pub fn SplitButton(
                 div {
                     "data-yggui-split-menu": "1",
                     role: "menu",
-                    style: format!(
-                        "position:absolute; top:calc(100% + 6px); left:0; z-index:40; \
-                         min-width:max(100%, 232px); padding:5px; border-radius:10px; \
-                         background:{}; box-shadow:inset 0 0 0 1px {}, 0 14px 34px rgba(0,0,0,0.22); \
-                         display:flex; flex-direction:column; gap:1px;",
-                        palette.surface, palette.hairline,
-                    ),
+                    style: menu_surface_style(&palette),
                     for item in items.iter().cloned() {
                         {
                             let is_selected = item.id == selected.id;
@@ -370,6 +393,31 @@ mod tests {
             SplitButtonItem::new("claude-code", "Claude Code Session").accent("#d97706"),
             SplitButtonItem::new("terminal", "Terminal"),
         ]
+    }
+
+    /// ⭐ THE FLOATING MENU DRAWS ON ITS OWN SURFACE, NEVER THE BUTTON'S.
+    ///
+    /// One field fed both until 2026-08-08, and the user photographed the
+    /// result: a see-through start-page menu. The host was passing a TINT —
+    /// correct for a button whose page is opaque behind it, and never correct
+    /// for a panel floating over unknown content. The two uses have opposite
+    /// requirements, so they are two fields, and this is what holds them apart.
+    #[test]
+    fn the_menu_draws_on_its_own_surface_never_the_buttons() {
+        let tint = "rgba(255,255,255,0.18)";
+        let palette = SplitButtonPalette::new(
+            "#101418", "#5b6675", tint, "#141a21", "#d6dce4", "rgba(120,142,166,0.16)", "#2563eb",
+            "#ffffff",
+        );
+        let style = menu_surface_style(&palette);
+        assert!(
+            style.contains("background:#141a21"),
+            "the menu must paint its own surface: {style}"
+        );
+        assert!(
+            !style.contains(tint),
+            "the BUTTON's fill must not reach the floating menu: {style}"
+        );
     }
 
     /// The face is chosen by id, never by position — that is what makes the
