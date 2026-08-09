@@ -56,18 +56,74 @@ pub fn complete_otp(cells: &[String]) -> Option<String> {
     Some(cells.iter().map(|cell| cell.trim()).collect())
 }
 
+/// Which characters a code is made of.
+///
+/// ⚠ Not cosmetic. A digits-only entry silently refuses every keystroke of an
+/// alphanumeric code, which reads to the user as "the box is broken" rather
+/// than "wrong alphabet" — reported from the field 2026-08-09, where a
+/// six-character code like `KYAXU8` could not be entered or pasted at all.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum OtpAlphabet {
+    /// `0-9`. The default, so existing callers are unaffected.
+    #[default]
+    Digits,
+    /// `A-Z` and `0-9`, upper-cased on the way in so a code shown as `KYAXU8`
+    /// can be typed or pasted in either case.
+    Alphanumeric,
+}
+
 /// Keep only digits, and only as many as a code holds.
 ///
+/// Retained as the digits-only shorthand; [`chars_for_otp`] is the general form.
+pub fn digits_for_otp(raw: &str) -> Vec<String> {
+    chars_for_otp(raw, OtpAlphabet::Digits)
+}
+
+/// Pull a code out of whatever the user typed or pasted.
+///
 /// The paste path is where this earns its keep: a pasted message is usually
-/// `"Your code is 481920"` or `"481920 — do not share"`, and taking the digits
+/// `"Your code is 481920"` or `"481920 — do not share"`, and getting the code
 /// out of it is the difference between paste working and paste appearing
 /// broken.
-pub fn digits_for_otp(raw: &str) -> Vec<String> {
-    raw.chars()
-        .filter(char::is_ascii_digit)
-        .take(YGGUI_OTP_CODE_LEN)
-        .map(|digit| digit.to_string())
-        .collect()
+///
+/// ⛔ **The two alphabets need genuinely different strategies, and using the
+/// digits one for letters is the bug.** Filtering characters works for digits
+/// because prose contributes none. For an alphanumeric code the same filter
+/// turns `"Your Practice sign-in code is: KYAXU8"` into `"YOURPRACTICESIGN…"`.
+/// So the alphanumeric path looks for a *token* of exactly the code length,
+/// preferring one that contains a digit — real codes almost always mix, while
+/// an English word of the same length rarely does.
+pub fn chars_for_otp(raw: &str, alphabet: OtpAlphabet) -> Vec<String> {
+    match alphabet {
+        OtpAlphabet::Digits => raw
+            .chars()
+            .filter(char::is_ascii_digit)
+            .take(YGGUI_OTP_CODE_LEN)
+            .map(|digit| digit.to_string())
+            .collect(),
+        OtpAlphabet::Alphanumeric => {
+            let upper = raw.to_uppercase();
+            let mut tokens = upper
+                .split(|c: char| !c.is_ascii_alphanumeric())
+                .filter(|token| token.chars().count() == YGGUI_OTP_CODE_LEN);
+            // Prefer a token that mixes letters and digits: that is what a code
+            // looks like, and it is what tells `KYAXU8` from `PLEASE`.
+            let mixed = tokens
+                .clone()
+                .find(|token| token.chars().any(|c| c.is_ascii_digit()));
+            if let Some(token) = mixed.or_else(|| tokens.next()) {
+                return token.chars().map(|c| c.to_string()).collect();
+            }
+            // Nothing code-shaped in there — the ordinary case of typing one
+            // character into one cell.
+            upper
+                .chars()
+                .filter(|c| c.is_ascii_alphanumeric())
+                .take(YGGUI_OTP_CODE_LEN)
+                .map(|c| c.to_string())
+                .collect()
+        }
+    }
 }
 
 /// Spread pasted (or typed) digits across the cells from a starting index.
@@ -190,6 +246,9 @@ pub fn OtpCodeEntry(
     cells: Vec<String>,
     on_update: EventHandler<Vec<String>>,
     on_complete: EventHandler<String>,
+    /// Defaults to [`OtpAlphabet::Digits`] so existing callers are unchanged.
+    #[props(default)]
+    alphabet: OtpAlphabet,
 ) -> Element {
     let mut cells_state = cells.clone();
     cells_state.resize(YGGUI_OTP_CODE_LEN, String::new());
@@ -224,7 +283,12 @@ pub fn OtpCodeEntry(
                         class: "yggui-otp-cell",
                         "data-yggui-otp-cell": "{index}",
                         r#type: "text",
-                        inputmode: "numeric",
+                        inputmode: match alphabet {
+                            OtpAlphabet::Digits => "numeric",
+                            // "text" rather than "numeric": a numeric keypad on
+                            // mobile cannot type the letters at all.
+                            OtpAlphabet::Alphanumeric => "text",
+                        },
                         autocomplete: if index == 0 { "one-time-code" } else { "off" },
                         maxlength: "1",
                         style: "{cell_style}",
@@ -232,7 +296,7 @@ pub fn OtpCodeEntry(
                         oninput: {
                             let current = cells_state.clone();
                             move |evt: FormEvent| {
-                                let digits = digits_for_otp(&evt.value());
+                                let digits = chars_for_otp(&evt.value(), alphabet);
                                 if digits.is_empty() {
                                     // A cleared cell is a real edit, not a no-op:
                                     // the user is backing out of a wrong digit.
@@ -262,7 +326,7 @@ pub fn OtpCodeEntry(
                 oninput: {
                     let current = cells_state.clone();
                     move |evt: FormEvent| {
-                        let digits = digits_for_otp(&evt.value());
+                        let digits = chars_for_otp(&evt.value(), alphabet);
                         if digits.is_empty() {
                             return;
                         }
@@ -360,4 +424,57 @@ mod tests {
         assert!(script.contains("window.AndroidClipboard"));
         assert!(otp_paste_from_native_script().contains("__ygguiOtpPasteFromNative"));
     }
+
+    #[test]
+    fn alphanumeric_paste_finds_the_code_inside_the_sentence() {
+        // The exact shape practice.gour.top sends. Filtering characters -- which
+        // is right for digits -- would yield "YOURPRACTICESIGN…" here.
+        assert_eq!(
+            chars_for_otp(
+                "Hi, Your Practice sign-in code is: KYAXU8",
+                OtpAlphabet::Alphanumeric
+            )
+            .join(""),
+            "KYAXU8"
+        );
+    }
+
+    #[test]
+    fn alphanumeric_prefers_the_token_that_mixes_letters_and_digits() {
+        // "PLEASE" is also six characters. A code almost always carries a digit;
+        // an English word of the same length rarely does.
+        assert_eq!(
+            chars_for_otp("PLEASE use code AB12CD now", OtpAlphabet::Alphanumeric).join(""),
+            "AB12CD"
+        );
+    }
+
+    #[test]
+    fn alphanumeric_uppercases_so_either_case_pastes() {
+        assert_eq!(
+            chars_for_otp("kyaxu8", OtpAlphabet::Alphanumeric).join(""),
+            "KYAXU8"
+        );
+    }
+
+    #[test]
+    fn alphanumeric_accepts_a_single_typed_letter() {
+        // The ordinary case: one character into one cell. No token matches, so
+        // the fallback must still let the keystroke through -- this is exactly
+        // what the digits-only filter refused.
+        assert_eq!(chars_for_otp("k", OtpAlphabet::Alphanumeric).join(""), "K");
+    }
+
+    #[test]
+    fn digits_alphabet_is_unchanged_by_the_alphanumeric_work() {
+        assert_eq!(
+            chars_for_otp("Your code is 481920", OtpAlphabet::Digits).join(""),
+            "481920"
+        );
+        assert_eq!(
+            chars_for_otp("no digits here", OtpAlphabet::Digits),
+            Vec::<String>::new()
+        );
+    }
+
 }
