@@ -64,7 +64,7 @@ pub use notifications::{
     TOAST_CSS, ToastAnchor, ToastCard, ToastItem, ToastPalette, ToastTone, ToastViewport,
 };
 pub use otp::{
-    OtpCodeEntry, YGGUI_OTP_CODE_LEN, YGGUI_OTP_CSS, complete_otp, digits_for_otp,
+    OtpAlphabet, OtpCodeEntry, YGGUI_OTP_CODE_LEN, YGGUI_OTP_CSS, complete_otp, chars_for_otp, digits_for_otp,
     install_otp_paste_bridge_script, otp_paste_from_native_script,
 };
 pub use pill_toolbar::{PILL_TOOLBAR_CSS, PillStep, PillToolbar, PillToolbarPalette};
