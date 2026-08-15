@@ -371,3 +371,53 @@ mod document_split_locks {
         assert_eq!(clamp_document_split_ratio(f32::INFINITY), 0.5);
     }
 }
+
+/// A single segment in an app's custom titlebar switch.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AppTitlebarSwitchSegment {
+    pub id: String,
+    pub label: String,
+    #[serde(default)]
+    pub title: String,
+}
+
+/// Dynamic titlebar switch specification contributed by a libyggterm app.
+///
+/// An app can recompose the titlebar switch (e.g. `Top` ↔ `Dash` for ytop),
+/// provide custom segmented mode controls, or omit it completely by providing
+/// empty segments.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AppTitlebarSwitch {
+    pub active: String,
+    pub action: String,
+    #[serde(default)]
+    pub segments: Vec<AppTitlebarSwitchSegment>,
+}
+
+#[cfg(test)]
+mod titlebar_switch_tests {
+    use super::*;
+
+    #[test]
+    fn test_titlebar_switch_serde() {
+        let sw = AppTitlebarSwitch {
+            active: "top".to_string(),
+            action: "mode".to_string(),
+            segments: vec![
+                AppTitlebarSwitchSegment {
+                    id: "top".to_string(),
+                    label: "⚡ Top".to_string(),
+                    title: "Infrastructure Top".to_string(),
+                },
+                AppTitlebarSwitchSegment {
+                    id: "dash".to_string(),
+                    label: "📊 Dash".to_string(),
+                    title: "Agent Fleet Dash".to_string(),
+                },
+            ],
+        };
+        let json = serde_json::to_string(&sw).expect("serialize");
+        let decoded: AppTitlebarSwitch = serde_json::from_str(&json).expect("deserialize");
+        assert_eq!(sw, decoded);
+    }
+}
