@@ -17,7 +17,7 @@ resolver = "2"
 # Kept in step with the release tag. It had drifted (0.1.0 while the tree was
 # tagged v0.2.0) because nothing consumes the number — yggterm pins by TAG —
 # and a version that nobody reads is a version that lies.
-version = "0.12.1"
+version = "0.13.0"
 edition = "2024"
 authors = ["Yggdrasil HQ"]
 license = "MPL-2.0"

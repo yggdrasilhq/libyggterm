@@ -10,6 +10,9 @@ pub mod chat_input;
 /// does.
 #[cfg(feature = "desktop-shell")]
 pub mod chrome;
+/// The centred "type where you are going" surface — one shell that is a field
+/// and its results at once, so every app stops growing its own corner input.
+pub mod command_palette;
 pub mod conversation;
 /// The four-way scroll control, shared by every surface that scrolls.
 pub mod dpad;
@@ -36,6 +39,10 @@ pub use chat_input::{CHAT_INPUT_CSS, ChatContextOption, ComposerSendShortcut, Yg
 pub use chrome::{
     ChromeControlIcon, ChromePalette, HoveredChromeControl, TitlebarChrome, WindowControlsStrip,
     search_field_shell_style, search_input_style,
+};
+pub use command_palette::{
+    CommandPalette, CommandPaletteItem, CommandPalettePalette, PaletteMove,
+    YGGUI_COMMAND_PALETTE_CSS, palette_index_after,
 };
 pub use conversation::{
     AssistantTurn, CHANGED_FILE_CHIP_LIMIT, CONVERSATION_COLUMN_PX, CONVERSATION_CSS,
