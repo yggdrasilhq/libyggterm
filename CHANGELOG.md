@@ -3,6 +3,51 @@
 Consumers pin this library by **tag**, so a tag is the release unit. Entries
 are written from the git record, not from memory.
 
+## v0.13.0 — 2026-08-21
+
+- **`yggui::command_palette` — one centred surface that is a field and its
+  results at the same time.** `CommandPalette`, `CommandPalettePalette`,
+  `CommandPaletteItem`, `PaletteMove`, `palette_index_after`,
+  `YGGUI_COMMAND_PALETTE_CSS`.
+
+  Every app grows this control eventually, and built per app it comes out as a
+  small corner input with a popover under it. The popover is the defect: a
+  detached list under a cramped field reads as an autocomplete afterthought, so
+  people stop trusting it to hold anything but URLs. DESIGN.md ▸ Search in
+  chrome asks for the opposite by name — the result surface wraps the field
+  itself into one continuous shell, VS Code rather than popover — and that is
+  what this draws.
+
+  ⚠ **It owns shape, material, arrangement and key handling — and no state and
+  no ranking.** It does not search, filter, or hold the query or the selection;
+  the host already has the history or the command list, and a palette keeping
+  its own copy would be a second answer to an answered question.
+
+  ⭐ `palette_index_after` is exported so the host applies the move but does not
+  re-derive the rule. Wraparound and the stale-index clamp are the fiddly parts,
+  and the index IS stale routinely — the list shrinks under the user's own
+  typing, so an out-of-range selection is the normal state between a keystroke
+  and the next render, not a bug to panic on.
+
+## The gap: v0.10.0 … v0.12.1 (2026-08-06 … 2026-08-08)
+
+⚠ Reconstructed from the git record 2026-08-21, because these five tags shipped
+without entries and the file therefore read as though v0.9.0 were current. A
+consumer pins by tag, so a changelog that stops five releases short is a
+signpost pointing at the wrong version.
+
+- **v0.12.1** — `fix(split-button)`: the floating menu gets its own opaque
+  surface. Plus `docs`: the three content tiers, i.e. which kind of app you are
+  writing and why.
+- **v0.12.0** — `feat(yggui)`: a split button, so a surface stops growing one
+  button per thing it can start.
+- **v0.11.0** — `fix(notifications)`: closing a toast must not delete the
+  notification.
+- **v0.10.1** — `feat(notifications)`: the floating toast activates too, not
+  just the panel.
+- **v0.10.0** — `fix(notifications)`: every progress bar the user ever saw was a
+  fake one.
+
 ## v0.9.0 — 2026-08-04
 
 - **`yggui::pill_toolbar` — a floating bar that costs no layout.** `PillToolbar`,
