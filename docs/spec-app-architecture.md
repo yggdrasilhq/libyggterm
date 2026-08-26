@@ -159,8 +159,11 @@ the protocol, not the app's code.
 2. **The app scaffolding** — ensure-the-daemon, the OSC emitter, the manifest
    writer, the loopback HTTP shell. Roughly 200 lines that every app needs
    verbatim and that the pilot already proved.
-3. **A `graph` widget** (Tier C). Admitted by rule 1 on the day it is proposed:
-   every corpus reader wants it, and nothing in the platform has ever drawn one.
+3. **Analytical EMD components** (Tier C). Version 1 is now admitted and
+   implemented: typed grids/panels, plots, sparklines, metrics, queries, data
+   grids, and agent findings. They travel inside a Markdown body because their
+   source must remain human- and agent-readable; the host paints their shared
+   scene rather than an app painting private graph pixels.
 4. **The renderers move out of the host as they stabilise**, markdown first.
 
 ## 7. The open measurement that decides one app
@@ -187,7 +190,9 @@ spreadsheet by this spec.
    identical (that is the test).
 3. The grid measurement (§7), because its answer changes what §4's "two
    front-ends" costs.
-4. `graph` widget: model, host render, then the first corpus reader.
+4. ✅ EMD analytical components: model, bounded parser, deterministic scene,
+   host render, then Ytop as the first live producer. App-routed component
+   controls and export remain follow-on work.
 5. Markdown render extraction (`spec-emd-renderer.md` step 4), which unblocks a
    standalone document app.
 

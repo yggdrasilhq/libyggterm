@@ -487,15 +487,13 @@ impl ProseTokens {
         )
     }
 
-    /// The accent bar carries the quote; the text stays upright. Italicising a
-    /// whole quote reads as decoration, and the bar already said it.
-    ///
-    /// ⚠ An accent LEFT BAR is the blockquote's vocabulary and nothing else's —
-    /// never reuse it for editability or selection (user, 2026-07-23).
+    /// A quote is editorial punctuation: one hairline in the current text ink
+    /// and italic copy. Using `ink.ink` makes the line black in a light theme
+    /// and lets the dark theme invert it with the rest of its foreground.
     pub fn blockquote_style(&self, ink: &ProseInk) -> String {
         format!(
-            "border-left:{}px solid {}; margin:{}px 0; padding:2px 0 2px {}px; color:{};",
-            self.quote_bar_px, ink.accent, self.block_gap_px, self.quote_inset_px, ink.muted,
+            "border-left:1px solid {}; margin:{}px 0; padding:2px 0 2px {}px; color:{}; font-style:italic;",
+            ink.ink, self.block_gap_px, self.quote_inset_px, ink.muted,
         )
     }
 
@@ -517,7 +515,10 @@ impl ProseTokens {
     }
 
     pub fn table_style(&self) -> String {
-        format!("border-collapse:collapse; font-size:{};", css_em(self.table_em))
+        format!(
+            "border-collapse:collapse; font-size:{};",
+            css_em(self.table_em)
+        )
     }
 
     /// Horizontal separators ONLY — no vertical grid, no header fill. A full
@@ -707,6 +708,22 @@ mod tests {
         assert_eq!(document.code_block_em, conversation.code_block_em);
     }
 
+    #[test]
+    fn quotes_use_an_inverting_hairline_and_italic_text() {
+        let tokens = ProseTokens::document();
+        let light = ProseInk::new("#111111", "#555555", "#0066cc", "#dddddd", "#f6f6f6");
+        let dark = ProseInk::new("#f4f4f4", "#b8b8b8", "#66aaff", "#333333", "#181818");
+        let light_style = tokens.blockquote_style(&light);
+        let dark_style = tokens.blockquote_style(&dark);
+        assert!(light_style.contains("border-left:1px solid #111111"));
+        assert!(dark_style.contains("border-left:1px solid #f4f4f4"));
+        assert!(light_style.contains("font-style:italic"));
+        assert!(
+            !light_style.contains("#0066cc"),
+            "quotes do not use accent blue"
+        );
+    }
+
     /// ★ NO SERIF IN A TRANSCRIPT (user, 2026-08-03, reversing an earlier ask).
     ///
     /// Both sides of the conversation wear the chat sans at one size. A serif
@@ -722,7 +739,10 @@ mod tests {
         assert_eq!(answer.size_px, Some(14.0));
         for body in [ask, answer] {
             let face = body.font.expect("the chat body names its face");
-            assert!(!face.contains("serif") || face.contains("sans-serif"), "{face}");
+            assert!(
+                !face.contains("serif") || face.contains("sans-serif"),
+                "{face}"
+            );
             // The interface face, and the SAME constant the rest of the shell
             // uses — the chat face was briefly its own stack led by DM Sans,
             // which the user rejected on sight once it was installed and

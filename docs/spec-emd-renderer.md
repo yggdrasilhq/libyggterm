@@ -1,5 +1,9 @@
 # Spec: emd-renderer — the fluid markdown-superset document engine
 
+The typed analytical component grammar is specified separately in
+[`spec-emd-components.md`](spec-emd-components.md). A fenced `emd` block is one
+top-level source block, so click-to-edit and byte-range splicing remain aligned.
+
 **Status:** RECORDED 2026-07-23 (user-directed: "record spec as you see fit …
 and implement an initial scaffolding so we do not redo work"). Scaffolding
 SHIPPED same day: the crate holds the typed model + parser + source-range

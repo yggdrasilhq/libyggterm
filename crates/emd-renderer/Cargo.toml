@@ -11,3 +11,5 @@ description = "emd (extended markdown) — the markdown-superset document model 
 
 [dependencies]
 pulldown-cmark = { version = "0.12", default-features = false }
+serde.workspace = true
+serde_json.workspace = true

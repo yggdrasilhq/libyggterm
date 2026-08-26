@@ -28,6 +28,10 @@
 //! blocks/spans in the source are dropped by construction; note-derived
 //! content must not reach the shell's JS context.
 
+pub mod components;
+
+pub use components::{ComponentDocument, EmdComponent};
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum MdInline {
     Text(String),
@@ -61,6 +65,14 @@ pub enum MdBlock {
     },
     Paragraph(Vec<MdInline>),
     CodeBlock(String),
+    /// A typed, inert EMD component parsed from a fenced `emd` JSON block.
+    Component(ComponentDocument),
+    /// Malformed EMD is visible. Silently rendering it as code would make a
+    /// broken live chart look like an intentional notebook excerpt.
+    ComponentError {
+        message: String,
+        source: String,
+    },
     BlockQuote(Vec<MdBlock>),
     List {
         ordered: bool,
@@ -74,7 +86,7 @@ pub enum MdBlock {
 }
 
 pub fn parse_markdown_blocks(source: &str) -> Vec<MdBlock> {
-    use pulldown_cmark::{Event, HeadingLevel, Options, Parser, Tag, TagEnd};
+    use pulldown_cmark::{CodeBlockKind, Event, HeadingLevel, Options, Parser, Tag, TagEnd};
     let mut options = Options::empty();
     options.insert(Options::ENABLE_TABLES);
     options.insert(Options::ENABLE_STRIKETHROUGH);
@@ -92,9 +104,8 @@ pub fn parse_markdown_blocks(source: &str) -> Vec<MdBlock> {
     let mut table_header: Vec<Vec<MdInline>> = Vec::new();
     let mut table_rows: Vec<Vec<Vec<MdInline>>> = Vec::new();
     let mut table_cells: Vec<Vec<MdInline>> = Vec::new();
-    let mut in_table_head = false;
     let mut in_table = false;
-    let mut code_block: Option<String> = None;
+    let mut code_block: Option<(Option<String>, String)> = None;
     let mut heading_level: Option<u8> = None;
 
     let heading_number = |level: HeadingLevel| -> u8 {
@@ -135,10 +146,31 @@ pub fn parse_markdown_blocks(source: &str) -> Vec<MdBlock> {
                     sink(&mut root, &mut block_stack).push(MdBlock::Paragraph(children));
                 }
             }
-            Event::Start(Tag::CodeBlock(_)) => code_block = Some(String::new()),
+            Event::Start(Tag::CodeBlock(kind)) => {
+                let language = match kind {
+                    CodeBlockKind::Fenced(info) => info
+                        .split_whitespace()
+                        .next()
+                        .filter(|value| !value.is_empty())
+                        .map(str::to_string),
+                    CodeBlockKind::Indented => None,
+                };
+                code_block = Some((language, String::new()));
+            }
             Event::End(TagEnd::CodeBlock) => {
-                if let Some(text) = code_block.take() {
-                    sink(&mut root, &mut block_stack).push(MdBlock::CodeBlock(text));
+                if let Some((language, text)) = code_block.take() {
+                    let block = if language.as_deref() == Some("emd") {
+                        match components::parse_component(&text) {
+                            Ok(component) => MdBlock::Component(component),
+                            Err(message) => MdBlock::ComponentError {
+                                message,
+                                source: text,
+                            },
+                        }
+                    } else {
+                        MdBlock::CodeBlock(text)
+                    };
+                    sink(&mut root, &mut block_stack).push(block);
                 }
             }
             Event::Start(Tag::BlockQuote(_)) => block_stack.push(Vec::new()),
@@ -177,11 +209,9 @@ pub fn parse_markdown_blocks(source: &str) -> Vec<MdBlock> {
                 });
             }
             Event::Start(Tag::TableHead) => {
-                in_table_head = true;
                 table_cells.clear();
             }
             Event::End(TagEnd::TableHead) => {
-                in_table_head = false;
                 table_header = std::mem::take(&mut table_cells);
             }
             Event::Start(Tag::TableRow) => table_cells.clear(),
@@ -247,7 +277,7 @@ pub fn parse_markdown_blocks(source: &str) -> Vec<MdBlock> {
                 }
             }
             Event::Text(text) => {
-                if let Some(code) = code_block.as_mut() {
+                if let Some((_language, code)) = code_block.as_mut() {
                     code.push_str(&text);
                 } else {
                     inline.push(MdInline::Text(text.to_string()));
@@ -385,11 +415,15 @@ mod tests {
             crate::MdBlock::Table { header, rows } => Some((header.len(), rows.len())),
             _ => None,
         });
-        assert_eq!(table, Some((2, 1)), "2-col 1-row table expected: {blocks:?}");
+        assert_eq!(
+            table,
+            Some((2, 1)),
+            "2-col 1-row table expected: {blocks:?}"
+        );
         assert!(
-            blocks
-                .iter()
-                .any(|b| matches!(b, crate::MdBlock::List { ordered: false, items } if items.len() == 2)),
+            blocks.iter().any(
+                |b| matches!(b, crate::MdBlock::List { ordered: false, items } if items.len() == 2)
+            ),
             "list missing: {blocks:?}"
         );
         let flat = format!("{blocks:?}");
@@ -397,5 +431,28 @@ mod tests {
             !flat.contains("script") && !flat.contains("alert"),
             "raw HTML must be dropped, not carried: {flat}"
         );
+    }
+
+    #[test]
+    fn emd_fences_are_typed_and_keep_one_edit_range() {
+        let source = "# CPU\n\n```emd\n{\"version\":1,\"kind\":\"sparkline\",\"spec\":{\"label\":\"CPU\",\"values\":[10,null,30],\"evidence\":{\"question\":\"Is CPU rising?\",\"source\":\"/proc/stat\",\"window\":\"30 s\",\"freshness\":\"2 s\",\"units\":\"percent\",\"state\":\"observed\",\"reproduction\":\"ytop --json\"}}}\n```\n";
+        let blocks = parse_markdown_blocks(source);
+        assert!(
+            matches!(blocks.get(1), Some(MdBlock::Component(_))),
+            "{blocks:?}"
+        );
+        let ranges = top_level_block_ranges(source);
+        assert_eq!(blocks.len(), ranges.len());
+        assert!(source[ranges[1].clone()].starts_with("```emd"));
+    }
+
+    #[test]
+    fn malformed_emd_fails_loud_without_executing_or_disappearing() {
+        let blocks = parse_markdown_blocks("```emd\n{not json}\n```\n");
+        assert!(matches!(
+            blocks.as_slice(),
+            [MdBlock::ComponentError { message, source }]
+                if message.contains("invalid EMD component JSON") && source.contains("not json")
+        ));
     }
 }

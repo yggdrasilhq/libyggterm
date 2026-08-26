@@ -3,6 +3,29 @@
 Consumers pin this library by **tag**, so a tag is the release unit. Entries
 are written from the git record, not from memory.
 
+## v0.14.0 — 2026-08-26
+
+- **Extended Markdown gains a bounded analytical component tree.** A fenced
+  `emd` JSON block now parses into typed panels, grids, plots, sparklines,
+  metrics, query panes, exact data grids, and agent findings. Every analytical
+  leaf declares its question, source, window, freshness, units, observation
+  state, and reproduction path. Missing values remain gaps rather than zeros.
+
+  `emd-renderer` owns deterministic scales, ticks, segmented paths, grouped-bar
+  geometry, tooltips, and a colourblind-safe palette; a UI host translates the
+  returned scene into its native drawing nodes. Source size, tree depth by
+  count, points, series, rows, and dimensions are all bounded. Malformed or
+  unsupported blocks remain visible as local errors and raw HTML is never used.
+
+- **Document quotations become quiet punctuation.** Blockquotes use a
+  one-pixel foreground-ink rule and italic muted text. The rule is dark in a
+  light palette and inverts with ink in a dark palette; accent blue is no
+  longer spent on quotation structure.
+
+**Host note:** `MdBlock` has new `Component` and `ComponentError` variants, so a
+host that exhaustively matches blocks must add component rendering or a visible
+fallback when moving to v0.14.0.
+
 ## v0.13.0 — 2026-08-21
 
 - **`yggui::command_palette` — one centred surface that is a field and its
