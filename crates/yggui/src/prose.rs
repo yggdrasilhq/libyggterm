@@ -271,6 +271,38 @@ pub struct ProseTokens {
     pub column_px: u32,
 }
 
+/// Semantic text roles used by typed analytical components.
+///
+/// Components are denser than article prose, but that does not give each host
+/// permission to invent a chart/query/dashboard type scale. Hosts choose only
+/// colour and layout; these roles keep face, size, leading, tracking, weight,
+/// and posture under the same owner as ordinary Markdown.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum AnalyticalTextRole {
+    Badge,
+    Evidence,
+    Title,
+    Subtitle,
+    Axis,
+    Legend,
+    Label,
+    Caption,
+    ExactValue,
+    MetricValue,
+    QueryHeader,
+    MonoLabel,
+    MonoBody,
+    DataTable,
+    DataHeader,
+    Eyebrow,
+    CardTitle,
+    Body,
+    CompactBody,
+    PanelTitle,
+    Control,
+    ErrorTitle,
+}
+
 /// The rhythm every surface shares. Only [`ProseTokens::body`] and the faces
 /// differ between presets; a heading is a heading.
 const SHARED: ProseTokens = ProseTokens {
@@ -425,6 +457,56 @@ impl ProseTokens {
              font-synthesis:none; font-optical-sizing:auto; \
              font-feature-settings:'kern' 1, 'liga' 1;",
             self.body.style(),
+        )
+    }
+
+    /// The interface face for analytical labels such as SVG axes.
+    ///
+    /// Hosts may add size, weight, and colour, but do not get to spell a
+    /// second font stack beside the prose system.
+    pub fn ui_face_style(&self) -> String {
+        format!("font-family:{};", self.ui_font)
+    }
+
+    /// The shared machine-readable face for query source and exact values.
+    pub fn mono_face_style(&self) -> String {
+        format!("font-family:{};", self.mono_font)
+    }
+
+    /// Complete typography for a typed analytical text role.
+    ///
+    /// The property set is fixed for the same reason as every prose helper:
+    /// Dioxus updates style property-by-property, so omission can leave an old
+    /// role's value painted after a component changes shape.
+    pub fn analytical_text_style(&self, role: AnalyticalTextRole) -> String {
+        use AnalyticalTextRole::*;
+        let (face, size, leading, tracking, weight, posture) = match role {
+            Badge => (self.ui_font, "0.68em", "1.3", "0.055em", 700, "normal"),
+            Evidence => (self.ui_font, "0.72em", "1.45", "0", 400, "normal"),
+            Title => (self.ui_font, "0.98em", "1.3", "0", 720, "normal"),
+            Subtitle => (self.ui_font, "0.76em", "1.4", "0", 400, "normal"),
+            Axis => (self.ui_font, "11px", "1.2", "0", 400, "normal"),
+            Legend => (self.ui_font, "0.72em", "1.35", "0", 400, "normal"),
+            Label => (self.ui_font, "0.76em", "1.35", "0", 650, "normal"),
+            Caption => (self.ui_font, "0.68em", "1.35", "0", 400, "normal"),
+            ExactValue => (self.ui_font, "0.86em", "1.2", "0", 720, "normal"),
+            MetricValue => (self.ui_font, "1.55em", "1.2", "0", 760, "normal"),
+            QueryHeader => (self.ui_font, "0.75em", "1.35", "0", 680, "normal"),
+            MonoLabel => (self.mono_font, "0.75em", "1.35", "0", 500, "normal"),
+            MonoBody => (self.mono_font, "0.76em", "1.55", "0", 400, "normal"),
+            DataTable => (self.ui_font, "0.72em", "1.5", "0", 400, "normal"),
+            DataHeader => (self.ui_font, "0.72em", "1.5", "0", 700, "normal"),
+            Eyebrow => (self.ui_font, "0.72em", "1.35", "0.04em", 400, "normal"),
+            CardTitle => (self.ui_font, "0.9em", "1.35", "0", 720, "normal"),
+            Body => (self.ui_font, "0.78em", "1.5", "0", 400, "normal"),
+            CompactBody => (self.ui_font, "0.74em", "1.5", "0", 400, "normal"),
+            PanelTitle => (self.ui_font, "0.88em", "1.35", "0", 730, "normal"),
+            Control => (self.ui_font, "0.68em", "1.3", "0", 400, "normal"),
+            ErrorTitle => (self.ui_font, "0.9em", "1.35", "0", 720, "normal"),
+        };
+        format!(
+            "font-family:{face}; font-size:{size}; line-height:{leading}; \
+             letter-spacing:{tracking}; font-weight:{weight}; font-style:{posture};"
         )
     }
 
@@ -612,6 +694,25 @@ mod tests {
         assert!(style.contains("line-height:1.7"), "{style}");
         assert!(style.contains("letter-spacing:0.002em"), "{style}");
         assert!(style.contains("'Inter'"), "{style}");
+    }
+
+    #[test]
+    fn analytical_faces_are_owned_here_too() {
+        let prose = ProseTokens::document();
+        assert_eq!(
+            prose.ui_face_style(),
+            format!("font-family:{};", UI_SANS_STACK)
+        );
+        assert_eq!(
+            prose.mono_face_style(),
+            format!("font-family:{};", MONO_STACK)
+        );
+        let axis = prose.analytical_text_style(AnalyticalTextRole::Axis);
+        assert!(axis.contains("font-size:11px"), "{axis}");
+        assert!(axis.contains(UI_SANS_STACK), "{axis}");
+        let source = prose.analytical_text_style(AnalyticalTextRole::MonoBody);
+        assert!(source.contains(MONO_STACK), "{source}");
+        assert!(source.contains("line-height:1.55"), "{source}");
     }
 
     /// A rail keeps the caller's face and size and changes only the leading.

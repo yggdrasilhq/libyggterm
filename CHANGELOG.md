@@ -3,6 +3,13 @@
 Consumers pin this library by **tag**, so a tag is the release unit. Entries
 are written from the git record, not from memory.
 
+## v0.14.1 — 2026-08-26
+
+- **Analytical hosts can inherit the shared faces without restating them.**
+  `ProseTokens::ui_face_style` and `mono_face_style` keep SVG axis labels,
+  query panes, tables, and component errors under the same one-owner typography
+  contract as ordinary Markdown.
+
 ## v0.14.0 — 2026-08-26
 
 - **Extended Markdown gains a bounded analytical component tree.** A fenced
