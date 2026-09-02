@@ -106,3 +106,35 @@ renderer's — the renderer only yields the typed node.
 4. Render extraction out of shell.rs when its churn settles.
 5. paper/ztlkn adopt; ztlkn adds graph/backlinks OVER the model — never
    inside it.
+
+## 7. The org grammar line and the plain-text surface (RECORDED 2026-09-02)
+
+Authorized by ymacs `docs/spec-primitives.md` §1.1 (owner directive,
+2026-09-02): emd-renderer owns the buffer CONTENT MODEL for ymacs — and the
+shape of that ownership is two more document shapes in this crate, under
+the same doctrines as the markdown tree:
+
+- **`text_surface::TextSurface`** — the plain-text (ASCII) editing
+  surface, moved in from yedit (its text-mode editor was the only place
+  those line/offset/splice semantics existed). Plain text is the
+  degenerate document: ONE block. The Dioxus view of it stays in the
+  shell per §4 — what moved is the model no app may re-derive anymore.
+- **`org`** — org-mode constructs as TYPED nodes with source ranges:
+  headings (level, keyword slot, priority, title, tags), src blocks,
+  drawers, checkbox items, tables, and the inert `Text` remainder. The
+  leaf ranges TILE the source exactly (the tiling test is the lock, per
+  §3), `cycle_todo`/`toggle_checkbox` are byte-exact splices composed
+  over `TextSurface::replace`, and unknown constructs stay VISIBLE as
+  text — never dropped, never re-wrapped.
+
+Deliberate engine/app split (the wikilink rule of §5, applied): the
+heading keyword slot records any ALL-CAPS token (≥2 chars, so prose like
+"* A note" parses as Emacs); whether that token is a legal TODO keyword
+is workflow membership — the app's configuration (ymacs' org-todo
+validates membership before cycling). The engine yields the typed node
+and the byte-exact splice; interpretation stays with the app.
+
+Not covered here: yedit's migration ONTO the moved surface (its own
+campaign; the seam is §1.1 of the ymacs law), org rendering decisions
+(any libyggterm host that draws org nodes owns those), and folding/
+agenda animation (ymacs org mode).

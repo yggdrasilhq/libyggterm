@@ -11,6 +11,16 @@
 //! back into the SOURCE — the source file is the document, and lossless
 //! round-trip is the invariant that makes fluid WYSIWYG trustworthy.
 //!
+//! Two more document shapes live here by the same doctrine:
+//! - [`text_surface::TextSurface`] — the plain-text (ASCII) editing
+//!   surface, the degenerate one-block document. Moved in from yedit
+//!   2026-09-02 (ymacs spec-primitives §1.1) so every libyggterm editor
+//!   shares one line/offset/splice engine.
+//! - [`org`] — the org grammar line: typed org nodes with source ranges
+//!   (headings/TODO, drawers, src blocks, checkboxes, tables), the same
+//!   tiling + byte-exact-splice invariants. ymacs' org mode animates
+//!   these nodes.
+//!
 //! Layering (deliberate):
 //! - THIS crate: model + parse + source-range mapping. Pure, UI-free — no
 //!   Dioxus, no theme. Server-side consumers (a future ztlkn graph indexer)
@@ -29,8 +39,15 @@
 //! content must not reach the shell's JS context.
 
 pub mod components;
+pub mod org;
+pub mod text_surface;
 
 pub use components::{ComponentDocument, EmdComponent};
+pub use org::{
+    CheckboxItem, Drawer, Heading, OrgDoc, OrgNode, SrcBlock, Table, cycle_todo, next_todo_keyword,
+    parse_org, splice, toggle_checkbox,
+};
+pub use text_surface::TextSurface;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum MdInline {

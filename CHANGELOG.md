@@ -3,6 +3,19 @@
 Consumers pin this library by **tag**, so a tag is the release unit. Entries
 are written from the git record, not from memory.
 
+## Unreleased
+
+- **emd-renderer owns the plain-text surface and the org grammar line.**
+  `TextSurface` is the ASCII editing surface (the degenerate one-block
+  document) — byte-faithful splices, Emacs-convention line math, loud
+  char-boundary failures — moved in from yedit so every libyggterm editor
+  shares one engine. `parse_org` types org constructs into a node forest
+  (headings with a keyword slot, src blocks, drawers, checkbox items,
+  tables) whose leaf ranges tile the source exactly; `cycle_todo` and
+  `toggle_checkbox` splice byte-exactly over `TextSurface::replace`, and
+  unknown constructs remain visible as text. Authorized by ymacs
+  spec-primitives §1.1; spec §7 records the grammar line.
+
 ## v0.14.1 — 2026-08-26
 
 - **Analytical hosts can inherit the shared faces without restating them.**
