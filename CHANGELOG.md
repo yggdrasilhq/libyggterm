@@ -5,16 +5,33 @@ are written from the git record, not from memory.
 
 ## Unreleased
 
-- **emd-renderer owns the plain-text surface and the org grammar line.**
-  `TextSurface` is the ASCII editing surface (the degenerate one-block
-  document) — byte-faithful splices, Emacs-convention line math, loud
-  char-boundary failures — moved in from yedit so every libyggterm editor
-  shares one engine. `parse_org` types org constructs into a node forest
-  (headings with a keyword slot, src blocks, drawers, checkbox items,
-  tables) whose leaf ranges tile the source exactly; `cycle_todo` and
-  `toggle_checkbox` splice byte-exactly over `TextSurface::replace`, and
-  unknown constructs remain visible as text. Authorized by ymacs
-  spec-primitives §1.1; spec §7 records the grammar line.
+## v0.14.3 — 2026-09-04
+
+- **The command palette adopts the host's inline completion — the omnibox
+  flourish, raised into the component layer.** A host that hands the palette
+  `completion` (the full text: typing plus suggested tail) and
+  `completion_typed_len` gets Chrome's inline autocomplete in the field: the
+  tail is SELECTED, so the next keystroke types over it and Enter accepts it.
+  `palette_completion_js` is the guarded write-back both the component and any
+  host-side field reuse — rAF-deferred, and dropped silently when the field
+  has already left the text the completion was computed from (the fast-typist
+  race the omnibox pill measured). The component still owns no ranking: the
+  host computes WHAT completes, the component shows it.
+
+## v0.14.2 — 2026-09-04 (the tag shipped without an entry; written from the git record)
+
+- **The palette field stops fighting the typist** (`58bb8d7`): the field is
+  uncontrolled with a revision-keyed remount — a controlled `value:` re-set
+  the DOM text on every render and a fast typist's keystrokes lost the race
+  (the ychrome command palette's "does not let me type"). Emacs kills
+  (Ctrl+K / Ctrl+D / Alt+D) and long-URL scroll-on-select for every palette.
+- **emd-renderer owns the plain-text surface and the org grammar line**
+  (`a6a9269`): `TextSurface` is the ASCII editing surface (the degenerate
+  one-block document) — byte-faithful splices, Emacs-convention line math,
+  loud char-boundary failures — moved in from yedit so every libyggterm
+  editor shares one engine. `parse_org` types org constructs into a node
+  forest; `cycle_todo` and `toggle_checkbox` splice byte-exactly over
+  `TextSurface::replace`. Authorized by ymacs spec-primitives §1.1.
 
 ## v0.14.1 — 2026-08-26
 

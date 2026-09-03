@@ -45,6 +45,16 @@
 //!
 //! and [`YGGUI_COMMAND_PALETTE_CSS`] goes into the host's style block.
 //!
+//! ## The inline completion (the omnibox flourish, raised)
+//!
+//! The one piece of the field the component will DRAW without owning: hand it
+//! `completion` (the full text: typing plus suggested tail) and
+//! `completion_typed_len` (a byte offset), and the field adopts the text with
+//! the tail SELECTED — the next keystroke types over it, Enter accepts it,
+//! exactly like the browser omnibox. The host computes it per keystroke from
+//! [`palette_index_after`]'s siblings on its own side; [`palette_completion_js`]
+//! is the guarded write-back both this component and any host-side field reuse.
+//!
 //! ⭐ **[`palette_index_after`] is exported on purpose.** The component reports
 //! which WAY the user moved and the host applies it, so the host's selection
 //! stays the single source of truth — but wraparound and clamping are fiddly
@@ -171,6 +181,59 @@ pub fn palette_index_after(current: usize, len: usize, moved: PaletteMove) -> us
         PaletteMove::First => 0,
         PaletteMove::Last => len - 1,
     }
+}
+
+/// The completion-ADOPTION script: the omnibox's inline autocomplete, raised
+/// into the component layer by owner ruling ("input bugs should be fixed in
+/// the libyggterm components themselves, and the omnibox flourishes are
+/// extras"). The host computes WHAT completes the query — it owns the history,
+/// the commands, whatever intelligence ranks the field — and hands the
+/// component `completion` + `completion_typed_len`; this builder is HOW the
+/// field comes to show it.
+///
+/// The script is [r]AF-deferred and GUARDED, because this write-back is
+/// asynchronous and the user is still typing into the field it writes to (the
+/// omnibox pill measured the race: a fast typist's next keystroke lands before
+/// the frame, and an unguarded frame overwrites the character just typed). At
+/// the moment the frame runs, the field must still hold the text the
+/// completion was computed FROM (`typed_prefix`) or the completed text
+/// already; anything else means the user has moved on, and this completion is
+/// silently dropped — a later `oninput` has produced the right one.
+///
+/// `typed_len`/`completed_len` are BYTE offsets (they come from
+/// `str::len()`), the same convention the omnibox pill uses; the selection is
+/// therefore only faithful while the address stays ASCII, which is the case
+/// the omnibox itself shipped.
+///
+/// Returns `None` when there is nothing to adopt — a completion that does not
+/// extend the typed prefix, or a boundary that is not a char boundary — so the
+/// caller never evals a script that would fight the field.
+pub fn palette_completion_js(
+    completed: &str,
+    typed_prefix: &str,
+    typed_len: usize,
+    completed_len: usize,
+) -> Option<String> {
+    if typed_len > completed_len
+        || !completed.is_char_boundary(typed_len)
+        || !completed.is_char_boundary(completed_len)
+        || completed.as_bytes().get(..typed_len)? != typed_prefix.as_bytes()
+    {
+        return None;
+    }
+    let completed_js = serde_json::to_string(completed).ok()?;
+    let typed_prefix_js = serde_json::to_string(typed_prefix).ok()?;
+    Some(format!(
+        r#"requestAnimationFrame(function(){{
+    var el = document.querySelector('[data-yggui-palette-input]');
+    if (!el) return;
+    // Still what we completed from? A completion for text the user has left
+    // behind must not land on top of what they typed since.
+    if (el.value !== {typed_prefix_js} && el.value !== {completed_js}) return;
+    if (el.value !== {completed_js}) el.value = {completed_js};
+    if (el.setSelectionRange) el.setSelectionRange({typed_len}, {completed_len});
+}});"#
+    ))
 }
 
 /// Hover, focus and scroll behaviour, which inline styles cannot express.
@@ -318,6 +381,22 @@ pub fn CommandPalette(
     /// query on its own: accept clears the field, begin-edit resets it.
     #[props(default = 0u64)]
     revision: u64,
+    /// The inline completion: the FULL text the field should show (the user's
+    /// typing plus the suggested tail), and the byte offset where the typing
+    /// ends. `None`/`0` mean no completion is being offered and the field is
+    /// left alone.
+    ///
+    /// The HOST computes it — from its history, its commands, whatever ranks
+    /// its rows — because ranking is the host's job (see the module head). The
+    /// component only ADOPTS it into the field, with the tail SELECTED so the
+    /// next keystroke types over it and Enter accepts it: Chrome's inline
+    /// autocomplete, applied through [`palette_completion_js`]'s guarded
+    /// write-back. The host recomputes it per keystroke from `on_query`; the
+    /// effect below fires whenever the pair moves.
+    #[props(default)]
+    completion: Option<String>,
+    #[props(default = 0usize)]
+    completion_typed_len: usize,
     on_query: EventHandler<String>,
     on_move: EventHandler<PaletteMove>,
     /// The chosen row's `id`. Never fires on an empty list.
@@ -329,6 +408,21 @@ pub fn CommandPalette(
     use_effect(move || {
         document::eval(YGGUI_TEXT_KILL_JS);
     });
+    // THE OMNIBOX FLOURISH, raised: whenever the host moves the completion,
+    // adopt it into the field with the suggested tail selected. The script
+    // itself is rAF-deferred and stale-guarded (see [`palette_completion_js`]),
+    // so a completion computed for a keystroke the field has already left
+    // behind lands nowhere.
+    use_effect(use_reactive(
+        (&completion, &completion_typed_len),
+        move |(completion, typed_len): (Option<String>, usize)| {
+            let Some(text) = completion else { return };
+            let prefix = text.get(..typed_len).unwrap_or_default().to_string();
+            if let Some(script) = palette_completion_js(&text, &prefix, typed_len, text.len()) {
+                let _ = document::eval(&script);
+            }
+        },
+    ));
     let count = items.len();
     let selected = if count == 0 { 0 } else { selected.min(count - 1) };
     let accept_id = items.get(selected).map(|item| item.id.clone());
@@ -590,6 +684,42 @@ mod tests {
         ] {
             assert_eq!(palette_index_after(7, 0, moved), 0, "{moved:?}");
         }
+    }
+
+    /// The completion ADOPTS only what extends the typing. A builder handed a
+    /// completion that does not begin with the typed prefix — or a boundary
+    /// that is not a char boundary — refuses rather than writing a field the
+    /// host's model does not agree with.
+    #[test]
+    fn a_completion_that_does_not_extend_the_typing_is_refused() {
+        let completed = "https://example.com";
+        let script = palette_completion_js(completed, "htt", 3, completed.len())
+            .expect("an honest completion builds");
+        assert!(script.contains("requestAnimationFrame"), "{script}");
+        // The tail is what gets selected, so the next keystroke types over it.
+        assert!(script.contains("setSelectionRange(3, 19)"), "{script}");
+        // The stale guard: the field must still hold what was completed from.
+        assert!(script.contains("el.value !== \"htt\""), "{script}");
+        // Not an extension of the typing: no script at all.
+        assert_eq!(palette_completion_js(completed, "ftp", 3, completed.len()), None);
+        // A byte offset inside a multi-byte char cannot select.
+        assert_eq!(palette_completion_js("héllo", "h", 2, 6), None);
+        // …but the honest prefix of one does build.
+        assert!(palette_completion_js("héllo", "h", 1, 6).is_some());
+        // A completion shorter than what was typed is a regression, not a tail.
+        assert_eq!(palette_completion_js("ht", "htt", 3, 2), None);
+    }
+
+    /// The component must stay WIRED to the builder — the flourish dies
+    /// silently the day someone deletes the effect and the tests still pass.
+    #[test]
+    fn the_field_adopts_the_hosts_completion() {
+        let src = product();
+        assert!(
+            src.contains("use_reactive(\n        (&completion, &completion_typed_len),"),
+            "the completion effect is gone from the component"
+        );
+        assert!(src.contains("palette_completion_js(&text, &prefix, typed_len, text.len())"));
     }
 
     /// ⛔ The arrows and Enter must be CONSUMED. Without it the caret walks the
