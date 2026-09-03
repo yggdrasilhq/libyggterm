@@ -185,6 +185,20 @@ pub const YGGUI_COMMAND_PALETTE_CSS: &str = r#"
 [data-yggui-palette-row]:hover {
   background-color: var(--yggui-palette-selected);
 }
+/* A SELECTED row must not amputate a long URL. Every row ellipsizes at rest —
+   a dropdown of full URLs is noise — but the row the user is ON is the row
+   they are reading, so it stops clipping and scrolls instead. The owner asked
+   for exactly this: selection "should not auto cutoff and should scroll (very
+   useful for long urls)". */
+[data-yggui-palette-row][data-yggui-palette-row-selected="true"] {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--yggui-palette-hairline) transparent;
+}
+[data-yggui-palette-row][data-yggui-palette-row-selected="true"] [data-yggui-palette-row-text] {
+  overflow: visible;
+  text-overflow: clip;
+}
 [data-yggui-palette-results] {
   scrollbar-width: thin;
   scrollbar-color: var(--yggui-palette-hairline) transparent;
@@ -217,6 +231,55 @@ const SURFACE_WIDTH_PX: u32 = 620;
 const FIELD_HEIGHT_PX: u32 = 48;
 const RESULTS_MAX_HEIGHT_PX: u32 = 380;
 
+/// THE TEXT-KILL KEYS, as one embedded helper: `__ygguiTextKill(op)` applies an
+/// emacs-style edit to WHATEVER editable element holds focus and returns the
+/// new value (null when it did not apply).
+///
+/// ⛔ WHY A GLOBAL HELPER AND NOT COMPONENT KEYS: the owner's ruling is that
+/// text editing belongs to the COMPONENT LAYER, not to each surface — "input
+/// bugs should be fixed in the libyggterm components themselves, and the
+/// omnibox flourishes are extras". One helper, three ops, every input box:
+/// `kill-end` (Ctrl+K), `del-forward` (Ctrl+D), `kill-word-forward` (Alt+D).
+/// The host shells install this once and bind the keys once, and every input
+/// box in the app grows the same emacs fingers.
+///
+/// Guards, in the helper because every caller needs them: it refuses anything
+/// that is not an `input`/`textarea`, and it refuses xterm's hidden textarea —
+/// the terminal owns Ctrl+D (EOF) and Ctrl+K absolutely. After editing it
+/// DISPATCHES a bubbling `input` event, so controlled inputs (Dioxus `oninput`
+/// handlers) hear the change exactly as if the user had typed it — no host
+/// desyncs from a value only the DOM saw.
+pub const YGGUI_TEXT_KILL_JS: &str = r#"
+window.__ygguiTextKill = function (op) {
+  var el = document.activeElement;
+  if (!el) return null;
+  var tag = (el.tagName || '').toLowerCase();
+  if (tag !== 'input' && tag !== 'textarea') return null;
+  if (el.closest && el.closest('.xterm')) return null;
+  var s = el.selectionStart, e = el.selectionEnd, v = el.value;
+  if (s == null || e == null) return null;
+  var nv = v, caret = s;
+  if (op === 'kill-end') {
+    nv = v.slice(0, s); caret = s;
+  } else if (op === 'del-forward') {
+    if (s !== e) { nv = v.slice(0, s) + v.slice(e); caret = s; }
+    else if (e < v.length) { nv = v.slice(0, s) + v.slice(e + 1); caret = s; }
+  } else if (op === 'kill-word-forward') {
+    var rest = v.slice(e);
+    var m = rest.match(/^\s*\S+/);
+    var cut = m ? m[0].length : 0;
+    nv = v.slice(0, s) + rest.slice(cut); caret = s;
+  } else {
+    return null;
+  }
+  if (nv === v) return nv;
+  el.value = nv;
+  try { el.setSelectionRange(caret, caret); } catch (_) {}
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+  return nv;
+};
+"#;
+
 /// The palette. Mount it at the top of the app's tree; it fixes itself to the
 /// viewport and lays its own scrim.
 #[component]
@@ -239,12 +302,33 @@ pub fn CommandPalette(
     /// empty box reads as a broken palette.
     #[props(default = "No matches".to_string())]
     empty_label: String,
+    /// The field's GENERATION. Bump it to make the field adopt `query` as its
+    /// text; leave it alone and the field keeps whatever the user typed.
+    ///
+    /// ⛔ THE FIELD IS UNCONTROLLED, AND THE CONTROLLED LOOK IS THE LIE THE
+    /// USER TYPES INTO. Owner report (the ychrome command palette, twice): "it
+    /// just does not let me type — janky and aggressive." A controlled
+    /// `value:` re-sets the DOM text on every render, so every keystroke races
+    /// the host's re-render — a fast typist's next key lands before the frame
+    /// that re-writes the value, and the frame clobbers it. The same race the
+    /// omnibox pill fixed at its own layer, one floor down. So the field owns
+    /// its DOM text (`initial_value`, remounted only when `revision` moves)
+    /// and reports edits upward; the host's `query` stays the ranking truth
+    /// but never fights the caret. Bump `revision` when the HOST changed the
+    /// query on its own: accept clears the field, begin-edit resets it.
+    #[props(default = 0u64)]
+    revision: u64,
     on_query: EventHandler<String>,
     on_move: EventHandler<PaletteMove>,
     /// The chosen row's `id`. Never fires on an empty list.
     on_accept: EventHandler<String>,
     on_dismiss: EventHandler<()>,
 ) -> Element {
+    // The kill helper defines itself once, before anything can press a key.
+    // Idempotent by guard, so a re-run costs one `if`.
+    use_effect(move || {
+        document::eval(YGGUI_TEXT_KILL_JS);
+    });
     let count = items.len();
     let selected = if count == 0 { 0 } else { selected.min(count - 1) };
     let accept_id = items.get(selected).map(|item| item.id.clone());
@@ -281,10 +365,15 @@ pub fn CommandPalette(
                 // above it. No border of its own, no margin: the hairline below
                 // is the only thing separating them, and only once there is
                 // something to separate.
+                //
+                // ⛔ UNCONTROLLED: `initial_value` + a `revision`-keyed remount,
+                // never a `value:` attribute (the write-back race is the
+                // does-not-let-me-type defect — see the prop's doc).
                 input {
+                    key: "{revision}",
                     "data-yggui-palette-input": "1",
                     r#type: "text",
-                    value: "{query}",
+                    initial_value: "{query}",
                     placeholder: "{placeholder}",
                     autofocus: true,
                     style: format!(
@@ -299,7 +388,46 @@ pub fn CommandPalette(
                         // prevent_default the caret walks the text while the
                         // list moves, so the field loses the user's place on
                         // every step through the results.
-                        match evt.key() {
+                        //
+                        // ⛔ HOME AND END BELONG TO THE CARET. They used to move
+                        // the LIST (First/Last), which read as "aggressive": a
+                        // text field where Home and End refuse to move the text
+                        // fights the one reflex every editor owns. The list's
+                        // first/last moves live on PageUp/PageDown, which no
+                        // text field claims.
+                        //
+                        // ⛔ AND THE EMACS KILLS ARE THE FIELD'S OWN: Ctrl+K
+                        // kills to end of line, Ctrl+D deletes forward,
+                        // Alt+D kills the word forward — owner request, applied
+                        // through the shared text-kill helper so the DOM text,
+                        // the caret and the host's query all move together.
+                        let mods = evt.modifiers();
+                        let key = evt.key();
+                        if mods.contains(Modifiers::CONTROL)
+                            && let Key::Character(ch) = &key
+                        {
+                            let op = match ch.to_lowercase().as_str() {
+                                "k" => Some("kill-end"),
+                                "d" => Some("del-forward"),
+                                _ => None,
+                            };
+                            if let Some(op) = op {
+                                evt.prevent_default();
+                                evt.stop_propagation();
+                                document::eval(&format!("__ygguiTextKill('{op}')"));
+                                return;
+                            }
+                        }
+                        if mods.contains(Modifiers::ALT)
+                            && let Key::Character(ch) = &key
+                            && ch.to_lowercase() == "d"
+                        {
+                            evt.prevent_default();
+                            evt.stop_propagation();
+                            document::eval("__ygguiTextKill('kill-word-forward')");
+                            return;
+                        }
+                        match key {
                             Key::ArrowDown => {
                                 evt.prevent_default();
                                 on_move.call(PaletteMove::Next);
@@ -308,11 +436,11 @@ pub fn CommandPalette(
                                 evt.prevent_default();
                                 on_move.call(PaletteMove::Previous);
                             }
-                            Key::Home => {
+                            Key::PageUp => {
                                 evt.prevent_default();
                                 on_move.call(PaletteMove::First);
                             }
-                            Key::End => {
+                            Key::PageDown => {
                                 evt.prevent_default();
                                 on_move.call(PaletteMove::Last);
                             }
@@ -366,11 +494,19 @@ pub fn CommandPalette(
                                     ),
                                     onclick: move |_| on_accept.call(id.clone()),
                                     span {
+                                        // The full text rides the row's title, so
+                                        // even an ellipsized row answers a hover.
+                                        title: if item.detail.trim().is_empty() {
+                                            item.label.clone()
+                                        } else {
+                                            format!("{} — {}", item.label, item.detail)
+                                        },
                                         style: format!(
                                             "flex:0 1 auto; min-width:0; font-size:13.5px; color:{}; \
                                              white-space:nowrap; overflow:hidden; text-overflow:ellipsis;",
                                             palette.ink,
                                         ),
+                                        "data-yggui-palette-row-text": "1",
                                         "{item.label}"
                                     }
                                     if !item.detail.trim().is_empty() {
@@ -380,6 +516,7 @@ pub fn CommandPalette(
                                                  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;",
                                                 palette.muted,
                                             ),
+                                            "data-yggui-palette-row-text": "1",
                                             "{item.detail}"
                                         }
                                     } else {
@@ -465,7 +602,7 @@ mod tests {
             .split("onkeydown:")
             .nth(1)
             .expect("the field handles keys");
-        for key in ["ArrowDown", "ArrowUp", "Home", "End", "Enter", "Escape"] {
+        for key in ["ArrowDown", "ArrowUp", "PageUp", "PageDown", "Enter", "Escape"] {
             let at = block
                 .find(&format!("Key::{key} =>"))
                 .unwrap_or_else(|| panic!("{key} is not handled at all"));
@@ -475,6 +612,125 @@ mod tests {
                 "{key} is observed but not consumed:\n{arm}"
             );
         }
+    }
+
+    /// ⛔ HOME AND END BELONG TO THE CARET (owner report: the palette felt
+    /// "aggressive" — a text field whose Home and End move a LIST instead of
+    /// the text fights the one reflex every editor owns). The list's jump-to-
+    /// ends live on PageUp/PageDown; Home and End must appear in the field's
+    /// key handling ONLY as prose, never as consumed arms.
+    #[test]
+    fn home_and_end_move_the_caret_not_the_list() {
+        let src = product();
+        let block = src
+            .split("onkeydown:")
+            .nth(1)
+            .expect("the field handles keys");
+        for key in ["Key::Home =>", "Key::End =>"] {
+            assert!(
+                !block.contains(key),
+                "{key} is consumed by the list again — the caret must keep it"
+            );
+        }
+        assert!(
+            block.contains("Key::PageUp =>") && block.contains("Key::PageDown =>"),
+            "the list's first/last moves must live on PageUp/PageDown"
+        );
+    }
+
+    /// ⛔ THE FIELD IS UNCONTROLLED. A `value:` attribute re-sets the DOM text
+    /// on every render, and a fast typist's next keystroke loses that race —
+    /// the owner's "it just does not let me type" (ychrome command palette).
+    /// The field owns its DOM text (`initial_value`, remounted only when the
+    /// host bumps `revision`) and reports edits upward.
+    #[test]
+    fn the_field_is_uncontrolled_and_the_host_moves_it_by_revision() {
+        let src = product();
+        let at = src
+            .find("key: \"{revision}\"")
+            .expect("the field's revision key exists");
+        let field = &src[at..(at + 1_200).min(src.len())];
+        assert!(
+            field.contains("initial_value:"),
+            "the field must seed its text once (uncontrolled), not be re-set per render"
+        );
+        assert!(
+            !field.lines().any(|line| line.trim_start().starts_with("value:")),
+            "a `value:` attribute is back — the write-back race is the \
+             does-not-let-me-type defect"
+        );
+        assert!(
+            src.contains("revision: u64,"),
+            "the revision prop is gone — hosts have no way to move the field"
+        );
+    }
+
+    /// The emacs kills are the field's own keys (owner request): Ctrl+K kills
+    /// to end of line, Ctrl+D deletes forward, Alt+D kills the word forward —
+    /// each consumed (prevent_default + stop_propagation) so no shell chord or
+    /// browser default races the edit, each applied through the shared
+    /// text-kill helper so the host hears the change as an ordinary input.
+    #[test]
+    fn the_emacs_kills_are_field_keys() {
+        let src = product();
+        for (needle, op) in [
+            ("\"k\" => Some(\"kill-end\")", "kill-end"),
+            ("\"d\" => Some(\"del-forward\")", "del-forward"),
+        ] {
+            assert!(src.contains(needle), "the Ctrl kill for {op} is gone");
+        }
+        assert!(
+            src.contains("__ygguiTextKill('kill-word-forward')"),
+            "Alt+D's kill-word-forward is gone"
+        );
+        let at = src.find("if mods.contains(Modifiers::CONTROL)").expect("ctrl arm");
+        let arm = &src[at..(at + 900).min(src.len())];
+        assert!(
+            arm.contains("evt.prevent_default();") && arm.contains("evt.stop_propagation();"),
+            "a kill key must be consumed, not observed"
+        );
+        // The helper itself must refuse the terminal's textarea, or Ctrl+D
+        // (EOF) and Ctrl+K die inside every running session.
+        assert!(
+            src.contains("closest('.xterm')"),
+            "the kill helper lost its xterm guard"
+        );
+    }
+
+    /// A SELECTED row must not amputate a long URL (owner: selection "should
+    /// not auto cutoff and should scroll — very useful for long urls"). Rest
+    /// rows keep the ellipsis; the selected row scrolls, and every row carries
+    /// its full text as a hover title.
+    #[test]
+    fn a_selected_row_scrolls_instead_of_cutting_off() {
+        let src = product();
+        assert!(
+            src.contains("[data-yggui-palette-row][data-yggui-palette-row-selected=\"true\"] {\n  overflow-x: auto;")
+                || (src.contains("[data-yggui-palette-row][data-yggui-palette-row-selected=\"true\"]")
+                    && src.contains("overflow-x: auto")),
+            "the selected row lost its horizontal scroll"
+        );
+        assert!(
+            src.contains("data-yggui-palette-row-text"),
+            "the row text spans lost their scroll marker"
+        );
+        assert!(
+            src.contains("title:"),
+            "rows must carry their full text as a hover title"
+        );
+    }
+
+    /// The text-kill helper is EXPORTED so a host shell can install it once and
+    /// give every input box in the app the same emacs fingers — the owner's
+    /// layer ruling: editing lives in the component library, not per surface.
+    #[test]
+    fn the_text_kill_helper_is_exported_to_hosts() {
+        assert!(src_yaml_has_text_kill_export());
+    }
+
+    fn src_yaml_has_text_kill_export() -> bool {
+        let lib = include_str!("lib.rs");
+        lib.contains("YGGUI_TEXT_KILL_JS")
     }
 
     /// The whole point of the shape: ONE surface. A field drawn as its own

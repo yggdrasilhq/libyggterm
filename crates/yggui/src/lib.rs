@@ -42,7 +42,7 @@ pub use chrome::{
 };
 pub use command_palette::{
     CommandPalette, CommandPaletteItem, CommandPalettePalette, PaletteMove,
-    YGGUI_COMMAND_PALETTE_CSS, palette_index_after,
+    YGGUI_COMMAND_PALETTE_CSS, YGGUI_TEXT_KILL_JS, palette_index_after,
 };
 pub use conversation::{
     AssistantTurn, CHANGED_FILE_CHIP_LIMIT, CONVERSATION_COLUMN_PX, CONVERSATION_CSS,
