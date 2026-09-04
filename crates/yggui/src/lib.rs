@@ -16,6 +16,8 @@ pub mod command_palette;
 pub mod conversation;
 /// The four-way scroll control, shared by every surface that scrolls.
 pub mod dpad;
+pub mod frosted_bar;
+pub mod intellitype;
 pub mod drag_tree;
 pub mod drag_visuals;
 pub mod motion;
