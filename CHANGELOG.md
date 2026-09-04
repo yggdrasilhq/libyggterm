@@ -5,6 +5,24 @@ are written from the git record, not from memory.
 
 ## Unreleased
 
+## v0.14.4 — 2026-09-04
+
+- **The FROSTED BAR and the glass KEY become components** (`frosted_bar`):
+  the floating glass panel the owner commissioned against the terminal
+  D-pad's recipe and then ruled generic — *"a generic yggui component base so
+  that other libyggterm apps may use the component as they feel fit."* The
+  recipe is exported (`frosted_panel_style` / `frosted_key_style`) for hosts
+  that must style their own nodes onto the glass, and locked by tests.
+- **THE INTELLITYPE LAW, executable** (`intellitype`): every named text input
+  offers the omnibox's desirable tricks — a prefill of what you are probably
+  typing, SELECTED, typed over or accepted with Enter — drawn from what that
+  field accepted before. Default ON; the named opt-outs are SECRETS
+  (`secret: true` — a field that must neither remember nor suggest) and a
+  field with no scope. Ships as the prebuilt [`IntelliField`] and as the
+  mechanics (`intelli_on_input` / `intellitype_js`) for hosts that render
+  their own inputs; the write-back is the rAF-deferred, stale-guarded one the
+  omnibox measured.
+
 ## v0.14.3 — 2026-09-04
 
 - **The command palette adopts the host's inline completion — the omnibox
