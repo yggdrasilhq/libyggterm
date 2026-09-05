@@ -200,7 +200,15 @@ pub fn YggChatInputBox(
                      padding:{}; border-radius:20px; background:{}; border:1px solid {}; \
                      box-shadow:{}; color:{}; font-size:14.5px; line-height:1.6;",
                     // Room for the two inset controls, on the sides they sit.
-                    if expanded { "44px 18px 46px 18px" } else { "13px 18px 40px 18px" },
+                    if expanded {
+                        "44px 18px 46px 18px"
+                    } else if context_available {
+                        // The + button sits at the top-left of the collapsed
+                        // box; the first text line must clear it.
+                        "13px 18px 40px 44px"
+                    } else {
+                        "13px 18px 40px 18px"
+                    },
                     tokens.composer_surface,
                     tokens.ask_hairline,
                     tokens.ask_shadow,
