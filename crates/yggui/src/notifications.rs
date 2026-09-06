@@ -3,6 +3,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 use dioxus::prelude::*;
+use yggui_icons::Icon;
 // Linux-only: the sole use is behind `cfg(target_os = "linux")`, and importing
 // it unconditionally warns on every other target this library now builds for.
 #[cfg(target_os = "linux")]
@@ -392,7 +393,7 @@ pub fn ToastCard(
                         evt.stop_propagation();
                         on_clear.call(evt);
                     },
-                    "×"
+                    Icon { icon: yggui_icons::X, size: 14 }
                 }
             }
             div {

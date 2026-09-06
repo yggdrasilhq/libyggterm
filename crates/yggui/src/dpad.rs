@@ -30,6 +30,7 @@
 //! - **Its brand**, via [`DpadPalette`].
 
 use dioxus::prelude::*;
+use yggui_icons::Icon;
 
 /// The four-way vocabulary. **↑/↓ are the EDGES and ←/→ are PAGES** — learned
 /// once, it works on every surface that mounts this pad.
@@ -75,6 +76,17 @@ impl DpadAction {
             Self::PageUp => "←",
             Self::PageDown => "→",
             Self::Bottom => "↓",
+        }
+    }
+
+    /// The lucide icon for this action — the RENDER is the icon; `glyph()`
+    /// survives as the text fallback/label.
+    pub fn icon(self) -> &'static str {
+        match self {
+            Self::Top => yggui_icons::ARROW_UP,
+            Self::PageUp => yggui_icons::ARROW_LEFT,
+            Self::PageDown => yggui_icons::ARROW_RIGHT,
+            Self::Bottom => yggui_icons::ARROW_DOWN,
         }
     }
 
@@ -233,13 +245,13 @@ pub fn ScrollDpad(
                         evt.stop_propagation();
                         on_action.call(action);
                     },
-                    "{action.glyph()}"
+                    Icon { icon: action.icon(), size: 16 }
                 }
             }
             div {
                 "data-yggui-dpad-centre": "1",
                 style: "{centre_style} grid-column:2; grid-row:2;",
-                "+"
+                Icon { icon: yggui_icons::PLUS, size: 16 }
             }
         }
     }

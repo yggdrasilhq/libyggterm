@@ -13,6 +13,7 @@ license = "MPL-2.0"
 # consuming the library at all.
 [dependencies]
 yggui-contract = { path = "../yggui-contract" }
+yggui-icons = { path = "../yggui-icons" }
 dioxus = { version = "=0.7.9" }
 anyhow.workspace = true
 once_cell = "1"

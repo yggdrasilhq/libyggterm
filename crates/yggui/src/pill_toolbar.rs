@@ -32,6 +32,7 @@
 //! adjacent to them.
 
 use dioxus::prelude::*;
+use yggui_icons::Icon;
 
 /// The bar's brand. Material, radius and motion are this module's.
 #[derive(Clone, PartialEq, Debug)]
@@ -226,7 +227,7 @@ pub fn PillToolbar(
                 "data-yggui-pill-step": "previous",
                 style: "{control_style}",
                 onclick: move |_| on_step.call(PillStep::Previous),
-                "↑"
+                Icon { icon: yggui_icons::ARROW_UP, size: 14 }
             }
             button {
                 r#type: "button",
@@ -235,7 +236,7 @@ pub fn PillToolbar(
                 "data-yggui-pill-step": "next",
                 style: "{control_style}",
                 onclick: move |_| on_step.call(PillStep::Next),
-                "↓"
+                Icon { icon: yggui_icons::ARROW_DOWN, size: 14 }
             }
             // Far from the two controls that get pressed constantly. This one
             // is pressed once a session, and a mis-hit costs a theme flip in

@@ -1,0 +1,9 @@
+[package]
+name = "yggui-icons"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "The one icon source for libyggterm surfaces: lucide paths, 1.5 stroke, currentColor."
+
+[dependencies]
+dioxus = { version = "=0.7.9" }

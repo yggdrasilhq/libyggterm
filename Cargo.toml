@@ -10,7 +10,7 @@
 # this licence choice exists to permit, which is exactly how yggterm consumes
 # this crate.
 [workspace]
-members = ["crates/emd-renderer", "crates/yggui", "crates/yggui-contract"]
+members = ["crates/emd-renderer", "crates/yggui", "crates/yggui-contract", "crates/yggui-icons"]
 resolver = "2"
 
 [workspace.package]
