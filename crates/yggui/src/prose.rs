@@ -310,33 +310,35 @@ const SHARED: ProseTokens = ProseTokens {
     ui_font: UI_SANS_STACK,
     mono_font: MONO_STACK,
     body: ProseBody::INHERIT,
-    // Heavy weights, negative tracking on the top two, NO rule underneath —
-    // decoration the markdown did not ask for (user spec 2026-07-18).
+    // Strong but not slab: 700 tops the scale — 800 is a kicker's weight, not
+    // a display heading's (owner taste, 2026-09-08: "headers too thick and too
+    // short" — weights eased down, sizes eased up). Negative tracking on the
+    // top two, NO rule underneath — decoration the markdown did not ask for.
     headings: [
         ProseHeading {
-            size_em: 1.8,
-            weight: 800,
+            size_em: 1.95,
+            weight: 700,
             tracking: "-0.015em",
             space_above_px: 34,
             space_below_px: 16,
         },
         ProseHeading {
-            size_em: 1.42,
-            weight: 780,
+            size_em: 1.5,
+            weight: 680,
             tracking: "-0.01em",
             space_above_px: 30,
             space_below_px: 14,
         },
         ProseHeading {
-            size_em: 1.18,
-            weight: 740,
+            size_em: 1.25,
+            weight: 650,
             tracking: "0",
             space_above_px: 26,
             space_below_px: 12,
         },
         ProseHeading {
-            size_em: 1.04,
-            weight: 720,
+            size_em: 1.08,
+            weight: 650,
             tracking: "0",
             space_above_px: 20,
             space_below_px: 10,
