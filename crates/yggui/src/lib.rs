@@ -16,6 +16,7 @@ pub mod command_palette;
 pub mod conversation;
 /// The four-way scroll control, shared by every surface that scrolls.
 pub mod dpad;
+mod scroll_rail;
 pub mod frosted_bar;
 pub mod intellitype;
 pub mod drag_tree;
@@ -54,6 +55,7 @@ pub use conversation::{
     changed_file_label,
 };
 pub use dpad::{DPAD_CSS, DpadAction, DpadPalette, DpadPlacement, ScrollDpad};
+pub use scroll_rail::{RailMark, RailPalette, ScrollRail};
 pub use drag_tree::{
     DRAG_BEGIN_THRESHOLD_PX, DragDropPlacement, DragDropTarget, ROW_DRAG_CLICK_SUPPRESS_MS,
     ROW_DRAG_SPRING_MS, RowDragGesture, RowDragHover, RowDropTarget, RowTreeDrop, RowTreeRow,
