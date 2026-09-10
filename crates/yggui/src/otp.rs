@@ -32,6 +32,24 @@
 //! **`on_complete` fires by itself** when the last cell fills — a code entry
 //! that still needs a Submit tap after the sixth digit is asking the user to
 //! confirm something they can already see is finished.
+//!
+//! **Focus is the component's job.** A six-cell entry where every keystroke
+//! must be preceded by a click is six small broken boxes, not one field: a
+//! single-character fill carries focus to the next cell, focus SELECTS (so
+//! typing over a filled cell replaces it instead of being swallowed by
+//! `maxlength`), Backspace on an empty cell walks the deletion backwards, and
+//! the arrows move between cells. Measured on practice.gour.top (2026-09-10):
+//! without this the second keystroke died silently and a six-character code
+//! needed six click-type rounds.
+//!
+//! **Cell ink pairs with the cell surface, not with the host's ink.** The
+//! background comes from `tokens.composer_surface`, which
+//! `CONVERSATION_THEME_CSS` flips under dark mode; a host-fixed ink does not
+//! flip with it, and the cells go dark-on-dark
+//! (`--yggui-conv-composer-surface: #1d242c` under a light theme's near-black
+//! text — measured the same day). The text and caret are therefore styled in
+//! [`YGGUI_OTP_CSS`] from `--yggui-conv-work-ink`, which lives on the same
+//! sheet as the background and flips with it.
 
 use dioxus::prelude::*;
 
@@ -147,6 +165,27 @@ fn fill_cells(current: &[String], digits: &[String], from: usize) -> Vec<String>
     next
 }
 
+/// Focus one cell by index, optionally selecting its contents.
+///
+/// Four callers, one contract: a single-character fill advances
+/// (`index + 1`), Backspace on an empty cell walks backwards (`index - 1`),
+/// the arrow keys move, and focus itself selects so the next keystroke
+/// replaces a filled cell. An out-of-range index is a harmless "no-cell"
+/// probe — advancing from the last cell must not throw focus on the floor.
+fn focus_otp_cell_script(index: usize, select: bool) -> String {
+    format!(
+        "(function(){{ \
+            var c = document.querySelector('[data-yggui-otp-cell=\"{index}\"]'); \
+            if (!c) {{ return \"no-cell\"; }} \
+            c.focus(); \
+            if ({select}) {{ c.select(); }} \
+            return \"focused\"; \
+        }})()",
+        index = index,
+        select = select,
+    )
+}
+
 pub const YGGUI_OTP_CSS: &str = r#"
 .yggui-otp {
   display: flex;
@@ -163,6 +202,13 @@ pub const YGGUI_OTP_CSS: &str = r#"
   font-variant-numeric: tabular-nums;
   border-radius: 12px;
   outline: none;
+  /* ⛔ Ink pairs with the background, which is `composer_surface` and flips
+     under dark mode. A host-fixed ink goes dark-on-dark the moment the OS
+     does (practice.gour.top, 2026-09-10). `--yggui-conv-work-ink` lives on
+     the same sheet as the surface and flips with it; the fallback is the
+     light-arm ink-ish default for a host that ships neither. */
+  color: var(--yggui-conv-work-ink, #1b232b);
+  caret-color: var(--yggui-conv-work-ink, #1b232b);
   transition: border-color 140ms cubic-bezier(0.2, 0, 0, 1),
     box-shadow 140ms cubic-bezier(0.2, 0, 0, 1);
 }
@@ -253,9 +299,13 @@ pub fn OtpCodeEntry(
     let mut cells_state = cells.clone();
     cells_state.resize(YGGUI_OTP_CODE_LEN, String::new());
 
+    // Text and caret are deliberately NOT `tokens.ink` here: the background is
+    // `tokens.composer_surface`, which CONVERSATION_THEME_CSS flips under dark
+    // mode while a host-fixed ink does not — the pairing lives in the
+    // component's own CSS instead (see YGGUI_OTP_CSS).
     let cell_style = format!(
-        "background:{}; border:1px solid {}; color:{}; font-family:{};",
-        tokens.composer_surface, tokens.ask_hairline, tokens.ink, tokens.prose.ui_font,
+        "background:{}; border:1px solid {}; font-family:{};",
+        tokens.composer_surface, tokens.ask_hairline, tokens.prose.ui_font,
     );
 
     let apply = move |next: Vec<String>| {
@@ -289,10 +339,25 @@ pub fn OtpCodeEntry(
                             // mobile cannot type the letters at all.
                             OtpAlphabet::Alphanumeric => "text",
                         },
+                        autocapitalize: match alphabet {
+                            OtpAlphabet::Digits => "off",
+                            // A code shown as "KYAXU8" arrives upper-case; the
+                            // on-screen keyboard should not fight the inbox.
+                            OtpAlphabet::Alphanumeric => "characters",
+                        },
+                        spellcheck: "false",
                         autocomplete: if index == 0 { "one-time-code" } else { "off" },
                         maxlength: "1",
                         style: "{cell_style}",
                         value: "{cells_state.get(index).cloned().unwrap_or_default()}",
+                        onfocus: move |_| {
+                            // Focus must SELECT: typing into a filled cell has to
+                            // replace it — maxlength otherwise swallows the
+                            // keystroke and the field reads as stuck.
+                            spawn(async move {
+                                let _ = document::eval(&focus_otp_cell_script(index, true)).await;
+                            });
+                        },
                         oninput: {
                             let current = cells_state.clone();
                             move |evt: FormEvent| {
@@ -308,6 +373,56 @@ pub fn OtpCodeEntry(
                                     return;
                                 }
                                 apply(fill_cells(&current, &digits, index));
+                                // One keystroke, one cell, caret carried to the
+                                // next: a six-character code is six keystrokes,
+                                // not six click-type rounds.
+                                if digits.len() == 1 && index + 1 < YGGUI_OTP_CODE_LEN {
+                                    let script = focus_otp_cell_script(index + 1, true);
+                                    spawn(async move {
+                                        let _ = document::eval(&script).await;
+                                    });
+                                }
+                            }
+                        },
+                        onkeydown: {
+                            let current = cells_state.clone();
+                            move |evt: KeyboardEvent| {
+                                let cell_empty = current
+                                    .get(index)
+                                    .map(|cell| cell.is_empty())
+                                    .unwrap_or(true);
+                                match evt.key() {
+                                    // Backspacing out of an EMPTY cell walks the
+                                    // deletion backwards: the previous cell is
+                                    // cleared and takes the caret in one press.
+                                    Key::Backspace if cell_empty && index > 0 => {
+                                        evt.prevent_default();
+                                        let mut next = current.clone();
+                                        if let Some(slot) = next.get_mut(index - 1) {
+                                            slot.clear();
+                                        }
+                                        apply(next);
+                                        let script = focus_otp_cell_script(index - 1, true);
+                                        spawn(async move {
+                                            let _ = document::eval(&script).await;
+                                        });
+                                    }
+                                    Key::ArrowLeft if index > 0 => {
+                                        evt.prevent_default();
+                                        let script = focus_otp_cell_script(index - 1, true);
+                                        spawn(async move {
+                                            let _ = document::eval(&script).await;
+                                        });
+                                    }
+                                    Key::ArrowRight if index + 1 < YGGUI_OTP_CODE_LEN => {
+                                        evt.prevent_default();
+                                        let script = focus_otp_cell_script(index + 1, true);
+                                        spawn(async move {
+                                            let _ = document::eval(&script).await;
+                                        });
+                                    }
+                                    _ => {}
+                                }
                             }
                         },
                     }
@@ -477,4 +592,21 @@ mod tests {
         );
     }
 
+    #[test]
+    fn the_focus_helper_names_its_cell_and_selects_on_request() {
+        let script = focus_otp_cell_script(2, true);
+        assert!(script.contains(r#"[data-yggui-otp-cell="2"]"#));
+        assert!(script.contains(".select()"));
+
+        // The arrow-key shape moves without selecting — the flag is a runtime
+        // JS guard, so the assertion is the guard value, not the call text.
+        assert!(focus_otp_cell_script(2, true).contains("if (true)"));
+        assert!(focus_otp_cell_script(3, false).contains("if (false)"));
+
+        // Advancing from the last cell probes one past the end and must stay a
+        // harmless "no-cell" probe, never a thrown focus.
+        let past_end = focus_otp_cell_script(YGGUI_OTP_CODE_LEN, true);
+        assert!(past_end.contains(r#"[data-yggui-otp-cell="6"]"#));
+        assert!(past_end.contains("no-cell"));
+    }
 }
