@@ -346,7 +346,19 @@ pub fn OtpCodeEntry(
                             OtpAlphabet::Alphanumeric => "characters",
                         },
                         spellcheck: "false",
-                        autocomplete: if index == 0 { "one-time-code" } else { "off" },
+                        // ⛔ "off" on EVERY cell — never "one-time-code".
+                        // That attribute is the exact signal password managers
+                        // key on: clicking the first cell hovered the manager's
+                        // dropdown over the box (owner-reported 2026-09-11).
+                        // The component already owns code delivery — the paste
+                        // bridge and auto-advance — so browser OTP fill adds
+                        // nothing but the jump-in. The vendor opt-outs below
+                        // name the managers that ignore plain "off".
+                        autocomplete: "off",
+                        "data-1p-ignore": "true",
+                        "data-lpignore": "true",
+                        "data-bwignore": "true",
+                        "data-form-fill-ignore": "true",
                         maxlength: "1",
                         style: "{cell_style}",
                         value: "{cells_state.get(index).cloned().unwrap_or_default()}",
@@ -435,6 +447,11 @@ pub fn OtpCodeEntry(
                 "data-yggui-otp-sink": "1",
                 r#type: "text",
                 "aria-hidden": "true",
+                autocomplete: "off",
+                "data-1p-ignore": "true",
+                "data-lpignore": "true",
+                "data-bwignore": "true",
+                "data-form-fill-ignore": "true",
                 tabindex: "-1",
                 style: "position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; \
                         border:none; padding:0; margin:0;",
