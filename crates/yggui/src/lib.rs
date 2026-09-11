@@ -34,6 +34,34 @@ pub mod rails;
 pub mod split_button;
 pub mod theme;
 
+/// ytrace provider for all libyggterm apps (viewport/rails/cwd_tree).
+/// Each app that links yggui can call `yggui::ytrace_provider()` to emit
+/// the six required probes. The provider is lazy so a surface without a probe
+/// is a Dash blind spot that is visible as “no ytrace for app X” in ytop.
+pub mod ytrace_support {
+    use once_cell::sync::Lazy;
+    use ytrace::{Clock, Provider, Sample};
+
+    static PROVIDER: Lazy<Provider> = Lazy::new(|| {
+        // app id is set by the consumer via YTRACE_APP env or defaults to yggui
+        let app = std::env::var("YTRACE_APP").unwrap_or_else(|_| "libyggterm".to_string());
+        let ver = env!("CARGO_PKG_VERSION");
+        let p = Provider::new(app, ver);
+        p.register("viewport/mount", Clock::Wall, Sample::always());
+        p.register("rails/select", Clock::Wall, Sample::always());
+        p.register("cwd_tree/navigate", Clock::Wall, Sample::always());
+        p.register("render/gui", Clock::Cpu, Sample::always());
+        // daemon_request is emitted by the host (yggterm), but the surface
+        // side also traces the declare path so Dash sees the round-trip.
+        p.register("daemon_request/declare", Clock::Wall, Sample::always());
+        p
+    });
+
+    pub fn provider() -> &'static Provider {
+        &PROVIDER
+    }
+}
+
 pub use chat_input::{CHAT_INPUT_CSS, ChatContextOption, ComposerSendShortcut, YggChatInputBox};
 #[cfg(feature = "desktop-shell")]
 pub use chrome::{
@@ -71,8 +99,8 @@ pub use notifications::{
     TOAST_CSS, ToastAnchor, ToastCard, ToastItem, ToastPalette, ToastTone, ToastViewport,
 };
 pub use otp::{
-    OtpAlphabet, OtpCodeEntry, YGGUI_OTP_CODE_LEN, YGGUI_OTP_CSS, complete_otp, chars_for_otp, digits_for_otp,
-    install_otp_paste_bridge_script, otp_paste_from_native_script,
+    OtpAlphabet, OtpCodeEntry, YGGUI_OTP_CODE_LEN, YGGUI_OTP_CSS, chars_for_otp, complete_otp,
+    digits_for_otp, install_otp_paste_bridge_script, otp_paste_from_native_script,
 };
 pub use pill_toolbar::{PILL_TOOLBAR_CSS, PillStep, PillToolbar, PillToolbarPalette};
 pub use prose::{

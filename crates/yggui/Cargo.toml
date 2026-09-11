@@ -19,6 +19,7 @@ once_cell = "1"
 serde.workspace = true
 serde_json.workspace = true
 tracing.workspace = true
+ytrace = { git = "https://github.com/yggdrasilhq/ytrace", branch = "main" }
 
 # The renderer is the CONSUMER's choice, not the library's.
 #

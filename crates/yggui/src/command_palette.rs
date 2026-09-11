@@ -246,7 +246,11 @@ pub fn CommandPalette(
     on_dismiss: EventHandler<()>,
 ) -> Element {
     let count = items.len();
-    let selected = if count == 0 { 0 } else { selected.min(count - 1) };
+    let selected = if count == 0 {
+        0
+    } else {
+        selected.min(count - 1)
+    };
     let accept_id = items.get(selected).map(|item| item.id.clone());
 
     rsx! {

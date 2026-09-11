@@ -406,7 +406,13 @@ mod tests {
     fn the_menu_draws_on_its_own_surface_never_the_buttons() {
         let tint = "rgba(255,255,255,0.18)";
         let palette = SplitButtonPalette::new(
-            "#101418", "#5b6675", tint, "#141a21", "#d6dce4", "rgba(120,142,166,0.16)", "#2563eb",
+            "#101418",
+            "#5b6675",
+            tint,
+            "#141a21",
+            "#d6dce4",
+            "rgba(120,142,166,0.16)",
+            "#2563eb",
             "#ffffff",
         );
         let style = menu_surface_style(&palette);

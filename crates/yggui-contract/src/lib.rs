@@ -359,7 +359,10 @@ mod document_split_locks {
     #[test]
     fn neither_half_can_be_dragged_away_entirely() {
         assert_eq!(clamp_document_split_ratio(0.0), DOCUMENT_SPLIT_MIN_RATIO);
-        assert_eq!(clamp_document_split_ratio(1.0), 1.0 - DOCUMENT_SPLIT_MIN_RATIO);
+        assert_eq!(
+            clamp_document_split_ratio(1.0),
+            1.0 - DOCUMENT_SPLIT_MIN_RATIO
+        );
         assert_eq!(clamp_document_split_ratio(-4.0), DOCUMENT_SPLIT_MIN_RATIO);
     }
 
