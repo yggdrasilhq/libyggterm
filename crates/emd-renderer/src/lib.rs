@@ -98,8 +98,22 @@ pub enum MdBlock {
     Table {
         header: Vec<Vec<MdInline>>,
         rows: Vec<Vec<Vec<MdInline>>>,
+        /// Per-column alignment from the delimiter row, same length as
+        /// `header`.
+        alignments: Vec<MdTableAlign>,
     },
     Rule,
+}
+
+/// Column alignment for one markdown table column, carried from the GFM
+/// delimiter row (`---`, `:---`, `:---:`, `---:`) instead of being dropped
+/// at parse time. `None` (the bare delimiter) renders as left at the host.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MdTableAlign {
+    None,
+    Left,
+    Center,
+    Right,
 }
 
 pub fn parse_markdown_blocks(source: &str) -> Vec<MdBlock> {
@@ -121,6 +135,7 @@ pub fn parse_markdown_blocks(source: &str) -> Vec<MdBlock> {
     let mut table_header: Vec<Vec<MdInline>> = Vec::new();
     let mut table_rows: Vec<Vec<Vec<MdInline>>> = Vec::new();
     let mut table_cells: Vec<Vec<MdInline>> = Vec::new();
+    let mut table_alignments: Vec<MdTableAlign> = Vec::new();
     let mut in_table = false;
     let mut code_block: Option<(Option<String>, String)> = None;
     let mut heading_level: Option<u8> = None;
@@ -213,16 +228,26 @@ pub fn parse_markdown_blocks(source: &str) -> Vec<MdBlock> {
                     items.push(body);
                 }
             }
-            Event::Start(Tag::Table(_)) => {
+            Event::Start(Tag::Table(alignments)) => {
                 in_table = true;
                 table_header.clear();
                 table_rows.clear();
+                table_alignments = alignments
+                    .iter()
+                    .map(|alignment| match alignment {
+                        pulldown_cmark::Alignment::None => MdTableAlign::None,
+                        pulldown_cmark::Alignment::Left => MdTableAlign::Left,
+                        pulldown_cmark::Alignment::Center => MdTableAlign::Center,
+                        pulldown_cmark::Alignment::Right => MdTableAlign::Right,
+                    })
+                    .collect();
             }
             Event::End(TagEnd::Table) => {
                 in_table = false;
                 sink(&mut root, &mut block_stack).push(MdBlock::Table {
                     header: std::mem::take(&mut table_header),
                     rows: std::mem::take(&mut table_rows),
+                    alignments: std::mem::take(&mut table_alignments),
                 });
             }
             Event::Start(Tag::TableHead) => {
@@ -429,7 +454,7 @@ mod tests {
             "heading missing: {blocks:?}"
         );
         let table = blocks.iter().find_map(|b| match b {
-            crate::MdBlock::Table { header, rows } => Some((header.len(), rows.len())),
+            crate::MdBlock::Table { header, rows, .. } => Some((header.len(), rows.len())),
             _ => None,
         });
         assert_eq!(
@@ -461,6 +486,31 @@ mod tests {
         let ranges = top_level_block_ranges(source);
         assert_eq!(blocks.len(), ranges.len());
         assert!(source[ranges[1].clone()].starts_with("```emd"));
+    }
+
+    /// GFM delimiter-row alignment is carried, not dropped: hosts render
+    /// per-column text-align from it (practice lesson tables, 2026-09-12).
+    #[test]
+    fn table_alignment_survives_the_delimiter_row() {
+        let source = "| Position | Left | Center | Right |\n|---|:---|:---:|---:|\n| Long call | a | b | c |\n";
+        let blocks = parse_markdown_blocks(source);
+        let table = blocks.iter().find_map(|b| match b {
+            MdBlock::Table { header, alignments, .. } => Some((header.len(), alignments.clone())),
+            _ => None,
+        });
+        assert_eq!(
+            table,
+            Some((
+                4,
+                vec![
+                    MdTableAlign::None,
+                    MdTableAlign::Left,
+                    MdTableAlign::Center,
+                    MdTableAlign::Right,
+                ]
+            )),
+            "delimiter-row alignment must survive the parse: {blocks:?}"
+        );
     }
 
     #[test]
