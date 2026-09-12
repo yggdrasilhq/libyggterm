@@ -74,6 +74,18 @@ pub enum MdInline {
     HardBreak,
 }
 
+/// GFM column alignment for one table column, parsed from the delimiter
+/// row (`---`, `:---`, `:---:`, `---:`). A stable local mirror of the
+/// parser crate's alignment type, so hosts never depend on a markdown
+/// crate's public API to style a column.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MdAlignment {
+    None,
+    Left,
+    Center,
+    Right,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum MdBlock {
     Heading {
@@ -98,6 +110,10 @@ pub enum MdBlock {
     Table {
         header: Vec<Vec<MdInline>>,
         rows: Vec<Vec<Vec<MdInline>>>,
+        /// One entry per column, as declared by the delimiter row; hosts
+        /// that do not care may ignore it, hosts that render tables use it
+        /// to restore the author's column intent.
+        alignments: Vec<MdAlignment>,
     },
     Rule,
 }
@@ -121,6 +137,7 @@ pub fn parse_markdown_blocks(source: &str) -> Vec<MdBlock> {
     let mut table_header: Vec<Vec<MdInline>> = Vec::new();
     let mut table_rows: Vec<Vec<Vec<MdInline>>> = Vec::new();
     let mut table_cells: Vec<Vec<MdInline>> = Vec::new();
+    let mut table_alignments: Vec<MdAlignment> = Vec::new();
     let mut in_table = false;
     let mut code_block: Option<(Option<String>, String)> = None;
     let mut heading_level: Option<u8> = None;
@@ -213,16 +230,26 @@ pub fn parse_markdown_blocks(source: &str) -> Vec<MdBlock> {
                     items.push(body);
                 }
             }
-            Event::Start(Tag::Table(_)) => {
+            Event::Start(Tag::Table(alignments)) => {
                 in_table = true;
                 table_header.clear();
                 table_rows.clear();
+                table_alignments = alignments
+                    .into_iter()
+                    .map(|alignment| match alignment {
+                        pulldown_cmark::Alignment::None => MdAlignment::None,
+                        pulldown_cmark::Alignment::Left => MdAlignment::Left,
+                        pulldown_cmark::Alignment::Center => MdAlignment::Center,
+                        pulldown_cmark::Alignment::Right => MdAlignment::Right,
+                    })
+                    .collect();
             }
             Event::End(TagEnd::Table) => {
                 in_table = false;
                 sink(&mut root, &mut block_stack).push(MdBlock::Table {
                     header: std::mem::take(&mut table_header),
                     rows: std::mem::take(&mut table_rows),
+                    alignments: std::mem::take(&mut table_alignments),
                 });
             }
             Event::Start(Tag::TableHead) => {
@@ -414,6 +441,33 @@ mod tests {
         assert!(spliced.contains("code here"));
     }
 
+    #[test]
+    fn markdown_tables_carry_delimiter_row_alignments() {
+        let source = "| item | qty | note |\n|:---|---:|:---:|\n| wrench | 3 | fine |\n";
+        let blocks = crate::parse_markdown_blocks(source);
+        let table = blocks.iter().find_map(|b| match b {
+            crate::MdBlock::Table {
+                header, alignments, ..
+            } => Some((header.len(), alignments.clone())),
+            _ => None,
+        });
+        assert_eq!(
+            table,
+            Some((
+                3,
+                vec![MdAlignment::Left, MdAlignment::Right, MdAlignment::Center]
+            )),
+            "delimiter-row alignment must survive the fold: {blocks:?}"
+        );
+        // A plain `---` delimiter row is None (default), not a direction.
+        let plain = crate::parse_markdown_blocks("| a | b |\n|---|---|\n| 1 | 2 |\n");
+        assert!(plain.iter().any(|b| matches!(
+            b,
+            crate::MdBlock::Table { alignments, .. }
+                if *alignments == vec![MdAlignment::None, MdAlignment::None]
+        )));
+    }
+
     /// The document surface's markdown renderer: structure lands as typed
     /// blocks (the triage-board acceptance shape — a wide table), and raw
     /// HTML is DROPPED, never forwarded toward the DOM.
@@ -429,7 +483,7 @@ mod tests {
             "heading missing: {blocks:?}"
         );
         let table = blocks.iter().find_map(|b| match b {
-            crate::MdBlock::Table { header, rows } => Some((header.len(), rows.len())),
+            crate::MdBlock::Table { header, rows, .. } => Some((header.len(), rows.len())),
             _ => None,
         });
         assert_eq!(
