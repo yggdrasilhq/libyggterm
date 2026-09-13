@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="320" viewBox="0 0 560 320">
+<defs><linearGradient id="shell"><stop stop-color="#b4e0d1"/><stop offset="1" stop-color="#d9e5ee"/></linearGradient></defs>
+<style>text{font-family:system-ui,sans-serif;font-size:14px;fill:#203444}.small{font-size:12px}.heading{font-size:16px;font-weight:650}</style>
+<rect width="560" height="320" fill="white"/>
+<text x="12" y="23" class="heading">Rejected · floating, sparse, disconnected</text>
+<rect x="12" y="36" width="536" height="28" fill="#484d55"/>
+<text x="24" y="55" style="fill:#fff">Home　Edit　View　Help</text>
+<rect x="26" y="68" width="504" height="52" rx="12" fill="#cbd1d8"/>
+<rect x="20" y="62" width="504" height="52" rx="12" fill="white" stroke="#cbd1d8"/>
+<text x="32" y="84">Open　Save　│　Undo　Search</text><text x="474" y="84">M-x</text>
+<text x="42" y="105" class="small">FILE　　　　　 EDIT</text>
+<text x="12" y="141">The panel covers the document's first lines.</text>
+<text x="12" y="177" class="heading">Proposed · integrated, grouped, restrained</text>
+<rect x="12" y="190" width="536" height="28" fill="url(#shell)"/>
+<text x="24" y="209">Home　Edit　View　Help</text><path d="M22 217H59" stroke="#2166b5" stroke-width="2"/>
+<rect x="12" y="219" width="536" height="54" fill="#f5f8fa" stroke="#ced9e1"/>
+<text x="24" y="241">Open　Save</text><text x="155" y="241">Undo　Redo</text><text x="290" y="241">Find　Replace</text><text x="442" y="241">Commands…</text>
+<path d="M141 229V262M276 229V262M428 229V262" stroke="#bccbd5"/>
+<text x="24" y="262" class="small">File</text><text x="155" y="262" class="small">History</text><text x="290" y="262" class="small">Search</text>
+<text x="12" y="293">Document begins below the pinned command band.</text>
+<text x="12" y="315" class="small">Invented reconstruction and proposal · not a repaired UI capture</text>
+</svg>

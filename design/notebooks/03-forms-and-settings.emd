@@ -1,0 +1,97 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+# Forms & settings
+
+**edition 2026-09-07 · rev 1**
+
+Forms are where a design language is most visible and most often broken,
+because a form is nothing but decisions repeated: every field, every label,
+every button is a fresh chance to drift. The rules here collapse those
+decisions into defaults.
+
+![Form rail at readable component scale](%ASSETS%/catalogue-forms-rail.png)
+
+Start with a concrete job: change a setting, understand its consequence, and
+continue. Keep the label, control and brief help together. Long explanations
+belong in an accessible details disclosure when they are necessary to decide;
+a tooltip must not be the only way keyboard or touch users learn a consequence.
+
+## Section cards: a form is a card, a list is not
+
+A form group, heading plus the fields under it, sits in a card (14px
+radius, inset hairline, 11–12px padding). **Opt-in per section, and it stays
+opt-in**: a card around a long list is a stack of nested boxes, which the
+brand rules out by name. A form wants the card; a file tree does not.
+
+- The heading is the structural voice: 10px, 800, uppercase, tracked, in the
+  TEXT colour. Muted-on-muted headings are what made long settings read as
+  one undifferentiated slab.
+- A form's primary action is **pinned**, not scrolled: in a rail, Save lives
+  in the footer bar and wears the accent (`primary: true`).
+
+## The short-phrase rule ⭐
+
+This exists because of a measured defect: settings rows whose explanatory
+prose sat **beside** the control as a five-to-seven-line paragraph, eating
+the row's width, leaving the toggle stranded in dead space, and making the
+whole rail read as a document with buttons in it.
+
+The rule:
+
+- **One short phrase, under the control it explains.** Muted, ~10.5px, never
+  a paragraph. If more explanation is needed, offer a labeled disclosure;
+  a concise tooltip may supplement it.
+- **Never beside.** Prose to the left of a toggle with a dead gap between is
+  the exact failure shape. Under, demoted, or nothing.
+- The proportion test: the control should dominate its row. If the
+  explanation occupies more visual weight than the control, the row is wrong.
+
+The same law in menus: a verb's *reason* lives in the **tooltip**, never in
+the label, a label is a name, and appending a justification to it produced
+unreadable menus once already.
+
+## One field skin
+
+There is ONE text field in the product; every box is that control wearing
+different geometry. The skin is a **stylesheet** (hover and focus are states;
+an inline style cannot express one), and the style function emits the BOX,
+never the fill, because one inline background out-specifies the stylesheet
+and silently kills hover and focus for that surface.
+
+- Resting, hover and focus fills derive from the theme accent; the hairline
+  is inset 1px; the focus ring is the dialog ring's vocabulary (2px accent,
+  2px outside, following the control's radius).
+- The pill shape is reserved: the browser omnibox and the find bar, which
+  mimic vocabulary users already own. Everywhere else, soft rectangles.
+- A field sits on a **section card** in a form, never floating on the bare
+  rail.
+
+### A stored value: mask dots, an eye, a copy, on the field
+
+- The dots are a **placeholder**, never a value, fixed length, vanishing on
+  the first keystroke, submittable by nothing.
+- The verbs (eye, copy) sit inside the trailing edge, quiet at rest, lit on
+  hover, with their room reserved so long values ellipsize behind them.
+- A revealed value is display-only; it never reaches the form draft.
+- **No eye for a value that is not there**, an empty box that adds one is an
+  ordinary empty box with its own placeholder.
+
+## Control choices that are already made
+
+- **Mode switches** (2+ exclusive modes): the one segmented control. Snug
+  track, near-edge-to-edge active fill, no drop shadow on the active chip.
+- **Binary on/off**: the switch (track + sliding thumb), not a segmented
+  pair.
+- **Primary action**: unmistakably clickable, accent fill, white label,
+  AA contrast or better. "This does not look like a button" is a design
+  failure, stated as a rule.
+- **Destructive verbs**: reversible by default. Bulk actions name their count
+  ("Close 12 other tabs"). Offer Undo when restoration is real. Irreversible
+  or consequential actions need an explicit review of the target and effect;
+  never promise Undo for data that cannot be restored.
+
+## Accepting a form change
+
+Screenshot the rail before and after. The before/after pair is judged on:
+partition proportions (§ Sidebars), the short-phrase rule, heading voice,
+field alignment on the shared grid, and the pinned Save. A form change that
+cannot show its before/after pair is not done.

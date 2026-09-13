@@ -1,0 +1,878 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2016" height="1270" viewBox="0 0 2016 1270" role="img" aria-labelledby="title desc"><title id="title">Excel-class ribbon, phase A</title><desc id="desc">Four vector artboards: full Home ribbon, Insert ribbon, collapsed ribbon with separate state detail, and a 980 pixel responsive Home ribbon.</desc>
+<style><![CDATA[svg {  --ink:#24343b; --muted:#52666f; --accent:#265f63; --paper:#fff; --hover:#f3f6f5; --line:color-mix(in srgb,var(--accent) 23%,var(--paper)); --control-line:color-mix(in srgb,var(--muted) 48%,var(--paper)); --tint:color-mix(in srgb,var(--accent) 8%,var(--paper)); 
+ --r-tab-height:34px; --r-band-height:96px; --r-header-height:44px;
+ --r-control-height:24px; --r-large-height:58px; --r-radius:3px;
+ --r-icon:16px; --r-icon-large:24px; --r-caption:11px; --r-text:12px;
+ --r-tab-text:13px; --r-rule:1px; --r-focus:2px; --r-underline:3px;
+ --r-gap:4px; --r-row-gap:6px; --r-group-pad:10px; --r-band-pad:9px;
+ --r-caption-line:14px; --r-command-area:64px; --r-zero:0px;
+ --r-regular:400; --r-medium:500; --r-semibold:600; --r-bold:700;
+ --r-font:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ --r-disabled-ink:color-mix(in srgb,var(--muted) 62%,var(--paper));
+ --r-disabled-paper:var(--hover); --r-stroke:1.25px;
+ --r-title:22px; --r-section:16px; --r-board-title:14px;
+ --r-search-width:360px; --r-search-compact:280px; --r-actions-width:389px;
+ --r-chip-width:73px; --r-chip-height:25px; --r-full:100%;
+ --r-size-0:0px;
+ --r-size-1:1px;
+ --r-size-2:2px;
+ --r-size-3:3px;
+ --r-size-6:6px;
+ --r-size-8:8px;
+ --r-size-11:11px;
+ --r-size-12:12px;
+ --r-size-13:13px;
+ --r-size-14:14px;
+ --r-size-16:16px;
+ --r-size-18:18px;
+ --r-size-21:21px;
+ --r-size-22:22px;
+ --r-size-24:24px;
+ --r-size-25:25px;
+ --r-size-27:27px;
+ --r-size-28:28px;
+ --r-size-30:30px;
+ --r-size-31:31px;
+ --r-size-32:32px;
+ --r-size-34:34px;
+ --r-size-36:36px;
+ --r-size-39:39px;
+ --r-size-42:42px;
+ --r-size-43:43px;
+ --r-size-44:44px;
+ --r-size-48:48px;
+ --r-size-50:50px;
+ --r-size-52:52px;
+ --r-size-58:58px;
+ --r-size-62:62px;
+ --r-size-64:64px;
+ --r-size-66:66px;
+ --r-size-72:72px;
+ --r-size-73:73px;
+ --r-size-76:76px;
+ --r-size-77p5:77.5px;
+ --r-size-78:78px;
+ --r-size-79:79px;
+ --r-size-84:84px;
+ --r-size-94:94px;
+ --r-size-96:96px;
+ --r-size-99:99px;
+ --r-size-104:104px;
+ --r-size-110:110px;
+ --r-size-111:111px;
+ --r-size-114:114px;
+ --r-size-118:118px;
+ --r-size-124:124px;
+ --r-size-126:126px;
+ --r-size-136:136px;
+ --r-size-139:139px;
+ --r-size-160:160px;
+ --r-size-165:165px;
+ --r-size-238:238px;
+ --r-size-280:280px;
+ --r-size-340:340px;
+ --r-size-360:360px;
+ --r-size-840:840px;
+ --r-size-980:980px;
+ --r-size-1270:1270px;
+ --r-size-1780:1780px;
+ --r-size-1920:1920px;
+ --r-size-2016:2016px; font-family:var(--r-font);font-size:var(--r-text);fill:var(--ink); }
+text { font-weight:var(--r-regular); }
+.canvas,.surface {fill:var(--hover)} .paper {fill:var(--paper)}
+.control,.swatch {fill:var(--paper);stroke:var(--control-line);stroke-width:var(--r-rule)}
+.rule,.frame {fill:none;stroke:var(--line);stroke-width:var(--r-rule)}
+.icon {fill:none;stroke:currentColor;stroke-width:var(--r-stroke);stroke-linecap:round;stroke-linejoin:round;color:var(--ink)}
+.accent {fill:var(--accent)} .muted,.tab,.caption {fill:var(--muted)}
+.caption {font-size:var(--r-caption)} .tab {font-size:var(--r-tab-text)}
+.active {fill:var(--accent);font-weight:var(--r-bold)}
+.strong,.boardtitle {font-weight:var(--r-semibold)} .boardtitle {font-size:var(--r-board-title)}
+.pagetitle {font-size:var(--r-title);font-weight:var(--r-semibold)}
+.section {font-size:var(--r-section);font-weight:var(--r-semibold)}
+.brand {fill:var(--paper);font-weight:var(--r-bold)}
+.control.primary {fill:var(--accent);stroke:var(--accent)} .primary text {fill:var(--paper)} .primary .icon {color:var(--paper)}
+.control.selected {fill:var(--tint);stroke:var(--accent)} .bold text {font-weight:var(--r-bold)} .italic text {font-style:italic}.underlined text {text-decoration:underline}
+.selection,.outline {fill:none;stroke:var(--accent);stroke-width:var(--r-rule)}
+.selection {stroke-width:var(--r-focus)} .control.focused {stroke:var(--accent);stroke-width:var(--r-focus)}
+.control.disabled {fill:var(--r-disabled-paper);stroke:var(--line)} .disabled text {fill:var(--r-disabled-ink)} .disabled .icon {color:var(--r-disabled-ink)}
+.tooltip {fill:var(--paper);stroke:var(--control-line);stroke-width:var(--r-rule)} .tooltip-arrow {fill:var(--paper);stroke:var(--control-line);stroke-width:var(--r-rule)}
+]]></style>
+<rect x="0" y="0" width="2016" height="1270" rx="0" class="canvas" style="width:var(--r-size-2016);height:var(--r-size-1270);rx:var(--r-size-0)"/>
+<text x="48" y="39" class="pagetitle" text-anchor="start">Ribbons / Excel-class command surface</text>
+<text x="1968" y="39" class="caption" text-anchor="end">YDESIGN   /   MOCK A   /   13 SEP 2026</text>
+<text x="48" y="72" class="boardtitle" text-anchor="start">01   Home / full command density</text>
+<text x="1968" y="72" class="caption" text-anchor="end">1920 px · pinned · Home selected</text>
+<g transform="translate(48 90)" class="artboard" id="artboard-home">
+<rect x="0" y="0" width="1920" height="238" rx="0" class="paper" style="width:var(--r-size-1920);height:var(--r-size-238);rx:var(--r-size-0)"/>
+<rect x="0" y="0" width="1920" height="44" rx="0" class="surface" style="width:var(--r-size-1920);height:var(--r-size-44);rx:var(--r-size-0)"/>
+<rect x="16" y="12" width="21" height="21" rx="3" class="accent" style="width:var(--r-size-21);height:var(--r-size-21);rx:var(--r-size-3)"/>
+<text x="26.5" y="27" class="brand" text-anchor="middle">Y</text>
+<text x="48" y="26" class="strong" text-anchor="start">Quarterly plan</text>
+<text x="151" y="26" class="caption" text-anchor="start">Saved</text>
+<rect x="780.0" y="8" width="360" height="28" rx="3" class="control" style="width:var(--r-size-360);height:var(--r-size-28);rx:var(--r-size-3)"/>
+<svg x="790.0" y="14" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M14 8a6 6 0 1 1-12 0 6 6 0 0 1 12 0 M12 13l6 6" class="icon"/></svg>
+<text x="814.0" y="27" class="muted" text-anchor="start">Search commands, help and more</text>
+<text x="1130.0" y="27" class="caption" text-anchor="end">Alt + Q</text>
+<text x="1869" y="26" class="strong" text-anchor="start">Y</text>
+<rect x="1855" y="8" width="36" height="28" rx="14" class="outline" style="width:var(--r-size-36);height:var(--r-size-28);rx:var(--r-size-14)"/>
+<rect x="0" y="44" width="1920" height="34" rx="0" class="surface" style="width:var(--r-size-1920);height:var(--r-size-34);rx:var(--r-size-0)"/>
+<path d="M0 78H1920" class="rule"/>
+<text x="24" y="65" class="tab" text-anchor="start">File</text>
+<text x="64" y="65" class="tab active" text-anchor="start">Home</text>
+<rect x="63" y="75" width="43" height="3" rx="0" class="accent" style="width:var(--r-size-43);height:var(--r-size-3);rx:var(--r-size-0)"/>
+<text x="121" y="65" class="tab" text-anchor="start">Insert</text>
+<text x="177" y="65" class="tab" text-anchor="start">Page Layout</text>
+<text x="273" y="65" class="tab" text-anchor="start">Formulas</text>
+<text x="351" y="65" class="tab" text-anchor="start">Data</text>
+<text x="400" y="65" class="tab" text-anchor="start">Review</text>
+<text x="465" y="65" class="tab" text-anchor="start">View</text>
+<text x="514" y="65" class="tab" text-anchor="start">Help</text>
+<g class="button "><title>Comments</title>
+<rect x="1531" y="49" width="104" height="24" rx="3" class="control " style="width:var(--r-size-104);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="1537" y="53.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16v11H8l-5 4v-4H2z" class="icon"/></svg>
+<text x="1559" y="65.0" class="label" text-anchor="start">Comments</text>
+</g>
+<g class="button "><title>Catch up</title>
+<rect x="1639" y="49" width="96" height="24" rx="3" class="control " style="width:var(--r-size-96);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="1645" y="53.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M1 10h4l3-7 4 14 3-7h4" class="icon"/></svg>
+<text x="1667" y="65.0" class="label" text-anchor="start">Catch up</text>
+</g>
+<g class="button "><title>Editing</title>
+<rect x="1739" y="49" width="94" height="24" rx="3" class="control " style="width:var(--r-size-94);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="1745" y="53.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M3 14L14 3l3 3L6 17l-4 1z M12 5l3 3" class="icon"/></svg>
+<text x="1767" y="65.0" class="label" text-anchor="start">Editing</text>
+<path d="M1821 59.0l3 3 3 -3" class="icon"/>
+</g>
+<g class="button primary"><title>Share</title>
+<rect x="1837" y="49" width="79" height="24" rx="3" class="control primary" style="width:var(--r-size-79);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="1843" y="53.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M11 2l6 5-6 5 M17 7H9v7 M6 5H2v13h15v-4" class="icon"/></svg>
+<text x="1865" y="65.0" class="label" text-anchor="start">Share</text>
+<path d="M1904 59.0l3 3 3 -3" class="icon"/>
+</g>
+<rect x="0" y="78" width="1920" height="96" rx="0" class="paper" style="width:var(--r-size-1920);height:var(--r-size-96);rx:var(--r-size-0)"/>
+<path d="M180 86L180 158" class="rule"/>
+<text x="98.0" y="166" class="caption" text-anchor="middle">Clipboard</text>
+<rect x="16" y="87" width="48" height="58" rx="3" class="control" style="width:var(--r-size-48);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="28.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M6 4H3v15h14V4h-3 M7 2h6v4H7z M6 10h8M6 14h6" class="icon"/></svg>
+<text x="40.0" y="130" class="label" text-anchor="middle">Paste</text>
+<path d="M17 134H63" class="rule"/>
+<path d="M37.0 138l3 3 3 -3" class="icon"/>
+<g class="button "><title>Cut</title>
+<rect x="70" y="87" width="76" height="24" rx="3" class="control " style="width:var(--r-size-76);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="76" y="91.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M7 12L17 2M7 7l10 11 M7 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0 M7 15a3 3 0 1 1-6 0 3 3 0 0 1 6 0" class="icon"/></svg>
+<text x="98" y="103.0" class="label" text-anchor="start">Cut</text>
+</g>
+<g class="button "><title>Copy</title>
+<rect x="70" y="117" width="76" height="24" rx="3" class="control " style="width:var(--r-size-76);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="76" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M7 7h11v12H7z M4 14H2V2h11v2" class="icon"/></svg>
+<text x="98" y="133.0" class="label" text-anchor="start">Copy</text>
+</g>
+<g class="button "><title>undo</title>
+<rect x="150" y="87" width="24" height="24" rx="3" class="control " style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="156" y="91.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M7 3L2 8l5 5 M2 8h9a6 6 0 0 1 6 6" class="icon"/></svg>
+</g>
+<g class="button "><title>redo</title>
+<rect x="150" y="117" width="24" height="24" rx="3" class="control " style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="156" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M13 3l5 5-5 5 M18 8h-9a6 6 0 0 0-6 6" class="icon"/></svg>
+</g>
+<path d="M426 86L426 158" class="rule"/>
+<text x="303.0" y="166" class="caption" text-anchor="middle">Font</text>
+<g class="button "><title>Aptos</title>
+<rect x="190" y="87" width="139" height="24" rx="3" class="control " style="width:var(--r-size-139);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="198" y="103.0" class="label" text-anchor="start">Aptos</text>
+<path d="M317 97.0l3 3 3 -3" class="icon"/>
+</g>
+<g class="button "><title>11</title>
+<rect x="335" y="87" width="48" height="24" rx="3" class="control " style="width:var(--r-size-48);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="343" y="103.0" class="label" text-anchor="start">11</text>
+<path d="M371 97.0l3 3 3 -3" class="icon"/>
+</g>
+<g class="button "><title>A⁺</title>
+<rect x="389" y="87" width="27" height="24" rx="3" class="control " style="width:var(--r-size-27);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="397" y="103.0" class="label" text-anchor="start">A⁺</text>
+</g>
+<g class="button selected bold"><title>B</title>
+<rect x="190" y="117" width="24" height="24" rx="3" class="control selected bold" style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="198" y="133.0" class="label" text-anchor="start">B</text>
+</g>
+<g class="button italic"><title>I</title>
+<rect x="218" y="117" width="24" height="24" rx="3" class="control italic" style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="226" y="133.0" class="label" text-anchor="start">I</text>
+</g>
+<g class="button underlined"><title>U</title>
+<rect x="246" y="117" width="24" height="24" rx="3" class="control underlined" style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="254" y="133.0" class="label" text-anchor="start">U</text>
+</g>
+<g class="button "><title>grid</title>
+<rect x="277" y="117" width="43" height="24" rx="3" class="control " style="width:var(--r-size-43);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="283" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 2h16v16H2z M2 7h16M2 12h16M7 2v16M12 2v16" class="icon"/></svg>
+<path d="M308 127.0l3 3 3 -3" class="icon"/>
+</g>
+<path d="M302 118L302 140" class="rule"/>
+<g class="button "><title>fill</title>
+<rect x="325" y="117" width="43" height="24" rx="3" class="control " style="width:var(--r-size-43);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="331" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M8 2l9 9-7 7-9-9z M3 7l7 7 5-5 M18 13v5" class="icon"/></svg>
+<path d="M356 127.0l3 3 3 -3" class="icon"/>
+</g>
+<path d="M350 118L350 140" class="rule"/>
+<g class="button "><title>A</title>
+<rect x="373" y="117" width="43" height="24" rx="3" class="control " style="width:var(--r-size-43);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="381" y="133.0" class="label" text-anchor="start">A</text>
+<path d="M404 127.0l3 3 3 -3" class="icon"/>
+</g>
+<path d="M398 118L398 140" class="rule"/>
+<rect x="335" y="136" width="13" height="2" rx="0" class="accent" style="width:var(--r-size-13);height:var(--r-size-2);rx:var(--r-size-0)"/>
+<rect x="381" y="136" width="13" height="2" rx="0" class="accent" style="width:var(--r-size-13);height:var(--r-size-2);rx:var(--r-size-0)"/>
+<path d="M648 86L648 158" class="rule"/>
+<text x="537.0" y="166" class="caption" text-anchor="middle">Alignment</text>
+<g class="button "><title>left</title>
+<rect x="436" y="87" width="24" height="24" rx="3" class="control " style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="442" y="91.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16M2 7h10M2 11h16M2 15h10" class="icon"/></svg>
+</g>
+<g class="button selected"><title>center</title>
+<rect x="464" y="87" width="24" height="24" rx="3" class="control selected" style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="470" y="91.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16M5 7h10M2 11h16M5 15h10" class="icon"/></svg>
+</g>
+<g class="button "><title>right</title>
+<rect x="492" y="87" width="24" height="24" rx="3" class="control " style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="498" y="91.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16M8 7h10M2 11h16M8 15h10" class="icon"/></svg>
+</g>
+<g class="button "><title>Wrap text</title>
+<rect x="523" y="87" width="114" height="24" rx="3" class="control " style="width:var(--r-size-114);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="529" y="91.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 4h16M2 9h12a4 4 0 0 1 0 8h-3 M12 14l-3 3 3 3" class="icon"/></svg>
+<text x="551" y="103.0" class="label" text-anchor="start">Wrap text</text>
+</g>
+<g class="button "><title>left</title>
+<rect x="436" y="117" width="24" height="24" rx="3" class="control " style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="442" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16M2 7h10M2 11h16M2 15h10" class="icon"/></svg>
+</g>
+<g class="button "><title>center</title>
+<rect x="464" y="117" width="24" height="24" rx="3" class="control " style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="470" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16M5 7h10M2 11h16M5 15h10" class="icon"/></svg>
+</g>
+<g class="button "><title>right</title>
+<rect x="492" y="117" width="24" height="24" rx="3" class="control " style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="498" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16M8 7h10M2 11h16M8 15h10" class="icon"/></svg>
+</g>
+<g class="button "><title>Merge cells</title>
+<rect x="523" y="117" width="114" height="24" rx="3" class="control " style="width:var(--r-size-114);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="529" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16v14H2z M1 10h7l-3-3M8 10l-3 3 M19 10h-7l3-3M12 10l3 3" class="icon"/></svg>
+<text x="551" y="133.0" class="label" text-anchor="start">Merge cells</text>
+<path d="M625 127.0l3 3 3 -3" class="icon"/>
+</g>
+<path d="M804 86L804 158" class="rule"/>
+<text x="726.0" y="166" class="caption" text-anchor="middle">Number</text>
+<g class="button "><title>General</title>
+<rect x="658" y="87" width="136" height="24" rx="3" class="control " style="width:var(--r-size-136);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="666" y="103.0" class="label" text-anchor="start">General</text>
+<path d="M782 97.0l3 3 3 -3" class="icon"/>
+</g>
+<g class="button "><title>$</title>
+<rect x="658" y="117" width="39" height="24" rx="3" class="control " style="width:var(--r-size-39);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="666" y="133.0" class="label" text-anchor="start">$</text>
+<path d="M685 127.0l3 3 3 -3" class="icon"/>
+</g>
+<g class="button "><title>%</title>
+<rect x="701" y="117" width="25" height="24" rx="3" class="control " style="width:var(--r-size-25);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="709" y="133.0" class="label" text-anchor="start">%</text>
+</g>
+<g class="button "><title>,</title>
+<rect x="730" y="117" width="28" height="24" rx="3" class="control " style="width:var(--r-size-28);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="738" y="133.0" class="label" text-anchor="start">,</text>
+</g>
+<g class="button "><title>.0</title>
+<rect x="762" y="117" width="32" height="24" rx="3" class="control " style="width:var(--r-size-32);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="770" y="133.0" class="label" text-anchor="start">.0</text>
+</g>
+<path d="M1454 86L1454 158" class="rule"/>
+<text x="1129.0" y="166" class="caption" text-anchor="middle">Styles</text>
+<rect x="814" y="87" width="73" height="25" rx="1" class="swatch" style="width:var(--r-size-73);height:var(--r-size-25);rx:var(--r-size-1)"/>
+<rect x="816" y="89" width="69" height="21" fill="#ffffff"/>
+<text x="820" y="104" style="fill:#24343b;font-size:var(--r-size-11);font-weight:var(--r-medium)">Normal</text>
+<rect x="814" y="87" width="73" height="25" rx="1" class="selection" style="width:var(--r-size-73);height:var(--r-size-25);rx:var(--r-size-1)"/>
+<rect x="891" y="87" width="73" height="25" rx="1" class="swatch" style="width:var(--r-size-73);height:var(--r-size-25);rx:var(--r-size-1)"/>
+<rect x="893" y="89" width="69" height="21" fill="#ffeba5"/>
+<text x="897" y="104" style="fill:#805b0b;font-size:var(--r-size-11);font-weight:var(--r-medium)">Neutral</text>
+<rect x="968" y="87" width="73" height="25" rx="1" class="swatch" style="width:var(--r-size-73);height:var(--r-size-25);rx:var(--r-size-1)"/>
+<rect x="970" y="89" width="69" height="21" fill="#ffc7ce"/>
+<text x="974" y="104" style="fill:#9c1828;font-size:var(--r-size-11);font-weight:var(--r-medium)">Bad</text>
+<rect x="1045" y="87" width="73" height="25" rx="1" class="swatch" style="width:var(--r-size-73);height:var(--r-size-25);rx:var(--r-size-1)"/>
+<rect x="1047" y="89" width="69" height="21" fill="#c6efce"/>
+<text x="1051" y="104" style="fill:#206032;font-size:var(--r-size-11);font-weight:var(--r-medium)">Good</text>
+<rect x="1122" y="87" width="73" height="25" rx="1" class="swatch" style="width:var(--r-size-73);height:var(--r-size-25);rx:var(--r-size-1)"/>
+<rect x="1124" y="89" width="69" height="21" fill="#ffcea0"/>
+<text x="1128" y="104" style="fill:#57371b;font-size:var(--r-size-11);font-weight:var(--r-medium)">Input</text>
+<rect x="1199" y="87" width="73" height="25" rx="1" class="swatch" style="width:var(--r-size-73);height:var(--r-size-25);rx:var(--r-size-1)"/>
+<rect x="1201" y="89" width="69" height="21" fill="#e8e8e8"/>
+<text x="1205" y="104" style="fill:#353535;font-size:var(--r-size-11);font-weight:var(--r-medium)">Output</text>
+<rect x="1276" y="87" width="73" height="25" rx="1" class="swatch" style="width:var(--r-size-73);height:var(--r-size-25);rx:var(--r-size-1)"/>
+<rect x="1278" y="89" width="69" height="21" fill="#fff3df"/>
+<text x="1282" y="104" style="fill:#a45408;font-size:var(--r-size-11);font-weight:var(--r-medium)">Calculation</text>
+<rect x="1353" y="87" width="73" height="25" rx="1" class="swatch" style="width:var(--r-size-73);height:var(--r-size-25);rx:var(--r-size-1)"/>
+<rect x="1355" y="89" width="69" height="21" fill="#696f72"/>
+<text x="1359" y="104" style="fill:#ffffff;font-size:var(--r-size-11);font-weight:var(--r-medium)">Check Cell</text>
+<g class="button "><title>Command</title>
+<rect x="1432" y="87" width="16" height="24" rx="3" class="control " style="width:var(--r-size-16);height:var(--r-size-24);rx:var(--r-size-3)"/>
+</g>
+<path d="M1437 97l3 3 3 -3" class="icon"/>
+<g class="button "><title>Conditional formatting</title>
+<rect x="814" y="117" width="165" height="24" rx="3" class="control " style="width:var(--r-size-165);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="820" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 2h16v16H2z M2 7h16M2 12h16M7 2v16M12 2v16" class="icon"/></svg>
+<text x="842" y="133.0" class="label" text-anchor="start">Conditional formatting</text>
+<path d="M967 127.0l3 3 3 -3" class="icon"/>
+</g>
+<g class="button "><title>Format as table</title>
+<rect x="985" y="117" width="139" height="24" rx="3" class="control " style="width:var(--r-size-139);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="991" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16v14H2z M2 8h16M7 3v14 M11 12h4" class="icon"/></svg>
+<text x="1013" y="133.0" class="label" text-anchor="start">Format as table</text>
+<path d="M1112 127.0l3 3 3 -3" class="icon"/>
+</g>
+<g class="button "><title>Cell styles</title>
+<rect x="1130" y="117" width="111" height="24" rx="3" class="control " style="width:var(--r-size-111);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="1136" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 2h16v16H2z M2 7h16M2 12h16M7 2v16M12 2v16" class="icon"/></svg>
+<text x="1158" y="133.0" class="label" text-anchor="start">Cell styles</text>
+<path d="M1229 127.0l3 3 3 -3" class="icon"/>
+</g>
+<path d="M1634 86L1634 158" class="rule"/>
+<text x="1544.0" y="166" class="caption" text-anchor="middle">Cells</text>
+<rect x="1464" y="87" width="48" height="58" rx="3" class="control" style="width:var(--r-size-48);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="1476.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 3h12v14H2z M2 8h12M7 3v14 M17 9v8M13 13h7" class="icon"/></svg>
+<text x="1488.0" y="130" class="label" text-anchor="middle">Insert</text>
+<path d="M1465 134H1511" class="rule"/>
+<path d="M1485.0 138l3 3 3 -3" class="icon"/>
+<rect x="1518" y="87" width="48" height="58" rx="3" class="control" style="width:var(--r-size-48);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="1530.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 3h12v14H2z M2 8h12M7 3v14 M14 13h6" class="icon"/></svg>
+<text x="1542.0" y="130" class="label" text-anchor="middle">Delete</text>
+<path d="M1519 134H1565" class="rule"/>
+<path d="M1539.0 138l3 3 3 -3" class="icon"/>
+<rect x="1572" y="87" width="52" height="58" rx="3" class="control" style="width:var(--r-size-52);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="1586.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 3h16v14H2z M2 8h16M7 3v14 M11 12h4" class="icon"/></svg>
+<text x="1598.0" y="130" class="label" text-anchor="middle">Format</text>
+<path d="M1573 134H1623" class="rule"/>
+<path d="M1595.0 138l3 3 3 -3" class="icon"/>
+<path d="M1904 86L1904 158" class="rule"/>
+<text x="1769.0" y="166" class="caption" text-anchor="middle">Editing</text>
+<g class="button "><title>AutoSum</title>
+<rect x="1644" y="87" width="110" height="24" rx="3" class="control " style="width:var(--r-size-110);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="1652" y="103.0" class="label" text-anchor="start">AutoSum</text>
+<path d="M1742 97.0l3 3 3 -3" class="icon"/>
+</g>
+<g class="button "><title>Sort &amp; filter</title>
+<rect x="1760" y="87" width="124" height="24" rx="3" class="control " style="width:var(--r-size-124);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="1766" y="91.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16l-6 7v7l-4 2v-9z" class="icon"/></svg>
+<text x="1788" y="103.0" class="label" text-anchor="start">Sort &amp; filter</text>
+<path d="M1872 97.0l3 3 3 -3" class="icon"/>
+</g>
+<g class="button "><title>Fill</title>
+<rect x="1644" y="117" width="72" height="24" rx="3" class="control " style="width:var(--r-size-72);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="1650" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M8 2l9 9-7 7-9-9z M3 7l7 7 5-5 M18 13v5" class="icon"/></svg>
+<text x="1672" y="133.0" class="label" text-anchor="start">Fill</text>
+<path d="M1704 127.0l3 3 3 -3" class="icon"/>
+</g>
+<g class="button "><title>Clear</title>
+<rect x="1722" y="117" width="72" height="24" rx="3" class="control " style="width:var(--r-size-72);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="1728" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 11l9-9 7 7-9 9H7z M7 6l7 7M10 18h9" class="icon"/></svg>
+<text x="1750" y="133.0" class="label" text-anchor="start">Clear</text>
+<path d="M1782 127.0l3 3 3 -3" class="icon"/>
+</g>
+<g class="button "><title>Find</title>
+<rect x="1800" y="117" width="84" height="24" rx="3" class="control " style="width:var(--r-size-84);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="1806" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M14 8a6 6 0 1 1-12 0 6 6 0 0 1 12 0 M12 13l6 6" class="icon"/></svg>
+<text x="1828" y="133.0" class="label" text-anchor="start">Find</text>
+<path d="M1872 127.0l3 3 3 -3" class="icon"/>
+</g>
+<path d="M1904 163l3 -3 3 3" class="icon"/>
+<rect x="0" y="174" width="1920" height="64" rx="0" class="paper" style="width:var(--r-size-1920);height:var(--r-size-64);rx:var(--r-size-0)"/>
+<rect x="0" y="174" width="1920" height="30" rx="0" class="surface" style="width:var(--r-size-1920);height:var(--r-size-30);rx:var(--r-size-0)"/>
+<rect x="12" y="178" width="72" height="22" rx="3" class="control" style="width:var(--r-size-72);height:var(--r-size-22);rx:var(--r-size-3)"/>
+<text x="21" y="193" class="caption" text-anchor="start">D8</text>
+<path d="M72 187l3 3 3 -3" class="icon"/>
+<text x="102" y="193" class="muted" text-anchor="start">fx</text>
+<rect x="126" y="178" width="1780" height="22" rx="3" class="control" style="width:var(--r-size-1780);height:var(--r-size-22);rx:var(--r-size-3)"/>
+<text x="137" y="193" class="caption" text-anchor="start">=SUM(D4:D7)</text>
+<path d="M0 204H1920" class="rule"/>
+<text x="16" y="225" class="caption" text-anchor="start">8</text>
+<text x="66" y="225" class="label" text-anchor="start">Operating expenses</text>
+<text x="350" y="225" class="strong" text-anchor="start">24,800</text>
+<text x="485" y="225" class="muted" text-anchor="start">Forecast</text>
+<rect x="326" y="205" width="126" height="31" rx="0" class="selection" style="width:var(--r-size-126);height:var(--r-size-31);rx:var(--r-size-0)"/>
+<path d="M34 204L34 238" class="rule"/>
+<path d="M320 204L320 238" class="rule"/>
+<path d="M458 204L458 238" class="rule"/>
+<rect x="0" y="0" width="1920" height="238" rx="0" class="frame" style="width:var(--r-size-1920);height:var(--r-size-238);rx:var(--r-size-0)"/>
+</g>
+<text x="48" y="369" class="boardtitle" text-anchor="start">02   Insert / a different task, a different command set</text>
+<text x="1968" y="369" class="caption" text-anchor="end">1920 px · pinned · Insert selected</text>
+<g transform="translate(48 387)" class="artboard" id="artboard-insert">
+<rect x="0" y="0" width="1920" height="238" rx="0" class="paper" style="width:var(--r-size-1920);height:var(--r-size-238);rx:var(--r-size-0)"/>
+<rect x="0" y="0" width="1920" height="44" rx="0" class="surface" style="width:var(--r-size-1920);height:var(--r-size-44);rx:var(--r-size-0)"/>
+<rect x="16" y="12" width="21" height="21" rx="3" class="accent" style="width:var(--r-size-21);height:var(--r-size-21);rx:var(--r-size-3)"/>
+<text x="26.5" y="27" class="brand" text-anchor="middle">Y</text>
+<text x="48" y="26" class="strong" text-anchor="start">Quarterly plan</text>
+<text x="151" y="26" class="caption" text-anchor="start">Saved</text>
+<rect x="780.0" y="8" width="360" height="28" rx="3" class="control" style="width:var(--r-size-360);height:var(--r-size-28);rx:var(--r-size-3)"/>
+<svg x="790.0" y="14" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M14 8a6 6 0 1 1-12 0 6 6 0 0 1 12 0 M12 13l6 6" class="icon"/></svg>
+<text x="814.0" y="27" class="muted" text-anchor="start">Search commands, help and more</text>
+<text x="1130.0" y="27" class="caption" text-anchor="end">Alt + Q</text>
+<text x="1869" y="26" class="strong" text-anchor="start">Y</text>
+<rect x="1855" y="8" width="36" height="28" rx="14" class="outline" style="width:var(--r-size-36);height:var(--r-size-28);rx:var(--r-size-14)"/>
+<rect x="0" y="44" width="1920" height="34" rx="0" class="surface" style="width:var(--r-size-1920);height:var(--r-size-34);rx:var(--r-size-0)"/>
+<path d="M0 78H1920" class="rule"/>
+<text x="24" y="65" class="tab" text-anchor="start">File</text>
+<text x="64" y="65" class="tab" text-anchor="start">Home</text>
+<text x="121" y="65" class="tab active" text-anchor="start">Insert</text>
+<rect x="120" y="75" width="42" height="3" rx="0" class="accent" style="width:var(--r-size-42);height:var(--r-size-3);rx:var(--r-size-0)"/>
+<text x="177" y="65" class="tab" text-anchor="start">Page Layout</text>
+<text x="273" y="65" class="tab" text-anchor="start">Formulas</text>
+<text x="351" y="65" class="tab" text-anchor="start">Data</text>
+<text x="400" y="65" class="tab" text-anchor="start">Review</text>
+<text x="465" y="65" class="tab" text-anchor="start">View</text>
+<text x="514" y="65" class="tab" text-anchor="start">Help</text>
+<g class="button "><title>Comments</title>
+<rect x="1531" y="49" width="104" height="24" rx="3" class="control " style="width:var(--r-size-104);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="1537" y="53.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16v11H8l-5 4v-4H2z" class="icon"/></svg>
+<text x="1559" y="65.0" class="label" text-anchor="start">Comments</text>
+</g>
+<g class="button "><title>Catch up</title>
+<rect x="1639" y="49" width="96" height="24" rx="3" class="control " style="width:var(--r-size-96);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="1645" y="53.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M1 10h4l3-7 4 14 3-7h4" class="icon"/></svg>
+<text x="1667" y="65.0" class="label" text-anchor="start">Catch up</text>
+</g>
+<g class="button "><title>Editing</title>
+<rect x="1739" y="49" width="94" height="24" rx="3" class="control " style="width:var(--r-size-94);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="1745" y="53.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M3 14L14 3l3 3L6 17l-4 1z M12 5l3 3" class="icon"/></svg>
+<text x="1767" y="65.0" class="label" text-anchor="start">Editing</text>
+<path d="M1821 59.0l3 3 3 -3" class="icon"/>
+</g>
+<g class="button primary"><title>Share</title>
+<rect x="1837" y="49" width="79" height="24" rx="3" class="control primary" style="width:var(--r-size-79);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="1843" y="53.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M11 2l6 5-6 5 M17 7H9v7 M6 5H2v13h15v-4" class="icon"/></svg>
+<text x="1865" y="65.0" class="label" text-anchor="start">Share</text>
+<path d="M1904 59.0l3 3 3 -3" class="icon"/>
+</g>
+<rect x="0" y="78" width="1920" height="96" rx="0" class="paper" style="width:var(--r-size-1920);height:var(--r-size-96);rx:var(--r-size-0)"/>
+<path d="M216 86L216 158" class="rule"/>
+<text x="116.0" y="166" class="caption" text-anchor="middle">Tables</text>
+<rect x="26" y="87" width="78" height="58" rx="3" class="control" style="width:var(--r-size-78);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="53.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 2h16v16H2z M2 7h16M2 12h16M7 2v16M12 2v16" class="icon"/></svg>
+<text x="65.0" y="130" class="label" text-anchor="middle">PivotTable</text>
+<path d="M27 134H103" class="rule"/>
+<path d="M62.0 138l3 3 3 -3" class="icon"/>
+<rect x="110" y="87" width="78" height="58" rx="3" class="control" style="width:var(--r-size-78);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="137.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 3h16v14H2z M2 8h16M7 3v14 M11 12h4" class="icon"/></svg>
+<text x="149.0" y="130" class="label" text-anchor="middle">Table</text>
+<path d="M111 134H187" class="rule"/>
+<path d="M146.0 138l3 3 3 -3" class="icon"/>
+<path d="M518 86L518 158" class="rule"/>
+<text x="367.0" y="166" class="caption" text-anchor="middle">Illustrations</text>
+<rect x="226" y="87" width="78" height="58" rx="3" class="control" style="width:var(--r-size-78);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="253.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 3h16v14H2z M2 14l5-5 4 4 3-3 4 4 M14 7h.1" class="icon"/></svg>
+<text x="265.0" y="130" class="label" text-anchor="middle">Pictures</text>
+<path d="M227 134H303" class="rule"/>
+<path d="M262.0 138l3 3 3 -3" class="icon"/>
+<rect x="310" y="87" width="78" height="58" rx="3" class="control" style="width:var(--r-size-78);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="337.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 2h10v10H2z M18 13a5 5 0 1 1-10 0 5 5 0 0 1 10 0" class="icon"/></svg>
+<text x="349.0" y="130" class="label" text-anchor="middle">Shapes</text>
+<path d="M311 134H387" class="rule"/>
+<path d="M346.0 138l3 3 3 -3" class="icon"/>
+<rect x="394" y="87" width="78" height="58" rx="3" class="control" style="width:var(--r-size-78);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="421.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M10 3v14M3 10h14" class="icon"/></svg>
+<text x="433.0" y="130" class="label" text-anchor="middle">Icons</text>
+<path d="M395 134H471" class="rule"/>
+<path d="M430.0 138l3 3 3 -3" class="icon"/>
+<path d="M878 86L878 158" class="rule"/>
+<text x="698.0" y="166" class="caption" text-anchor="middle">Charts</text>
+<rect x="528.0" y="87" width="77.5" height="58" rx="3" class="control" style="width:var(--r-size-77p5);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="554.75" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 2v16h17 M5 14V9h3v5 M11 14V4h3v10 M17 14V7h2v7" class="icon"/></svg>
+<text x="566.75" y="130" class="label" text-anchor="middle">Column</text>
+<path d="M529.0 134H604.5" class="rule"/>
+<path d="M563.75 138l3 3 3 -3" class="icon"/>
+<rect x="611.5" y="87" width="77.5" height="58" rx="3" class="control" style="width:var(--r-size-77p5);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="638.25" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 17V3M2 17h17 M5 13l4-6 4 3 5-7" class="icon"/></svg>
+<text x="650.25" y="130" class="label" text-anchor="middle">Line</text>
+<path d="M612.5 134H688.0" class="rule"/>
+<path d="M647.25 138l3 3 3 -3" class="icon"/>
+<rect x="695.0" y="87" width="77.5" height="58" rx="3" class="control" style="width:var(--r-size-77p5);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="721.75" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 2v16h17 M5 14V9h3v5 M11 14V4h3v10 M17 14V7h2v7" class="icon"/></svg>
+<text x="733.75" y="130" class="label" text-anchor="middle">Bar</text>
+<path d="M696.0 134H771.5" class="rule"/>
+<path d="M730.75 138l3 3 3 -3" class="icon"/>
+<rect x="778.5" y="87" width="77.5" height="58" rx="3" class="control" style="width:var(--r-size-77p5);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="805.25" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 17V3M2 17h17 M5 13l4-6 4 3 5-7" class="icon"/></svg>
+<text x="817.25" y="130" class="label" text-anchor="middle">Scatter</text>
+<path d="M779.5 134H855.0" class="rule"/>
+<path d="M814.25 138l3 3 3 -3" class="icon"/>
+<path d="M1100 86L1100 158" class="rule"/>
+<text x="989.0" y="166" class="caption" text-anchor="middle">Sparklines</text>
+<rect x="888" y="87" width="78" height="58" rx="3" class="control" style="width:var(--r-size-78);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="915.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 17V3M2 17h17 M5 13l4-6 4 3 5-7" class="icon"/></svg>
+<text x="927.0" y="130" class="label" text-anchor="middle">Line</text>
+<path d="M889 134H965" class="rule"/>
+<path d="M924.0 138l3 3 3 -3" class="icon"/>
+<rect x="972" y="87" width="78" height="58" rx="3" class="control" style="width:var(--r-size-78);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="999.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 2v16h17 M5 14V9h3v5 M11 14V4h3v10 M17 14V7h2v7" class="icon"/></svg>
+<text x="1011.0" y="130" class="label" text-anchor="middle">Column</text>
+<path d="M973 134H1049" class="rule"/>
+<path d="M1008.0 138l3 3 3 -3" class="icon"/>
+<path d="M1300 86L1300 158" class="rule"/>
+<text x="1200.0" y="166" class="caption" text-anchor="middle">Filters</text>
+<rect x="1110" y="87" width="78" height="58" rx="3" class="control" style="width:var(--r-size-78);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="1137.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 3h16l-6 7v7l-4 2v-9z" class="icon"/></svg>
+<text x="1149.0" y="130" class="label" text-anchor="middle">Slicer</text>
+<path d="M1111 134H1187" class="rule"/>
+<path d="M1146.0 138l3 3 3 -3" class="icon"/>
+<rect x="1194" y="87" width="78" height="58" rx="3" class="control" style="width:var(--r-size-78);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="1221.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0 M10 5v5l4 2" class="icon"/></svg>
+<text x="1233.0" y="130" class="label" text-anchor="middle">Timeline</text>
+<path d="M1195 134H1271" class="rule"/>
+<path d="M1230.0 138l3 3 3 -3" class="icon"/>
+<path d="M1460 86L1460 158" class="rule"/>
+<text x="1380.0" y="166" class="caption" text-anchor="middle">Links</text>
+<rect x="1310" y="87" width="78" height="58" rx="3" class="control" style="width:var(--r-size-78);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="1337.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M8 6l3-3a4 4 0 0 1 6 6l-3 3 M12 14l-3 3a4 4 0 0 1-6-6l3-3 M7 13l6-6" class="icon"/></svg>
+<text x="1349.0" y="130" class="label" text-anchor="middle">Link</text>
+<path d="M1311 134H1387" class="rule"/>
+<path d="M1346.0 138l3 3 3 -3" class="icon"/>
+<path d="M1702 86L1702 158" class="rule"/>
+<text x="1581.0" y="166" class="caption" text-anchor="middle">Text</text>
+<rect x="1470" y="87" width="78" height="58" rx="3" class="control" style="width:var(--r-size-78);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="1497.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 3h16v14H2z M5 7h10M5 11h7" class="icon"/></svg>
+<text x="1509.0" y="130" class="label" text-anchor="middle">Text box</text>
+<path d="M1471 134H1547" class="rule"/>
+<path d="M1506.0 138l3 3 3 -3" class="icon"/>
+<rect x="1554" y="87" width="78" height="58" rx="3" class="control" style="width:var(--r-size-78);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="1581.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 3h16v14H2z M2 8h16M7 3v14 M11 12h4" class="icon"/></svg>
+<text x="1593.0" y="130" class="label" text-anchor="middle">Header</text>
+<path d="M1555 134H1631" class="rule"/>
+<path d="M1590.0 138l3 3 3 -3" class="icon"/>
+<path d="M1904 86L1904 158" class="rule"/>
+<text x="1803.0" y="166" class="caption" text-anchor="middle">Symbols</text>
+<rect x="1712" y="87" width="78" height="58" rx="3" class="control" style="width:var(--r-size-78);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="1739.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M10 3v14M3 10h14" class="icon"/></svg>
+<text x="1751.0" y="130" class="label" text-anchor="middle">Equation</text>
+<path d="M1713 134H1789" class="rule"/>
+<path d="M1748.0 138l3 3 3 -3" class="icon"/>
+<rect x="1796" y="87" width="78" height="58" rx="3" class="control" style="width:var(--r-size-78);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="1823.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 2h10v10H2z M18 13a5 5 0 1 1-10 0 5 5 0 0 1 10 0" class="icon"/></svg>
+<text x="1835.0" y="130" class="label" text-anchor="middle">Symbol</text>
+<path d="M1797 134H1873" class="rule"/>
+<path d="M1832.0 138l3 3 3 -3" class="icon"/>
+<path d="M1904 163l3 -3 3 3" class="icon"/>
+<rect x="0" y="174" width="1920" height="64" rx="0" class="paper" style="width:var(--r-size-1920);height:var(--r-size-64);rx:var(--r-size-0)"/>
+<rect x="0" y="174" width="1920" height="30" rx="0" class="surface" style="width:var(--r-size-1920);height:var(--r-size-30);rx:var(--r-size-0)"/>
+<rect x="12" y="178" width="72" height="22" rx="3" class="control" style="width:var(--r-size-72);height:var(--r-size-22);rx:var(--r-size-3)"/>
+<text x="21" y="193" class="caption" text-anchor="start">D8</text>
+<path d="M72 187l3 3 3 -3" class="icon"/>
+<text x="102" y="193" class="muted" text-anchor="start">fx</text>
+<rect x="126" y="178" width="1780" height="22" rx="3" class="control" style="width:var(--r-size-1780);height:var(--r-size-22);rx:var(--r-size-3)"/>
+<text x="137" y="193" class="caption" text-anchor="start">=SUM(D4:D7)</text>
+<path d="M0 204H1920" class="rule"/>
+<text x="16" y="225" class="caption" text-anchor="start">8</text>
+<text x="66" y="225" class="label" text-anchor="start">Operating expenses</text>
+<text x="350" y="225" class="strong" text-anchor="start">24,800</text>
+<text x="485" y="225" class="muted" text-anchor="start">Forecast</text>
+<rect x="326" y="205" width="126" height="31" rx="0" class="selection" style="width:var(--r-size-126);height:var(--r-size-31);rx:var(--r-size-0)"/>
+<path d="M34 204L34 238" class="rule"/>
+<path d="M320 204L320 238" class="rule"/>
+<path d="M458 204L458 238" class="rule"/>
+<rect x="0" y="0" width="1920" height="238" rx="0" class="frame" style="width:var(--r-size-1920);height:var(--r-size-238);rx:var(--r-size-0)"/>
+</g>
+<text x="48" y="666" class="boardtitle" text-anchor="start">03   Collapsed / document first, states kept explicit</text>
+<text x="1968" y="666" class="caption" text-anchor="end">1920 px · collapsed + separate command detail</text>
+<g transform="translate(48 684)" class="artboard" id="artboard-collapsed">
+<rect x="0" y="0" width="1920" height="238" rx="0" class="paper" style="width:var(--r-size-1920);height:var(--r-size-238);rx:var(--r-size-0)"/>
+<rect x="0" y="0" width="1920" height="44" rx="0" class="surface" style="width:var(--r-size-1920);height:var(--r-size-44);rx:var(--r-size-0)"/>
+<rect x="16" y="12" width="21" height="21" rx="3" class="accent" style="width:var(--r-size-21);height:var(--r-size-21);rx:var(--r-size-3)"/>
+<text x="26.5" y="27" class="brand" text-anchor="middle">Y</text>
+<text x="48" y="26" class="strong" text-anchor="start">Quarterly plan</text>
+<text x="151" y="26" class="caption" text-anchor="start">Saved</text>
+<rect x="780.0" y="8" width="360" height="28" rx="3" class="control" style="width:var(--r-size-360);height:var(--r-size-28);rx:var(--r-size-3)"/>
+<svg x="790.0" y="14" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M14 8a6 6 0 1 1-12 0 6 6 0 0 1 12 0 M12 13l6 6" class="icon"/></svg>
+<text x="814.0" y="27" class="muted" text-anchor="start">Search commands, help and more</text>
+<text x="1130.0" y="27" class="caption" text-anchor="end">Alt + Q</text>
+<text x="1869" y="26" class="strong" text-anchor="start">Y</text>
+<rect x="1855" y="8" width="36" height="28" rx="14" class="outline" style="width:var(--r-size-36);height:var(--r-size-28);rx:var(--r-size-14)"/>
+<rect x="0" y="44" width="1920" height="34" rx="0" class="surface" style="width:var(--r-size-1920);height:var(--r-size-34);rx:var(--r-size-0)"/>
+<path d="M0 78H1920" class="rule"/>
+<text x="24" y="65" class="tab" text-anchor="start">File</text>
+<text x="64" y="65" class="tab active" text-anchor="start">Home</text>
+<rect x="63" y="75" width="43" height="3" rx="0" class="accent" style="width:var(--r-size-43);height:var(--r-size-3);rx:var(--r-size-0)"/>
+<text x="121" y="65" class="tab" text-anchor="start">Insert</text>
+<text x="177" y="65" class="tab" text-anchor="start">Page Layout</text>
+<text x="273" y="65" class="tab" text-anchor="start">Formulas</text>
+<text x="351" y="65" class="tab" text-anchor="start">Data</text>
+<text x="400" y="65" class="tab" text-anchor="start">Review</text>
+<text x="465" y="65" class="tab" text-anchor="start">View</text>
+<text x="514" y="65" class="tab" text-anchor="start">Help</text>
+<g class="button "><title>Comments</title>
+<rect x="1531" y="49" width="104" height="24" rx="3" class="control " style="width:var(--r-size-104);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="1537" y="53.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16v11H8l-5 4v-4H2z" class="icon"/></svg>
+<text x="1559" y="65.0" class="label" text-anchor="start">Comments</text>
+</g>
+<g class="button "><title>Catch up</title>
+<rect x="1639" y="49" width="96" height="24" rx="3" class="control " style="width:var(--r-size-96);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="1645" y="53.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M1 10h4l3-7 4 14 3-7h4" class="icon"/></svg>
+<text x="1667" y="65.0" class="label" text-anchor="start">Catch up</text>
+</g>
+<g class="button "><title>Editing</title>
+<rect x="1739" y="49" width="94" height="24" rx="3" class="control " style="width:var(--r-size-94);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="1745" y="53.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M3 14L14 3l3 3L6 17l-4 1z M12 5l3 3" class="icon"/></svg>
+<text x="1767" y="65.0" class="label" text-anchor="start">Editing</text>
+<path d="M1821 59.0l3 3 3 -3" class="icon"/>
+</g>
+<g class="button primary"><title>Share</title>
+<rect x="1837" y="49" width="79" height="24" rx="3" class="control primary" style="width:var(--r-size-79);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="1843" y="53.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M11 2l6 5-6 5 M17 7H9v7 M6 5H2v13h15v-4" class="icon"/></svg>
+<text x="1865" y="65.0" class="label" text-anchor="start">Share</text>
+<path d="M1904 59.0l3 3 3 -3" class="icon"/>
+</g>
+<g class="button expand"><title>Command</title>
+<rect x="1888" y="84" width="24" height="24" rx="3" class="control expand" style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+</g>
+<path d="M1897 94l3 3 3 -3" class="icon"/>
+<rect x="0" y="78" width="1920" height="160" rx="0" class="paper" style="width:var(--r-size-1920);height:var(--r-size-160);rx:var(--r-size-0)"/>
+<text x="20" y="109" class="section" text-anchor="start">Quarterly plan</text>
+<text x="20" y="131" class="muted" text-anchor="start">The worksheet reclaims the command band. Select a tab to reveal commands.</text>
+<text x="790" y="105" class="caption" text-anchor="start">COMMAND STATE DETAIL</text>
+<g class="button focused"><title>Copy</title>
+<rect x="790" y="117" width="99" height="24" rx="3" class="control focused" style="width:var(--r-size-99);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="796" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M7 7h11v12H7z M4 14H2V2h11v2" class="icon"/></svg>
+<text x="818" y="133.0" class="label" text-anchor="start">Copy</text>
+</g>
+<g class="button disabled"><title>Paste</title>
+<rect x="901" y="117" width="99" height="24" rx="3" class="control disabled" style="width:var(--r-size-99);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="907" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M6 4H3v15h14V4h-3 M7 2h6v4H7z M6 10h8M6 14h6" class="icon"/></svg>
+<text x="929" y="133.0" class="label" text-anchor="start">Paste</text>
+</g>
+<g class="button disabled"><title>Format Painter</title>
+<rect x="1012" y="117" width="118" height="24" rx="3" class="control disabled" style="width:var(--r-size-118);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="1018" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M4 2h12v7H4z M10 9v3h4v7h-4v-5" class="icon"/></svg>
+<text x="1040" y="133.0" class="label" text-anchor="start">Format Painter</text>
+</g>
+<rect x="790" y="152" width="340" height="72" rx="3" class="tooltip" style="width:var(--r-size-340);height:var(--r-size-72);rx:var(--r-size-3)"/>
+<text x="802" y="173" class="strong" text-anchor="start">Copy</text>
+<text x="1118" y="173" class="caption" text-anchor="end">Ctrl + C</text>
+<text x="802" y="194" class="label" text-anchor="start">Copy the selected cells to the clipboard.</text>
+<text x="802" y="212" class="caption" text-anchor="start">Available while the worksheet has focus.</text>
+<path d="M810 152l6-7 6 7" class="tooltip-arrow"/>
+<text x="1154" y="134" class="muted" text-anchor="start">Paste and Format Painter unavailable</text>
+<text x="1154" y="155" class="caption" text-anchor="start">Empty clipboard · no source formatting</text>
+<g class="button "><title>Show ribbon</title>
+<rect x="560" y="49" width="110" height="24" rx="3" class="control " style="width:var(--r-size-110);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="568" y="65.0" class="label" text-anchor="start">Show ribbon</text>
+<path d="M658 59.0l3 3 3 -3" class="icon"/>
+</g>
+<rect x="0" y="0" width="1920" height="238" rx="0" class="frame" style="width:var(--r-size-1920);height:var(--r-size-238);rx:var(--r-size-0)"/>
+</g>
+<text x="48" y="963" class="boardtitle" text-anchor="start">04   Home / compact group menus</text>
+<text x="1968" y="963" class="caption" text-anchor="end">980 px · same control sizes · no horizontal scroll</text>
+<g transform="translate(48 981)" class="artboard" id="artboard-narrow">
+<rect x="0" y="0" width="980" height="238" rx="0" class="paper" style="width:var(--r-size-980);height:var(--r-size-238);rx:var(--r-size-0)"/>
+<rect x="0" y="0" width="980" height="44" rx="0" class="surface" style="width:var(--r-size-980);height:var(--r-size-44);rx:var(--r-size-0)"/>
+<rect x="16" y="12" width="21" height="21" rx="3" class="accent" style="width:var(--r-size-21);height:var(--r-size-21);rx:var(--r-size-3)"/>
+<text x="26.5" y="27" class="brand" text-anchor="middle">Y</text>
+<text x="48" y="26" class="strong" text-anchor="start">Quarterly plan</text>
+<text x="151" y="26" class="caption" text-anchor="start">Saved</text>
+<rect x="350.0" y="8" width="280" height="28" rx="3" class="control" style="width:var(--r-size-280);height:var(--r-size-28);rx:var(--r-size-3)"/>
+<svg x="360.0" y="14" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M14 8a6 6 0 1 1-12 0 6 6 0 0 1 12 0 M12 13l6 6" class="icon"/></svg>
+<text x="384.0" y="27" class="muted" text-anchor="start">Search commands, help and more</text>
+<text x="620.0" y="27" class="caption" text-anchor="end">Alt + Q</text>
+<text x="929" y="26" class="strong" text-anchor="start">Y</text>
+<rect x="915" y="8" width="36" height="28" rx="14" class="outline" style="width:var(--r-size-36);height:var(--r-size-28);rx:var(--r-size-14)"/>
+<rect x="0" y="44" width="980" height="34" rx="0" class="surface" style="width:var(--r-size-980);height:var(--r-size-34);rx:var(--r-size-0)"/>
+<path d="M0 78H980" class="rule"/>
+<text x="24" y="65" class="tab" text-anchor="start">File</text>
+<text x="64" y="65" class="tab active" text-anchor="start">Home</text>
+<rect x="63" y="75" width="43" height="3" rx="0" class="accent" style="width:var(--r-size-43);height:var(--r-size-3);rx:var(--r-size-0)"/>
+<text x="121" y="65" class="tab" text-anchor="start">Insert</text>
+<text x="177" y="65" class="tab" text-anchor="start">Data</text>
+<text x="226" y="65" class="tab" text-anchor="start">View</text>
+<g class="button "><title>More</title>
+<rect x="269" y="49" width="50" height="24" rx="3" class="control " style="width:var(--r-size-50);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="277" y="65.0" class="label" text-anchor="start">More</text>
+<path d="M307 59.0l3 3 3 -3" class="icon"/>
+</g>
+<g class="button "><title>Comments</title>
+<rect x="591" y="49" width="104" height="24" rx="3" class="control " style="width:var(--r-size-104);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="597" y="53.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16v11H8l-5 4v-4H2z" class="icon"/></svg>
+<text x="619" y="65.0" class="label" text-anchor="start">Comments</text>
+</g>
+<g class="button "><title>Catch up</title>
+<rect x="699" y="49" width="96" height="24" rx="3" class="control " style="width:var(--r-size-96);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="705" y="53.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M1 10h4l3-7 4 14 3-7h4" class="icon"/></svg>
+<text x="727" y="65.0" class="label" text-anchor="start">Catch up</text>
+</g>
+<g class="button "><title>Editing</title>
+<rect x="799" y="49" width="94" height="24" rx="3" class="control " style="width:var(--r-size-94);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="805" y="53.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M3 14L14 3l3 3L6 17l-4 1z M12 5l3 3" class="icon"/></svg>
+<text x="827" y="65.0" class="label" text-anchor="start">Editing</text>
+<path d="M881 59.0l3 3 3 -3" class="icon"/>
+</g>
+<g class="button primary"><title>Share</title>
+<rect x="897" y="49" width="79" height="24" rx="3" class="control primary" style="width:var(--r-size-79);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="903" y="53.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M11 2l6 5-6 5 M17 7H9v7 M6 5H2v13h15v-4" class="icon"/></svg>
+<text x="925" y="65.0" class="label" text-anchor="start">Share</text>
+<path d="M964 59.0l3 3 3 -3" class="icon"/>
+</g>
+<rect x="0" y="78" width="980" height="96" rx="0" class="paper" style="width:var(--r-size-980);height:var(--r-size-96);rx:var(--r-size-0)"/>
+<path d="M180 86L180 158" class="rule"/>
+<text x="98.0" y="166" class="caption" text-anchor="middle">Clipboard</text>
+<rect x="16" y="87" width="48" height="58" rx="3" class="control" style="width:var(--r-size-48);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="28.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M6 4H3v15h14V4h-3 M7 2h6v4H7z M6 10h8M6 14h6" class="icon"/></svg>
+<text x="40.0" y="130" class="label" text-anchor="middle">Paste</text>
+<path d="M17 134H63" class="rule"/>
+<path d="M37.0 138l3 3 3 -3" class="icon"/>
+<g class="button "><title>Cut</title>
+<rect x="70" y="87" width="76" height="24" rx="3" class="control " style="width:var(--r-size-76);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="76" y="91.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M7 12L17 2M7 7l10 11 M7 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0 M7 15a3 3 0 1 1-6 0 3 3 0 0 1 6 0" class="icon"/></svg>
+<text x="98" y="103.0" class="label" text-anchor="start">Cut</text>
+</g>
+<g class="button "><title>Copy</title>
+<rect x="70" y="117" width="76" height="24" rx="3" class="control " style="width:var(--r-size-76);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="76" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M7 7h11v12H7z M4 14H2V2h11v2" class="icon"/></svg>
+<text x="98" y="133.0" class="label" text-anchor="start">Copy</text>
+</g>
+<g class="button "><title>undo</title>
+<rect x="150" y="87" width="24" height="24" rx="3" class="control " style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="156" y="91.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M7 3L2 8l5 5 M2 8h9a6 6 0 0 1 6 6" class="icon"/></svg>
+</g>
+<g class="button "><title>redo</title>
+<rect x="150" y="117" width="24" height="24" rx="3" class="control " style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="156" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M13 3l5 5-5 5 M18 8h-9a6 6 0 0 0-6 6" class="icon"/></svg>
+</g>
+<path d="M426 86L426 158" class="rule"/>
+<text x="303.0" y="166" class="caption" text-anchor="middle">Font</text>
+<g class="button "><title>Aptos</title>
+<rect x="190" y="87" width="139" height="24" rx="3" class="control " style="width:var(--r-size-139);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="198" y="103.0" class="label" text-anchor="start">Aptos</text>
+<path d="M317 97.0l3 3 3 -3" class="icon"/>
+</g>
+<g class="button "><title>11</title>
+<rect x="335" y="87" width="48" height="24" rx="3" class="control " style="width:var(--r-size-48);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="343" y="103.0" class="label" text-anchor="start">11</text>
+<path d="M371 97.0l3 3 3 -3" class="icon"/>
+</g>
+<g class="button "><title>A⁺</title>
+<rect x="389" y="87" width="27" height="24" rx="3" class="control " style="width:var(--r-size-27);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="397" y="103.0" class="label" text-anchor="start">A⁺</text>
+</g>
+<g class="button selected bold"><title>B</title>
+<rect x="190" y="117" width="24" height="24" rx="3" class="control selected bold" style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="198" y="133.0" class="label" text-anchor="start">B</text>
+</g>
+<g class="button italic"><title>I</title>
+<rect x="218" y="117" width="24" height="24" rx="3" class="control italic" style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="226" y="133.0" class="label" text-anchor="start">I</text>
+</g>
+<g class="button underlined"><title>U</title>
+<rect x="246" y="117" width="24" height="24" rx="3" class="control underlined" style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="254" y="133.0" class="label" text-anchor="start">U</text>
+</g>
+<g class="button "><title>grid</title>
+<rect x="277" y="117" width="43" height="24" rx="3" class="control " style="width:var(--r-size-43);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="283" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 2h16v16H2z M2 7h16M2 12h16M7 2v16M12 2v16" class="icon"/></svg>
+<path d="M308 127.0l3 3 3 -3" class="icon"/>
+</g>
+<path d="M302 118L302 140" class="rule"/>
+<g class="button "><title>fill</title>
+<rect x="325" y="117" width="43" height="24" rx="3" class="control " style="width:var(--r-size-43);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="331" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M8 2l9 9-7 7-9-9z M3 7l7 7 5-5 M18 13v5" class="icon"/></svg>
+<path d="M356 127.0l3 3 3 -3" class="icon"/>
+</g>
+<path d="M350 118L350 140" class="rule"/>
+<g class="button "><title>A</title>
+<rect x="373" y="117" width="43" height="24" rx="3" class="control " style="width:var(--r-size-43);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<text x="381" y="133.0" class="label" text-anchor="start">A</text>
+<path d="M404 127.0l3 3 3 -3" class="icon"/>
+</g>
+<path d="M398 118L398 140" class="rule"/>
+<rect x="335" y="136" width="13" height="2" rx="0" class="accent" style="width:var(--r-size-13);height:var(--r-size-2);rx:var(--r-size-0)"/>
+<rect x="381" y="136" width="13" height="2" rx="0" class="accent" style="width:var(--r-size-13);height:var(--r-size-2);rx:var(--r-size-0)"/>
+<path d="M648 86L648 158" class="rule"/>
+<text x="537.0" y="166" class="caption" text-anchor="middle">Alignment</text>
+<g class="button "><title>left</title>
+<rect x="436" y="87" width="24" height="24" rx="3" class="control " style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="442" y="91.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16M2 7h10M2 11h16M2 15h10" class="icon"/></svg>
+</g>
+<g class="button selected"><title>center</title>
+<rect x="464" y="87" width="24" height="24" rx="3" class="control selected" style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="470" y="91.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16M5 7h10M2 11h16M5 15h10" class="icon"/></svg>
+</g>
+<g class="button "><title>right</title>
+<rect x="492" y="87" width="24" height="24" rx="3" class="control " style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="498" y="91.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16M8 7h10M2 11h16M8 15h10" class="icon"/></svg>
+</g>
+<g class="button "><title>Wrap text</title>
+<rect x="523" y="87" width="114" height="24" rx="3" class="control " style="width:var(--r-size-114);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="529" y="91.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 4h16M2 9h12a4 4 0 0 1 0 8h-3 M12 14l-3 3 3 3" class="icon"/></svg>
+<text x="551" y="103.0" class="label" text-anchor="start">Wrap text</text>
+</g>
+<g class="button "><title>left</title>
+<rect x="436" y="117" width="24" height="24" rx="3" class="control " style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="442" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16M2 7h10M2 11h16M2 15h10" class="icon"/></svg>
+</g>
+<g class="button "><title>center</title>
+<rect x="464" y="117" width="24" height="24" rx="3" class="control " style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="470" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16M5 7h10M2 11h16M5 15h10" class="icon"/></svg>
+</g>
+<g class="button "><title>right</title>
+<rect x="492" y="117" width="24" height="24" rx="3" class="control " style="width:var(--r-size-24);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="498" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16M8 7h10M2 11h16M8 15h10" class="icon"/></svg>
+</g>
+<g class="button "><title>Merge cells</title>
+<rect x="523" y="117" width="114" height="24" rx="3" class="control " style="width:var(--r-size-114);height:var(--r-size-24);rx:var(--r-size-3)"/>
+<svg x="529" y="121.0" width="16" height="16" viewBox="0 0 20 20" style="width:var(--r-size-16);height:var(--r-size-16)" aria-hidden="true"><path d="M2 3h16v14H2z M1 10h7l-3-3M8 10l-3 3 M19 10h-7l3-3M12 10l3 3" class="icon"/></svg>
+<text x="551" y="133.0" class="label" text-anchor="start">Merge cells</text>
+<path d="M625 127.0l3 3 3 -3" class="icon"/>
+</g>
+<rect x="658" y="87" width="66" height="58" rx="3" class="control" style="width:var(--r-size-66);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="679.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 3h16v14H2z M2 8h16M7 3v14 M11 12h4" class="icon"/></svg>
+<text x="691.0" y="130" class="label" text-anchor="middle">Number</text>
+<path d="M659 134H723" class="rule"/>
+<path d="M688.0 138l3 3 3 -3" class="icon"/>
+<text x="691.0" y="166" class="caption" text-anchor="middle">Number</text>
+<rect x="734" y="87" width="66" height="58" rx="3" class="control" style="width:var(--r-size-66);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="755.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 2h16v16H2z M2 7h16M2 12h16M7 2v16M12 2v16" class="icon"/></svg>
+<text x="767.0" y="130" class="label" text-anchor="middle">Styles</text>
+<path d="M735 134H799" class="rule"/>
+<path d="M764.0 138l3 3 3 -3" class="icon"/>
+<text x="767.0" y="166" class="caption" text-anchor="middle">Styles</text>
+<rect x="810" y="87" width="66" height="58" rx="3" class="control" style="width:var(--r-size-66);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="831.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M2 3h12v14H2z M2 8h12M7 3v14 M17 9v8M13 13h7" class="icon"/></svg>
+<text x="843.0" y="130" class="label" text-anchor="middle">Cells</text>
+<path d="M811 134H875" class="rule"/>
+<path d="M840.0 138l3 3 3 -3" class="icon"/>
+<text x="843.0" y="166" class="caption" text-anchor="middle">Cells</text>
+<rect x="886" y="87" width="62" height="58" rx="3" class="control" style="width:var(--r-size-62);height:var(--r-size-58);rx:var(--r-size-3)"/>
+<svg x="905.0" y="92" width="24" height="24" viewBox="0 0 20 20" style="width:var(--r-size-24);height:var(--r-size-24)" aria-hidden="true"><path d="M14 8a6 6 0 1 1-12 0 6 6 0 0 1 12 0 M12 13l6 6" class="icon"/></svg>
+<text x="917.0" y="130" class="label" text-anchor="middle">Editing</text>
+<path d="M887 134H947" class="rule"/>
+<path d="M914.0 138l3 3 3 -3" class="icon"/>
+<text x="917.0" y="166" class="caption" text-anchor="middle">Editing</text>
+<path d="M964 163l3 -3 3 3" class="icon"/>
+<rect x="0" y="174" width="980" height="64" rx="0" class="paper" style="width:var(--r-size-980);height:var(--r-size-64);rx:var(--r-size-0)"/>
+<rect x="0" y="174" width="980" height="30" rx="0" class="surface" style="width:var(--r-size-980);height:var(--r-size-30);rx:var(--r-size-0)"/>
+<rect x="12" y="178" width="72" height="22" rx="3" class="control" style="width:var(--r-size-72);height:var(--r-size-22);rx:var(--r-size-3)"/>
+<text x="21" y="193" class="caption" text-anchor="start">D8</text>
+<path d="M72 187l3 3 3 -3" class="icon"/>
+<text x="102" y="193" class="muted" text-anchor="start">fx</text>
+<rect x="126" y="178" width="840" height="22" rx="3" class="control" style="width:var(--r-size-840);height:var(--r-size-22);rx:var(--r-size-3)"/>
+<text x="137" y="193" class="caption" text-anchor="start">=SUM(D4:D7)</text>
+<path d="M0 204H980" class="rule"/>
+<text x="16" y="225" class="caption" text-anchor="start">8</text>
+<text x="66" y="225" class="label" text-anchor="start">Operating expenses</text>
+<text x="350" y="225" class="strong" text-anchor="start">24,800</text>
+<text x="485" y="225" class="muted" text-anchor="start">Forecast</text>
+<rect x="326" y="205" width="126" height="31" rx="0" class="selection" style="width:var(--r-size-126);height:var(--r-size-31);rx:var(--r-size-0)"/>
+<path d="M34 204L34 238" class="rule"/>
+<path d="M320 204L320 238" class="rule"/>
+<path d="M458 204L458 238" class="rule"/>
+<rect x="0" y="0" width="980" height="238" rx="0" class="frame" style="width:var(--r-size-980);height:var(--r-size-238);rx:var(--r-size-0)"/>
+</g>
+<text x="1064" y="1014" class="section" text-anchor="start">Collapse groups, preserve recognition.</text>
+<text x="1064" y="1048" class="muted" text-anchor="start">Clipboard, Font and Alignment remain directly available.</text>
+<text x="1064" y="1073" class="muted" text-anchor="start">Number, Styles, Cells and Editing become labeled menus.</text>
+<text x="1064" y="1113" class="muted" text-anchor="start">Search stays centered. Collaboration stays at the trailing edge.</text>
+<text x="1064" y="1138" class="muted" text-anchor="start">Secondary tabs move into More; labels and targets never shrink.</text>
+<text x="1064" y="1185" class="caption" text-anchor="start">Static state study. Keyboard and command execution require the live specimen.</text>
+</svg>

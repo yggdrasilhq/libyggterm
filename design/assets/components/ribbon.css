@@ -1,0 +1,142 @@
+/* Phase A companion. Load after current/specimens/assets/book.css.
+   All selectors are scoped; this is an anatomy contract, not v2 drop-in wiring. */
+.ribbon {font-family:var(--r-font);font-size:var(--r-text);color:var(--ink);width:var(--r-full);min-width:var(--r-zero);container-type:inline-size;background:var(--paper)}
+.ribbon *, .ribbon *::before, .ribbon *::after {box-sizing:border-box}
+.ribbon .ribbon-header {display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:var(--r-header-height);padding-inline:var(--r-size-16);background:var(--hover)}
+.ribbon .ribbon-search {width:var(--r-search-width);height:var(--r-size-28)}
+.ribbon .ribbon-tabs {display:flex;align-items:center;gap:var(--r-zero);height:var(--r-tab-height);min-height:var(--r-tab-height);padding:var(--r-zero) var(--r-size-16);background:var(--hover);border:var(--r-zero);border-bottom:var(--r-rule) solid var(--line);border-radius:var(--r-zero);overflow:visible}
+.ribbon .ribbon-tab-list {display:flex;gap:var(--r-zero);height:var(--r-full)}
+.ribbon .ribbon-tab {min-width:var(--r-zero);min-height:var(--r-zero);height:var(--r-tab-height);padding:var(--r-zero) var(--r-size-8);border:var(--r-zero);border-bottom:var(--r-underline) solid transparent;border-radius:var(--r-zero);background:transparent;color:var(--muted);font-size:var(--r-tab-text);font-weight:var(--r-regular);white-space:nowrap;cursor:pointer}
+.ribbon .ribbon-tab[aria-selected=true] {border-bottom-color:var(--accent);color:var(--accent);font-weight:var(--r-bold);min-height:var(--r-zero);background:transparent}
+.ribbon .ribbon-actions {margin-left:auto;display:flex;gap:var(--r-gap);align-items:center}
+.ribbon .ribbon-band {display:flex;gap:var(--r-zero);height:var(--r-band-height);min-height:var(--r-band-height);padding:var(--r-band-pad) var(--r-size-16) var(--r-gap);border:var(--r-zero);border-bottom:var(--r-rule) solid var(--line);border-radius:var(--r-zero);overflow:visible;background:var(--paper)}
+.ribbon .ribbon-group {display:flex;flex-direction:column;flex:none;padding:var(--r-zero) var(--r-group-pad);border-right:var(--r-rule) solid var(--line);min-width:var(--r-zero)}
+.ribbon .ribbon-group:first-child {padding-left:var(--r-zero)}
+.ribbon .ribbon-group:last-child {border-right:var(--r-zero)}
+.ribbon .ribbon-commands {display:flex;align-items:flex-start;gap:var(--r-row-gap);min-height:var(--r-command-area)}
+.ribbon .ribbon-cluster {display:grid;grid-template-rows:repeat(2,var(--r-control-height));gap:var(--r-row-gap)}
+.ribbon .ribbon-caption {margin:var(--r-zero);text-align:center;font-size:var(--r-caption);line-height:var(--r-caption-line);color:var(--muted);white-space:nowrap}
+.ribbon .command, .ribbon .ribbon-combo, .ribbon .ribbon-search {display:inline-flex;align-items:center;justify-content:center;gap:var(--r-row-gap);min-height:var(--r-control-height);height:var(--r-control-height);padding:var(--r-zero) var(--r-size-6);border:var(--r-rule) solid var(--control-line);border-radius:var(--r-radius);background:var(--paper);color:var(--ink);font:inherit;white-space:nowrap;cursor:pointer}
+.ribbon .ribbon-search {height:var(--r-size-28)}
+.ribbon .command.large {height:var(--r-large-height);flex-direction:column}
+.ribbon .command.icon-only {width:var(--r-control-height);padding:var(--r-zero)}
+.ribbon .command-icon {width:var(--r-icon);height:var(--r-icon);fill:none;stroke:currentColor;stroke-width:var(--r-stroke)}
+.ribbon .large .command-icon {width:var(--r-icon-large);height:var(--r-icon-large)}
+.ribbon .split {display:inline-flex}
+.ribbon .split .command {border-radius:var(--r-radius) var(--r-zero) var(--r-zero) var(--r-radius)}
+.ribbon .split .dropdown {border-left:var(--r-zero);border-radius:var(--r-zero) var(--r-radius) var(--r-radius) var(--r-zero);width:var(--r-size-18)}
+.ribbon .command.primary {min-width:var(--r-zero);font-size:var(--r-text);background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.ribbon .command[aria-pressed=true] {background:var(--tint);border-color:var(--accent)}
+.ribbon .command:hover:not(:disabled), .ribbon .ribbon-tab:hover {background:var(--hover)}
+.ribbon .command.primary:hover:not(:disabled) {background:var(--accent);outline:var(--r-rule) solid var(--accent)}
+.ribbon .command:active:not(:disabled) {background:var(--tint)}
+.ribbon .command:disabled {color:var(--r-disabled-ink);background:var(--r-disabled-paper);border-color:var(--line);cursor:default}
+.ribbon :is(button,input,select):focus-visible {outline:var(--r-focus) solid var(--accent);outline-offset:var(--r-rule)}
+.ribbon .ribbon-gallery {display:flex;gap:var(--r-gap)}
+.ribbon .style-chip {width:var(--r-chip-width);height:var(--r-chip-height);border:var(--r-rule) solid var(--control-line);border-radius:var(--r-rule);font-size:var(--r-caption)}
+.ribbon .style-chip[aria-selected=true] {outline:var(--r-focus) solid var(--accent);outline-offset:var(--r-zero)}
+.ribbon .ribbon-tooltip {padding:var(--r-size-12);border:var(--r-rule) solid var(--control-line);border-radius:var(--r-radius);background:var(--paper);color:var(--ink);font-size:var(--r-text)}
+.ribbon.is-collapsed .ribbon-band {display:none}
+.ribbon .group-overflow, .ribbon .tabs-more {display:none}
+/* Host supplies measured fit state. This avoids an untokenized breakpoint
+   and supports translated labels; at 980px the four named groups collapse. */
+.ribbon[data-fit=compact] .ribbon-search {width:var(--r-search-compact)}
+.ribbon[data-fit=compact] .ribbon-tab[data-secondary] {display:none}
+.ribbon[data-fit=compact] .tabs-more {display:inline-flex}
+.ribbon[data-fit=compact] .ribbon-group[data-collapse] .ribbon-commands {display:none}
+.ribbon[data-fit=compact] .ribbon-group[data-collapse] .group-overflow {display:inline-flex}
+/* Specimen-only live style swatches. Literal colors are intentional here. */
+.ribbon .style-chip[data-style=normal] {background:#fff;color:#24343b}
+.ribbon .style-chip[data-style=neutral] {background:#ffeba5;color:#805b0b}
+.ribbon .style-chip[data-style=bad] {background:#ffc7ce;color:#9c1828}
+.ribbon .style-chip[data-style=good] {background:#c6efce;color:#206032}
+.ribbon .style-chip[data-style=input] {background:#ffcea0;color:#57371b}
+.ribbon .style-chip[data-style=output] {background:#e8e8e8;color:#353535}
+.ribbon .style-chip[data-style=calculation] {background:#fff3df;color:#a45408}
+.ribbon .style-chip[data-style="check-cell"] {background:#696f72;color:#fff}
+/* BEGIN PROPOSED BOOK.CSS TOKEN EXTENSION
+   Append this block to the canonical sheet during approved construction.
+   Existing palette names above come directly from book.css. Size tokens also
+   cover SVG specimen geometry; positions and icon path coordinates are drawing data. */
+.ribbon {
+
+ --r-tab-height:34px; --r-band-height:96px; --r-header-height:44px;
+ --r-control-height:24px; --r-large-height:58px; --r-radius:3px;
+ --r-icon:16px; --r-icon-large:24px; --r-caption:11px; --r-text:12px;
+ --r-tab-text:13px; --r-rule:1px; --r-focus:2px; --r-underline:3px;
+ --r-gap:4px; --r-row-gap:6px; --r-group-pad:10px; --r-band-pad:9px;
+ --r-caption-line:14px; --r-command-area:64px; --r-zero:0px;
+ --r-regular:400; --r-medium:500; --r-semibold:600; --r-bold:700;
+ --r-font:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ --r-disabled-ink:color-mix(in srgb,var(--muted) 62%,var(--paper));
+ --r-disabled-paper:var(--hover); --r-stroke:1.25px;
+ --r-title:22px; --r-section:16px; --r-board-title:14px;
+ --r-search-width:360px; --r-search-compact:280px; --r-actions-width:389px;
+ --r-chip-width:73px; --r-chip-height:25px; --r-full:100%;
+ --r-size-0:0px;
+ --r-size-1:1px;
+ --r-size-2:2px;
+ --r-size-3:3px;
+ --r-size-6:6px;
+ --r-size-8:8px;
+ --r-size-11:11px;
+ --r-size-12:12px;
+ --r-size-13:13px;
+ --r-size-14:14px;
+ --r-size-16:16px;
+ --r-size-18:18px;
+ --r-size-21:21px;
+ --r-size-22:22px;
+ --r-size-24:24px;
+ --r-size-25:25px;
+ --r-size-27:27px;
+ --r-size-28:28px;
+ --r-size-30:30px;
+ --r-size-31:31px;
+ --r-size-32:32px;
+ --r-size-34:34px;
+ --r-size-36:36px;
+ --r-size-39:39px;
+ --r-size-42:42px;
+ --r-size-43:43px;
+ --r-size-44:44px;
+ --r-size-48:48px;
+ --r-size-50:50px;
+ --r-size-52:52px;
+ --r-size-58:58px;
+ --r-size-62:62px;
+ --r-size-64:64px;
+ --r-size-66:66px;
+ --r-size-72:72px;
+ --r-size-73:73px;
+ --r-size-76:76px;
+ --r-size-77p5:77.5px;
+ --r-size-78:78px;
+ --r-size-79:79px;
+ --r-size-84:84px;
+ --r-size-94:94px;
+ --r-size-96:96px;
+ --r-size-99:99px;
+ --r-size-104:104px;
+ --r-size-110:110px;
+ --r-size-111:111px;
+ --r-size-114:114px;
+ --r-size-118:118px;
+ --r-size-124:124px;
+ --r-size-126:126px;
+ --r-size-136:136px;
+ --r-size-139:139px;
+ --r-size-160:160px;
+ --r-size-165:165px;
+ --r-size-238:238px;
+ --r-size-280:280px;
+ --r-size-340:340px;
+ --r-size-360:360px;
+ --r-size-840:840px;
+ --r-size-980:980px;
+ --r-size-1270:1270px;
+ --r-size-1780:1780px;
+ --r-size-1920:1920px;
+ --r-size-2016:2016px;
+}
+/* END PROPOSED BOOK.CSS TOKEN EXTENSION */
