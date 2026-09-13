@@ -7,13 +7,13 @@ A ribbon helps someone recognize a command without remembering its name.
 Tabs name tasks; groups gather related commands; familiar commands stay in
 predictable places. The document remains the main event.
 
-![Ribbon study: detached sparse toolbar and integrated grouped ribbon](%ASSETS%/ribbon-study.svg)
+![Ribbon study: detached sparse toolbar and integrated grouped ribbon](%ASSETS%/img/ribbon-study.svg)
 
 The Excel-class target (consulted mock, 2026-09-10): task tabs, a dominant
 primary, selector controls, a real switch in the toggle chip, dividers and
 captions under every group.
 
-![The Excel-class ribbon target](%ASSETS%/ribbon-excel-mock.png)
+![The Excel-class ribbon target](%ASSETS%/img/ribbon-excel-mock.png)
 
 The polished target (consulted mock A, 2026-09-13, SVG because malleable):
 four artboards, one file. Home at full density over a 34px tab strip; the
@@ -21,7 +21,7 @@ Insert set proving tabs genuinely switch commands; the collapsed state with
 the command-state detail made explicit (why Paste is unavailable); the 980px
 compact form where whole groups become labeled menus and nothing shrinks.
 
-![The Excel-class ribbon, mock A](%ASSETS%/ribbon-excel-class.svg)
+![The Excel-class ribbon, mock A](%ASSETS%/img/ribbon-excel-class.svg)
 
 The mock law it follows: token-scoped color, every group captioned, the
 styles gallery carries real colors, trailing collaboration actions ride the

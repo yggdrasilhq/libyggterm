@@ -8,7 +8,7 @@ because a form is nothing but decisions repeated: every field, every label,
 every button is a fresh chance to drift. The rules here collapse those
 decisions into defaults.
 
-![Form rail at readable component scale](%ASSETS%/catalogue-forms-rail.png)
+![Form rail at readable component scale](%ASSETS%/img/catalogue-forms-rail.png)
 
 Start with a concrete job: change a setting, understand its consequence, and
 continue. Keep the label, control and brief help together. Long explanations

@@ -75,7 +75,7 @@ grafted onto a list with no heading voice, reads broken even when every
 individual row is fine. When a rail feels wrong, check the partitions before
 touching any row.
 
-![Large sidebar anatomy study, reconstructed failure and proposed account list](%ASSETS%/vault-study.svg)
+![Large sidebar anatomy study, reconstructed failure and proposed account list](%ASSETS%/img/vault-study.svg)
 
 The 30% figure is a diagnostic ceiling, not a quota to fill. Start with the
 smallest controls needed for the active task. Search should shorten the list;
