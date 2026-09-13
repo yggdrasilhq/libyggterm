@@ -1,0 +1,53 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+# Foundations, calm chrome, clear content
+
+**edition 2026-09-07 · rev 1**
+
+The shell should make work feel continuous. Its pale blue-grey base and faint
+blue-to-green tint connect tabs and rails; an opaque reading surface gives
+text a stable background. Save gradients for the surrounding workspace. The
+content should not have to compete with a decorative backdrop.
+
+![Continuous workspace background and restrained command grouping](%ASSETS%/ribbon-study.svg)
+
+## Semantic color, not a collection of hex values
+
+Accent derives from the theme. It identifies selection, focus and a genuine
+primary action. It is a limited attention resource: if every button is filled,
+no button has priority. Separators use a quiet hairline; elevation explains a
+temporary overlapping surface. A docked region needs neither a floating shadow
+nor an extra card simply to exist.
+
+The current exported status palette is durable green `#22c55e`, transient
+blue `#3b82f6`, attention amber `#f59e0b`, and reserved-dead red `#ef4444`.
+These values document npm/design-tokens.json; consumers ask the shared theme
+for semantic tokens instead of copying literals. Color must be accompanied
+by a label, icon state or other readable cue when it communicates a decision.
+
+## Typography is a hierarchy of jobs
+
+The exported interface family is Inter Variable; code uses JetBrains Mono.
+The reading baseline is 16 px with 1.7 leading in a roughly 720 px column.
+Use a narrow prose measure but let diagrams and component studies be large
+enough to inspect. Do not shrink an entire application screenshot into a
+postage stamp and call it an example: isolate the relevant region, retain
+scale, and put the explanation next to it.
+
+The inherited compact chrome currently uses 12 px rows and smaller metadata.
+That is a recorded baseline, not proof of comfortable reading. The complex
+sidebar study proposes larger two-line account rows and targets because the
+user must distinguish identities, not merely scan short filenames. Verify
+the actual font, scale, target geometry, focus and contrast before accepting
+an app's density. App notebooks may define a different brand type hierarchy.
+
+## Beauty follows relationships
+
+Related objects align. A label sits near its control. A command belongs near
+the object it changes. Repeated rows keep a stable rhythm, but unrelated
+tasks do not inherit the same panel merely because that was easy to code.
+Whitespace reveals groups; it does not fill a fixed-width toolbar by leaving
+most of it empty. Icons share a stroke and optical weight, with a hit region
+large enough that the user aims at a control rather than a tiny drawing.
+
+Read the ribbon and complex-sidebar studies next. They apply these choices
+to failures, retain what was useful, and state what still needs implementation.

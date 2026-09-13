@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="320" viewBox="0 0 560 320">
+<style>text{font-family:system-ui,sans-serif;font-size:14px;fill:#203444}.small{font-size:12px}.heading{font-size:16px;font-weight:650}</style>
+<rect width="560" height="320" fill="white"/>
+<text x="12" y="23" class="heading">Rejected · setup before task</text><text x="290" y="23" class="heading">Proposed · identity, then action</text>
+<rect x="12" y="36" width="258" height="258" rx="6" fill="#e5eef1"/>
+<text x="24" y="59">Vault　Fill　Add　Tools</text>
+<rect x="22" y="70" width="238" height="110" rx="10" fill="white"/>
+<text x="32" y="93">Passkeys</text><text x="32" y="116" class="small">Technical setup explanation</text><text x="32" y="135" class="small">repeated on every page.</text><text x="32" y="164">Enrol a passkey</text>
+<text x="24" y="203">Search vault…</text><text x="24" y="229">◎　example.test</text><text x="52" y="249" class="small">reader@example.test</text><text x="24" y="279">◎　another.test</text>
+<rect x="282" y="36" width="266" height="258" rx="6" fill="#f5f8fa"/>
+<text x="294" y="59">Vault</text><text x="491" y="59">+ Add</text>
+<rect x="292" y="70" width="246" height="30" rx="5" fill="white" stroke="#bccbd5"/><text x="302" y="90">Search accounts</text>
+<text x="294" y="122" class="small">For example.test · 2 matches</text>
+<rect x="290" y="134" width="250" height="65" rx="6" fill="#e3eef8"/>
+<rect x="298" y="144" width="26" height="26" rx="5" fill="#32699b"/><text x="306" y="162" style="fill:white">E</text>
+<text x="334" y="156">Personal</text><text x="334" y="176" class="small">reader · Passkey</text>
+<rect x="490" y="143" width="42" height="36" rx="5" fill="white" stroke="#b4c8d6"/><text x="500" y="166">Fill</text>
+<text x="306" y="220">E</text><text x="334" y="213">Work</text><text x="334" y="233" class="small">writer · Password</text><text x="500" y="220">Fill</text>
+<path d="M292 259H538" stroke="#c8d6df"/><text x="294" y="281" class="small">Unlocked · Synced</text><text x="502" y="281" class="small">Lock</text>
+<text x="12" y="315" class="small">Invented comparison · site mark and credential kind are separate cues</text>
+</svg>

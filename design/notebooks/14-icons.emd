@@ -1,0 +1,153 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+# Icons, the one icon source
+
+**edition 2026-09-07 · rev 1**
+
+Every surface reaches for the same glyphs through **one crate**; this page is
+its contract and its specimen index. The recipe is **observed** (measured from
+the rendered references); the one-owner rule is a **verified** invariant,
+grep-able, not aspirational. This book absorbs the former *Iconography*
+notebook (2026-09-06), which measured the gap and proposed the crate; the
+crate has since landed, so that notebook's proposal section is history and its
+evidence table lives here.
+
+## Why not a font (the decision behind "iconfont")
+
+The owner's verdict that started this book: "yggui needs to have an iconfont.
+The icons of ZCode look crisp. But the yggterm iconography leaves much to be
+desired." The want behind "iconfont" is *one place, one name, crisp
+everywhere*, and that want is satisfied by a **crate of inline-svg constants
+plus one sizing convention**, not by a font. A font can't do multi-tone, scales
+poorly in wasm, hurts screen readers, and forces a glyph→codepoint
+memorisation layer. The crate gets all of the want with none of those costs.
+
+## What each surface renders (observed 2026-09-06, before the crate)
+
+| Surface | Icon system before | Evidence |
+|---|---|---|
+| libyggterm `yggui` core | unicode text glyphs, `↑ ↓ → ← ×` | grep: zero `<svg`, zero `viewBox` |
+| `chrome.rs` window controls | text glyph strings | chrome.rs |
+| yggui-chat (jyas webapp) | 13 lucide constants as complete inline svgs, stroke 1.5, currentColor | `src/icons.rs` |
+| practice-rs webapp | none, glyph/text only | zero `viewBox` in app sources |
+| **ZCode** | bespoke inlined set: lucide fragments recombined + bespoke glyphs, 16px, stroke **1.5**, round caps, currentColor, fill none; plus lucide-react for plugin icons | zcodereversed mining |
+| t3code | lucide-react stock (stroke 2.0 default) | package.json |
+
+The arrows row was the visible defect, `↑↓→←×` render with the ambient text
+font, so weight, width and vertical centering change per platform/font. That
+was most of what "leaves much to be desired" was.
+
+## The crispness recipe (observed)
+
+lucide's 24-grid paths, rendered at the wrapper size, with three departures
+from stock usage that make icons read crisp at UI sizes:
+
+1. **`stroke-width="1.5"`**, lucide's default 2.0 blobs below 20px; 1.5 is
+   the difference between crisp and fuzzy (the desktop references render
+   exactly this).
+2. **One optical box**, a flex-centered wrapper (`i12/i14/i16/i20`), svg at
+   100% of it, `currentColor`, `fill:none`, round caps and joins.
+3. **Recombine, don't re-draw**, bespoke glyphs are lucide fragments on the
+   same grid with the same terminals, so the set reads as one family.
+
+## The crate (yggui · L1)
+
+| Piece | The rule it owns |
+|---|---|
+| `yggui-icons` consts (`ARROW_UP`, `COPY`, …; lucide-kebab → `SCREAMING_SNAKE`) | The only icon source. A new inline `<svg` in an app layer is the defect this crate exists to prevent, grep-able |
+| `Icon { icon, size }` | The wrapper geometry: flex-centered, exact px, `flex:none`, `color:inherit` |
+| `glyph()`-style text fallbacks | Kept for a11y labels and tests; the RENDER is always the icon |
+
+Provenance: lucide (ISC) paths; crate code carries the workspace licence.
+
+## Unicode arrows are the defect class (enforced)
+
+`↑ ↓ → ← ×` render with the ambient text font, weight, width and vertical
+centering change per platform. Core surfaces that carried them now render
+set equivalents (dpad, find steppers, close buttons). Review rule: a text
+arrow in a control is a finding, not a style.
+
+## Specimens
+
+The icon row and every icon-bearing control in the component testbed app
+render from the crate at 1.5 stroke; the composer, sidebar rows and rail
+sections show them in context at 14–16px. Chapter status and the owed pixel
+pass are tracked in the [chapter inventory](chapter-inventory.md).
+
+## The catalogue: every icon, as SVG blocks
+
+The one icon source is the `yggui-icons` crate (lucide v1.17 paths on the
+24 grid, stroke 1.5, round caps and joins, currentColor, fill none,
+rendered at wrapper size; 16px is the default UI size). The catalogue
+below IS the crate, block by block; a new inline `<svg` in an app layer
+is the defect this crate exists to prevent. Lucide path data is ISC;
+provenance recorded in the crate.
+
+- **Arrow Up**
+
+![Arrow Up](%ASSETS%/icon-arrow-up.svg)
+- **Arrow Down**
+
+![Arrow Down](%ASSETS%/icon-arrow-down.svg)
+- **Arrow Left**
+
+![Arrow Left](%ASSETS%/icon-arrow-left.svg)
+- **Arrow Right**
+
+![Arrow Right](%ASSETS%/icon-arrow-right.svg)
+- **Chevron Up**
+
+![Chevron Up](%ASSETS%/icon-chevron-up.svg)
+- **Chevron Down**
+
+![Chevron Down](%ASSETS%/icon-chevron-down.svg)
+- **Chevron Left**
+
+![Chevron Left](%ASSETS%/icon-chevron-left.svg)
+- **Chevron Right**
+
+![Chevron Right](%ASSETS%/icon-chevron-right.svg)
+- **X**
+
+![X](%ASSETS%/icon-x.svg)
+- **Plus**
+
+![Plus](%ASSETS%/icon-plus.svg)
+- **Minus**
+
+![Minus](%ASSETS%/icon-minus.svg)
+- **Ellipsis**
+
+![Ellipsis](%ASSETS%/icon-ellipsis.svg)
+- **Ellipsis Vertical**
+
+![Ellipsis Vertical](%ASSETS%/icon-ellipsis-vertical.svg)
+- **Search**
+
+![Search](%ASSETS%/icon-search.svg)
+- **Square Pen**
+
+![Square Pen](%ASSETS%/icon-square-pen.svg)
+- **Pencil**
+
+![Pencil](%ASSETS%/icon-pencil.svg)
+- **Copy**
+
+![Copy](%ASSETS%/icon-copy.svg)
+- **Rotate Cw**
+
+![Rotate Cw](%ASSETS%/icon-rotate-cw.svg)
+- **Git Branch**
+
+![Git Branch](%ASSETS%/icon-git-branch.svg)
+- **Settings**
+
+![Settings](%ASSETS%/icon-settings.svg)
+- **Share**
+
+![Share](%ASSETS%/icon-share.svg)
+- **Message Circle**
+
+![Message Circle](%ASSETS%/icon-message-circle.svg)
+- **Hash**
+
+![Hash](%ASSETS%/icon-hash.svg)
