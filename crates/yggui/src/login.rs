@@ -24,6 +24,7 @@ use dioxus::prelude::*;
 pub const LOGIN_SURFACE_CSS: &str = r#"
 :root {
   --yggui-login-card-radius: 18px;
+  --yggui-login-card-gap: 22px;
   --yggui-login-card-surface: #ffffff;
   --yggui-login-card-shadow:
     0 18px 50px rgba(10, 20, 40, 0.13),
@@ -32,6 +33,7 @@ pub const LOGIN_SURFACE_CSS: &str = r#"
 @media (prefers-color-scheme: dark) {
   :root:not(.light):not([data-theme="light"]) {
     --yggui-login-card-radius: 18px;
+    --yggui-login-card-gap: 22px;
     --yggui-login-card-surface: #151b26;
     --yggui-login-card-shadow:
       0 20px 56px rgba(0, 0, 0, 0.45),
@@ -40,6 +42,7 @@ pub const LOGIN_SURFACE_CSS: &str = r#"
 }
 :root.dark, :root[data-theme="dark"] {
   --yggui-login-card-radius: 18px;
+  --yggui-login-card-gap: 22px;
   --yggui-login-card-surface: #151b26;
   --yggui-login-card-shadow:
     0 20px 56px rgba(0, 0, 0, 0.45),
@@ -63,7 +66,12 @@ pub fn FloatingLoginCard(
 ) -> Element {
     rsx! {
         div {
-            style: "display:block; min-width:0; min-height:0; box-sizing:border-box; \
+            // The card owns its inner rhythm: a grid with a generous gap,
+            // so a host's heading never touches its first control (owner
+            // report 2026-09-28 — "Sign in to Practice" kissed the Google
+            // button). Hosts override with .login-panel-head rules, never
+            // by un-padding the card.
+            style: "display:grid; align-content:start; gap: var(--yggui-login-card-gap); min-width:0; min-height:0; box-sizing:border-box; \
                     border-radius: var(--yggui-login-card-radius); \
                     background: var(--yggui-login-card-surface); \
                     box-shadow: var(--yggui-login-card-shadow); \
