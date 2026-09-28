@@ -13,6 +13,9 @@ pub mod chrome;
 /// The centred "type where you are going" surface — one shell that is a field
 /// and its results at once, so every app stops growing its own corner input.
 pub mod command_palette;
+/// The shared login surface: marketing field beside a floating rounded auth
+/// card — the ZCode grammar, owned once so no app re-draws the seam.
+pub mod login;
 pub mod conversation;
 /// The four-way scroll control, shared by every surface that scrolls.
 pub mod dpad;
@@ -43,6 +46,7 @@ pub use chrome::{
     ChromeControlIcon, ChromePalette, HoveredChromeControl, TitlebarChrome, WindowControlsStrip,
     search_field_shell_style, search_input_style,
 };
+pub use login::{FloatingLoginCard, LOGIN_SURFACE_CSS};
 pub use command_palette::{
     CommandPalette, CommandPaletteItem, CommandPalettePalette, PaletteMove,
     YGGUI_COMMAND_PALETTE_CSS, YGGUI_TEXT_KILL_JS, palette_index_after,
