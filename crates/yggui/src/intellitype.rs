@@ -189,16 +189,14 @@ pub fn IntelliField(
     /// The field's history identity — who is asking, and which field. e.g.
     /// `"ychrome/startpage-search"`. An unnamed field is a plain input.
     scope: String,
-    #[props(default = String::new())]
-    initial_value: String,
+    #[props(default = String::new())] initial_value: String,
     /// The field's GENERATION: bump to make the field adopt `initial_value`.
     #[props(default = 0u64)]
     revision: u64,
     /// ⛔ THE OPT-OUT: a secret field never records and never prefill.
     #[props(default = false)]
     secret: bool,
-    #[props(default = "Type".to_string())]
-    placeholder: String,
+    #[props(default = "Type".to_string())] placeholder: String,
     /// Inline style passthrough (layout belongs to the host; this never
     /// touches the intellitype behaviour).
     #[props(default = String::new())]
@@ -362,7 +360,10 @@ mod tests {
         let src = product();
         assert!(src.contains("data-yggui-intellitype\": if secret { \"secret\" }"));
         assert!(src.contains("type: if secret { \"password\" }"));
-        assert!(src.contains("if !secret"), "the secret path guards recording AND prefill");
+        assert!(
+            src.contains("if !secret"),
+            "the secret path guards recording AND prefill"
+        );
         assert!(src.contains("never records and never prefill"));
     }
 }

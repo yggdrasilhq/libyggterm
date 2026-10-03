@@ -25,7 +25,11 @@ pub struct RailMark {
 
 impl RailMark {
     pub fn new(offset: f32, depth: u8, label: impl Into<String>) -> Self {
-        Self { offset: clamp01(offset), depth, label: label.into() }
+        Self {
+            offset: clamp01(offset),
+            depth,
+            label: label.into(),
+        }
     }
 }
 
@@ -78,7 +82,11 @@ pub fn ScrollRail(
     #[props(default = String::new())]
     surface_id: String,
 ) -> Element {
-    let scope = if surface_id.is_empty() { "default".to_string() } else { surface_id.clone() };
+    let scope = if surface_id.is_empty() {
+        "default".to_string()
+    } else {
+        surface_id.clone()
+    };
     let hover_css = format!(
         "[data-yggui-rail-surface='{scope}'] .yggui-rail-mark:hover {{ \
          opacity:1 !important; background:{} !important; }}",

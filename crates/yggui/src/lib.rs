@@ -13,17 +13,16 @@ pub mod chrome;
 /// The centred "type where you are going" surface — one shell that is a field
 /// and its results at once, so every app stops growing its own corner input.
 pub mod command_palette;
-/// The shared login surface: marketing field beside a floating rounded auth
-/// card — the ZCode grammar, owned once so no app re-draws the seam.
-pub mod login;
 pub mod conversation;
 /// The four-way scroll control, shared by every surface that scrolls.
 pub mod dpad;
-mod scroll_rail;
-pub mod frosted_bar;
-pub mod intellitype;
 pub mod drag_tree;
 pub mod drag_visuals;
+pub mod frosted_bar;
+pub mod intellitype;
+/// The shared login surface: marketing field beside a floating rounded auth
+/// card — the ZCode grammar, owned once so no app re-draws the seam.
+pub mod login;
 pub mod motion;
 pub mod notifications;
 pub mod otp;
@@ -35,6 +34,7 @@ pub mod pill_toolbar;
 /// scale and rhythm, so a host adapter spells no literal.
 pub mod prose;
 pub mod rails;
+mod scroll_rail;
 /// One primary action that remembers, plus a caret to the rest — the answer to
 /// a surface that grew one button per thing it can start.
 pub mod split_button;
@@ -46,7 +46,6 @@ pub use chrome::{
     ChromeControlIcon, ChromePalette, HoveredChromeControl, TitlebarChrome, WindowControlsStrip,
     search_field_shell_style, search_input_style,
 };
-pub use login::{FloatingLoginCard, LOGIN_SURFACE_CSS};
 pub use command_palette::{
     CommandPalette, CommandPaletteItem, CommandPalettePalette, PaletteMove,
     YGGUI_COMMAND_PALETTE_CSS, YGGUI_TEXT_KILL_JS, palette_index_after,
@@ -59,7 +58,6 @@ pub use conversation::{
     changed_file_label,
 };
 pub use dpad::{DPAD_CSS, DpadAction, DpadPalette, DpadPlacement, ScrollDpad};
-pub use scroll_rail::{RailMark, RailPalette, ScrollRail};
 pub use drag_tree::{
     DRAG_BEGIN_THRESHOLD_PX, DragDropPlacement, DragDropTarget, ROW_DRAG_CLICK_SUPPRESS_MS,
     ROW_DRAG_SPRING_MS, RowDragGesture, RowDragHover, RowDropTarget, RowTreeDrop, RowTreeRow,
@@ -70,6 +68,7 @@ pub use drag_tree::{
     tree_path_contains, valid_drop_target,
 };
 pub use drag_visuals::{DragGhostCard, DragGhostPalette, TreeDropZones};
+pub use login::{FloatingLoginCard, LOGIN_SURFACE_CSS};
 pub use motion::{
     MOTION_EMPHASIZED_DECELERATE, MOTION_ENTER_DURATION_MS, emphasized_enter_transition,
     emphasized_exit_transition, standard_accelerate_transition, standard_decelerate_transition,
@@ -79,8 +78,8 @@ pub use notifications::{
     TOAST_CSS, ToastAnchor, ToastCard, ToastItem, ToastPalette, ToastTone, ToastViewport,
 };
 pub use otp::{
-    OtpAlphabet, OtpCodeEntry, YGGUI_OTP_CODE_LEN, YGGUI_OTP_CSS, complete_otp, chars_for_otp, digits_for_otp,
-    install_otp_paste_bridge_script, otp_paste_from_native_script,
+    OtpAlphabet, OtpCodeEntry, YGGUI_OTP_CODE_LEN, YGGUI_OTP_CSS, chars_for_otp, complete_otp,
+    digits_for_otp, install_otp_paste_bridge_script, otp_paste_from_native_script,
 };
 pub use pill_toolbar::{PILL_TOOLBAR_CSS, PillStep, PillToolbar, PillToolbarPalette};
 pub use prose::{
@@ -88,6 +87,7 @@ pub use prose::{
     READING_SANS_STACK, UI_SANS_STACK,
 };
 pub use rails::{RailHeader, RailScrollBody, RailSectionTitle, SideRailReveal, SideRailShell};
+pub use scroll_rail::{RailMark, RailPalette, ScrollRail};
 pub use theme::{
     MAX_THEME_STOPS, THEME_EDITOR_SWATCHES, append_theme_stop, chrome_material_tint,
     clamp_theme_spec, default_theme_editor_spec, dominant_accent, gradient_background_repeat_css,

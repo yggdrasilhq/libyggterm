@@ -395,8 +395,7 @@ pub fn CommandPalette(
     /// effect below fires whenever the pair moves.
     #[props(default)]
     completion: Option<String>,
-    #[props(default = 0usize)]
-    completion_typed_len: usize,
+    #[props(default = 0usize)] completion_typed_len: usize,
     on_query: EventHandler<String>,
     on_move: EventHandler<PaletteMove>,
     /// The chosen row's `id`. Never fires on an empty list.
@@ -424,7 +423,11 @@ pub fn CommandPalette(
         },
     ));
     let count = items.len();
-    let selected = if count == 0 { 0 } else { selected.min(count - 1) };
+    let selected = if count == 0 {
+        0
+    } else {
+        selected.min(count - 1)
+    };
     let accept_id = items.get(selected).map(|item| item.id.clone());
 
     rsx! {
@@ -701,7 +704,10 @@ mod tests {
         // The stale guard: the field must still hold what was completed from.
         assert!(script.contains("el.value !== \"htt\""), "{script}");
         // Not an extension of the typing: no script at all.
-        assert_eq!(palette_completion_js(completed, "ftp", 3, completed.len()), None);
+        assert_eq!(
+            palette_completion_js(completed, "ftp", 3, completed.len()),
+            None
+        );
         // A byte offset inside a multi-byte char cannot select.
         assert_eq!(palette_completion_js("héllo", "h", 2, 6), None);
         // …but the honest prefix of one does build.
@@ -732,7 +738,14 @@ mod tests {
             .split("onkeydown:")
             .nth(1)
             .expect("the field handles keys");
-        for key in ["ArrowDown", "ArrowUp", "PageUp", "PageDown", "Enter", "Escape"] {
+        for key in [
+            "ArrowDown",
+            "ArrowUp",
+            "PageUp",
+            "PageDown",
+            "Enter",
+            "Escape",
+        ] {
             let at = block
                 .find(&format!("Key::{key} =>"))
                 .unwrap_or_else(|| panic!("{key} is not handled at all"));
@@ -785,7 +798,9 @@ mod tests {
             "the field must seed its text once (uncontrolled), not be re-set per render"
         );
         assert!(
-            !field.lines().any(|line| line.trim_start().starts_with("value:")),
+            !field
+                .lines()
+                .any(|line| line.trim_start().starts_with("value:")),
             "a `value:` attribute is back — the write-back race is the \
              does-not-let-me-type defect"
         );
@@ -813,7 +828,9 @@ mod tests {
             src.contains("__ygguiTextKill('kill-word-forward')"),
             "Alt+D's kill-word-forward is gone"
         );
-        let at = src.find("if mods.contains(Modifiers::CONTROL)").expect("ctrl arm");
+        let at = src
+            .find("if mods.contains(Modifiers::CONTROL)")
+            .expect("ctrl arm");
         let arm = &src[at..(at + 900).min(src.len())];
         assert!(
             arm.contains("evt.prevent_default();") && arm.contains("evt.stop_propagation();"),
