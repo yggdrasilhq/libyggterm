@@ -1,0 +1,93 @@
+# profile: zcode — PATTERN-LEVEL reference ONLY (proprietary app; no copied
+# assets, no brand strings). Values are MEASURED COLORS from first-party
+# stylesheet analysis. SSOT: ~/git/zcodereversed/FINDINGS.md
+# (extraction 2026-09-05; shipped-arm re-read 2026-09-06). Seeded 2026-10-27.
+# The SHIPPED theme is `.theme-zai-dark` (NOT the generic tailwind .dark arm).
+
+[meta]
+name = "zcode"
+license = "proprietary reference — pattern-level replication only, zero assets"
+provenance = "~/git/zcodereversed/FINDINGS.md (asar extraction, resources/app.asar styles-t2tKjMWX.css)"
+themes = ["zai-light", "zai-dark (shipped)"]
+
+[typography]
+ui-family = "system-ui"
+ui-size = "14px"              # --ui-font-size, theme-independent, measured
+code-family = "monospace"
+code-size = "13px"
+
+[geometry]
+radius = "0.375rem"           # measured class default; verify against sheet before bindings
+spacing-unit = "4px"
+control-height = "28px"
+sidebar-width = "240px"
+topbar-height = "40px"
+content-inset = "8px"
+row-inset = "8px"
+
+[density]
+mode = "compact"
+
+[motion]
+duration-fast = "120ms"
+duration-medium = "200ms"
+easing = "ease-out"
+reduced-motion = "TBD — not extracted yet"
+
+# ---- SHIPPED DARK (.theme-zai-dark) ----
+[dark.color]
+canvas = "#161616"            # background + sidebar, measured
+chrome = "#202020"            # header/panel/tab
+chrome-active = "#161616"     # active tab
+surface = "#2b2b2b"           # card/popover/input
+surface-hover = "#ffffff0d"   # white 5%
+surface-active = "#ffffff1a"  # white 10% (selected)
+border = "#ffffff1a"          # white 10%
+border-strong = "#ffffff26"   # white 15% (hover)
+text = "#d4d4d8"              # foreground neutral-300
+text-muted = "neutral-400 (60%)"   # subtle = 60%
+text-subtlest = "neutral-400 (30%)" # subtlest = 30%
+text-inverse = "#000000"
+accent = "#001d3d"            # accent, measured (brand = #fff)
+accent-fg = "#ffffff"
+accent-subtle = "#363636"     # secondary/menu family
+selection = "#4099ff47"       # terminal selection; app selection = white 10%
+focus = "#0b7fff"             # light-arm blue family carried into dark inputs
+disabled = "#5c5c5c"
+success = "#46bf72"           # fg #000
+destructive = "#ff5c5c"
+warning = "#ff8a30"           # fg #000
+info = "#0b7fff"
+idle-task = "#7b5ce5"         # surface #160d38
+scrollbar-thumb = "TBD"
+
+[dark.color.trajectory]
+user = "#60a5fa"
+assistant = "#2dd4bf"
+reasoning = "#a78bfa"
+tool-call = "#f59e0b"
+tool-result = "#38bdf8"
+
+[dark.color.terminal]
+background = "#161616"
+selection = "#4099ff47"
+ansi = { black = "#363636", red = "#ff5c5c", green = "#46bf72", yellow = "#ff8a30", blue = "#4099ff", magenta = "#7b5ce5", cyan = "#42c8c8", white = "#f8f8f8" }
+
+# ---- ZAI LIGHT (secondary; shipped toggle exists) ----
+[light.color]
+canvas = "TBD (zai-light arm, FINDINGS §neutral-100 chrome — verify before bindings)"
+chrome = "neutral-100"
+surface = "#ffffff"
+surface-hover = "neutral-200"
+border = "neutral-950 10%"
+text = "neutral-700"
+accent = "sky-400"
+accent-subtle = "sky-50"
+selection = "black 10%"
+
+# diff/git (both arms fold these): added #46bf72 / removed #ff5c5c /
+# modified #ff8a30 / renamed #4099ff — map onto success/destructive/warning/info.
+#
+# ⚠ jyas fold note (FINDINGS): the 2026-09-05 jyas dark fold keyed the GENERIC
+# .dark arm (oklch 20.5% canvas). The shipped canvas is #161616 — any jyas
+# re-fold keys .theme-zai-* values, not the tailwind defaults.

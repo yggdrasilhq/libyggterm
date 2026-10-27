@@ -1,0 +1,73 @@
+# design/tokens/roles.toml — the ONE semantic-role schema (profile-independent)
+# Layer 2 of 3: primitives → THESE ROLES → component aliases.
+# A profile binds a VALUE to every role it claims to implement. Roles are
+# stable; profiles vary; components consume only role paths.
+
+version = 1
+revision = "2026-10-27-seed"
+
+[color]
+canvas        = "the app background behind everything"
+chrome        = "persistent chrome surfaces: header, tab strip, panel, sidebar"
+chrome-active = "the active element inside chrome (active tab, selected header)"
+surface       = "raised surfaces: cards, popovers, inputs, menus"
+surface-hover = "hover state on raised surfaces / generic hover"
+surface-active = "selected/active surface state"
+border        = "default hairline borders"
+border-strong = "emphasis borders (hover, focused containers)"
+text          = "primary foreground"
+text-muted    = "secondary foreground"
+text-subtlest = "tertiary/faint foreground"
+text-inverse  = "foreground on inverted (accent-filled) elements"
+accent        = "brand/accent fill (the one loud color)"
+accent-fg     = "foreground on accent fill"
+accent-subtle = "tinted accent background (badges, selected tints)"
+selection     = "text/cell selection background"
+focus         = "focus ring / focus outline"
+disabled      = "disabled foreground or surface"
+success = "status: success (and diff-added where the profile folds them)"
+destructive = "status: destructive (and diff-removed)"
+warning = "status: warning"
+info = "status: informational"
+idle-task = "status: queued/idle task identity"
+
+[color.trajectory]
+user = "chat trajectory: user messages"
+assistant = "chat trajectory: assistant messages"
+reasoning = "chat trajectory: reasoning/thinking"
+tool-call = "chat trajectory: tool invocation"
+tool-result = "chat trajectory: tool result"
+
+[color.terminal]
+background = "embedded terminal background"
+selection = "terminal selection"
+# ansi-16 is profile-bound: profiles map the 16 slots explicitly (see profiles)
+
+[typography]
+ui-family = "UI sans stack"
+ui-size = "base UI size (px/rem)"
+code-family = "monospace stack"
+code-size = "code size"
+
+[geometry]
+radius = "base corner radius (sm = r-4px, md = r-2px, lg = r, xl = r+4px by convention)"
+spacing-unit = "base spacing unit (the 4px-class step)"
+control-height = "standard control height"
+sidebar-width = "expanded sidebar width"
+topbar-height = "topbar height"
+content-inset = "outer content inset"
+row-inset = "sidebar/list row inner inset"
+
+[density]
+mode = "compact | comfortable — platform/profile density profile"
+touch-target = "minimum touch target (mobile profiles)"
+
+[motion]
+duration-fast = "micro transitions (ms)"
+duration-medium = "standard transitions (ms)"
+easing = "default curve"
+reduced-motion = "reduced-motion behavior declaration"
+
+[elevation]
+overlay = "overlay/dialog elevation treatment (shadow/blur recipe)"
+glass = "glass recipe (blur/opacity/saturation) where the profile has one"

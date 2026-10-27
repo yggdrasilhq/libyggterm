@@ -1,0 +1,98 @@
+# profile: t3code — MEASURED from the MIT reference (reuse permitted with
+# copyright + permission notice). SSOT: ~/git/t3codereversed/FINDINGS.md
+# (upstream commit e60821f0e) + css/index.css (verbatim sheet in that repo).
+# Extraction date: 2026-09-06; profile seeded 2026-10-27.
+
+[meta]
+name = "t3code"
+license = "MIT (T3 Tools Inc) — preserve copyright AND permission notice"
+provenance = "~/git/t3codereversed/FINDINGS.md @ e60821f0e; css/index.css"
+themes = ["light", "dark"]
+
+[typography]
+ui-family = "ui-sans-serif, system-ui, sans-serif"
+ui-size = "14px"
+code-family = "ui-monospace, monospace"
+code-size = "13px"
+
+[geometry]
+radius = "0.625rem"           # 10px, measured
+spacing-unit = "4px"
+control-height = "28px"
+sidebar-width = "240px"
+topbar-height = "52px"        # --workspace-topbar-height, measured
+content-inset = "0.5rem"      # sidebar-content-inset / command-shell-inset
+row-inset = "0.625rem"        # sidebar-row-content-inset, measured
+
+[density]
+mode = "comfortable"
+
+[motion]
+duration-fast = "130ms"       # mobile composer headline transition, measured
+duration-medium = "180ms"     # mobile composer morph, cubic-bezier(0.4,0,0.2,1)
+easing = "cubic-bezier(0.4, 0, 0.2, 1)"
+reduced-motion = "view-transitions disabled under data-mobile-composer-route-transition"
+
+[elevation.glass]
+blur = "12px (light) / 16px (dark)"
+opacity = "0.80"
+saturation = "1.14 (light) / 1.08 (dark)"
+grain = "feTurbulence fractalNoise SVG data-URI baked per-surface at opacity 0.035"
+
+# ---- LIGHT THEME ----
+[light.color]
+canvas = "#fcfcfd"            # zinc-25
+chrome = "#f4f4f5"            # zinc-100 (header/panel/sidebar per FINDINGS)
+chrome-active = "#ffffff"
+surface = "#ffffff"           # card/input white
+surface-hover = "#fafafa"     # muted zinc-50
+surface-active = "#f4f4f5"    # accent zinc-100
+border = "#e4e4e7"            # zinc-200
+border-strong = "#d4d4d8"     # input zinc-300
+text = "#27272a"              # zinc-800
+text-muted = "#71717a"        # zinc-500
+text-subtlest = "#a1a1aa"     # zinc-400
+text-inverse = "#ffffff"
+accent = "oklch(0.588 0.217 264)"  # primary blue, measured
+accent-fg = "#ffffff"
+accent-subtle = "#f4f4f5"     # accent zinc-100 (fg zinc-900)
+selection = "oklch(0.588 0.217 264 / 0.2)"
+focus = "oklch(0.588 0.217 264)"   # ring = primary
+disabled = "#d4d4d8"
+success = "#22c55e"           # red-500-class status set: exact values TBD from sheet
+destructive = "#ef4444"
+warning = "#f59e0b"
+info = "#3b82f6"
+sidebar = "#fafafa"           # zinc-50; row-hover zinc-25, row-active WHITE
+scrollbar-thumb = "rgb(217 217 217)"  # 6px scrollbar
+
+# ---- DARK THEME ----
+[dark.color]
+canvas = "#000000"            # PURE black, measured
+chrome = "#000000"            # sidebar = card = #000
+chrome-active = "#191a1d"     # accent #191a1d
+surface = "#000000"
+surface-hover = "rgb(255 255 255 / 8%)"   # dark rows lift by ALPHA, not palette
+surface-active = "rgb(255 255 255 / 11%)"
+border = "rgb(255 255 255 / 8%)"
+border-strong = "rgb(255 255 255 / 18%)"
+text = "#f1f3f7"
+text-muted = "#a3a3a3"
+text-subtlest = "#737373"
+text-inverse = "#000000"
+accent = "oklch(0.588 0.217 264)"
+accent-fg = "#ffffff"
+accent-subtle = "#191a1d"     # fg #f7f9ff
+selection = "rgb(255 255 255 / 20%)"
+focus = "oklch(0.588 0.217 264)"
+disabled = "rgb(255 255 255 / 30%)"
+success = "#22c55e"
+destructive = "#ef4444"
+warning = "#f59e0b"
+info = "#3b82f6"
+sidebar = "#000000"
+scrollbar-thumb = "rgb(255 255 255 / 8%)"
+
+# NOTE (provenance law): status colors above are PLACEHOLDERS from the generic
+# palette — the FINDINGS sheet carries the exact destructive mix ("red-500
+# mixed 90% white"); pull exact values from css/index.css before bindings.
