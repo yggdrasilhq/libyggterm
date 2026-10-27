@@ -1,0 +1,16 @@
+{
+  "contract_rev": 1,
+  "kind": "plain",
+  "launch": "corpus/plain-fixture-app.sh",
+  "revision": "2026-10-27-r1",
+  "dependencies": {
+    "implementation": [{ "crate": "fixture-miniapp-synthetic", "revision": "script:1" }]
+  },
+  "design": { "profiles": {} },
+  "fixture": {
+    "values": { "dataset": "synthetic-t3-buttons", "seed": 7 },
+    "mutable_keys": ["seed"]
+  },
+  "masks": [],
+  "selftest": { "plants": ["item-drop", "initial-drift"] }
+}

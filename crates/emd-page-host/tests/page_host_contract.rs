@@ -128,8 +128,8 @@ fn an_unresolved_dependency_is_actionable_before_any_render() {
     // REPORTABLE through the same resolution table (the manifest key is
     // named), while the host stays auditable.
     let host = host_result.unwrap();
-    assert!(!host.resolution.ok());
-    let failures = host.resolution.failures();
+    assert!(!host.scenario.resolutions.ok());
+    let failures = host.scenario.resolutions.failures();
     assert!(
         failures[0].contains("dependencies.implementation[0].revision"),
         "the failing key is named: {}",
@@ -157,7 +157,7 @@ fn a_resolved_workspace_dependency_is_clean() {
         ),
     }];
     let host = PageHost::load(synthetic_page(), manifest).unwrap();
-    assert!(host.resolution.ok(), "{:?}", host.resolution.failures());
+    assert!(host.scenario.resolutions.ok(), "{:?}", host.scenario.resolutions.failures());
     assert!(host.ready().unwrap());
 }
 

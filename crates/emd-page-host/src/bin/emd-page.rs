@@ -139,6 +139,7 @@ fn git_revision() -> Option<String> {
 fn load_host(page: Page, manifest: &HostManifest) -> Result<PageHost, Fail> {
     PageHost::load(page, manifest.clone()).map_err(|error| match &error {
         HostError::Manifest(message)
+        | HostError::Mount(message)
         | HostError::Fixture(message)
         | HostError::Dependency(message) => Fail(message.clone()),
         other => Fail(other.to_string()),
@@ -150,9 +151,9 @@ fn load_errors(host: &PageHost) -> Vec<String> {
         .parsed
         .errors()
         .iter()
-        .map(|error| error.finding(&host.page.path))
+        .map(|error| error.finding(&host.parsed.path))
         .collect::<Vec<_>>();
-    findings.extend(host.resolution.failures());
+    findings.extend(host.scenario.resolutions.failures());
     findings
 }
 
@@ -192,7 +193,7 @@ fn render(page: Page, manifest: HostManifest) -> Result<i32, Fail> {
     let mut bundle_value = bundle_value;
     bundle::join_identity(&mut bundle_value, git_revision());
     let fence_errors_empty = bundle_value
-        .pointer("/evaluation/fence_errors")
+        .pointer("/evaluation/item_errors")
         .and_then(|v| v.as_array())
         .map(|v| v.is_empty())
         .unwrap_or(true);

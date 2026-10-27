@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/emd-renderer", "crates/yggui", "crates/yggui-contract", "crates/yggui-icons", "crates/emd-page-host"]
+members = ["crates/emd-renderer", "crates/yggui", "crates/yggui-contract", "crates/yggui-icons", "crates/emd-page-host", "crates/fixture-host"]
 resolver = "2"
 
 [workspace.package]

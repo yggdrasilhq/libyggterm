@@ -2,38 +2,36 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL-2.0/.
 
-//! emd-page-host — the reproducible executable test host for emd component
-//! pages. Spec: `docs/spec-emd-components.md` §Hosted-component contract.
+//! emd-page-host — the EMD ARM of the portable scenario contract.
+//! Portable half: `fixture_host` (one manifest model, one lifecycle, one
+//! judge, one bundle schema — and the plain fixture-app arm). Spec:
+//! `docs/spec-emd-components.md` §Hosted-component contract.
 //!
-//! The ydesign loop's load-bearing claim (chain 0028 Q4) is that a design
-//! page is an EXECUTABLE HOST of cases, not a static mockup. What makes a
-//! host executable and reproducible:
+//! The ydesign loop's claim (chain 0028 Q4, amended by chain 0029): the
+//! falsifiable unit is the SCENARIO — implementation + fixture +
+//! interaction + expected observations — and it must survive the notebook
+//! renderer disappearing. This crate keeps the emd arm of that contract:
 //!
-//! - **versioned validation** — every ```emd fence validates against the
-//!   component wire version (floor AND ceiling), with bounds and evidence
-//!   rules preserved; version-first, so the REJECTED version is named;
-//! - **typed component boundaries** — a page's behavior is declared in a
-//!   `page.host.json` manifest (dependencies, fixture, masks); source-only
-//!   pages are read-only prose hosts;
+//! - **the documented emd path** — a page is markdown parsed by
+//!   `emd_renderer::parse_markdown_blocks`; every ```emd fence validates
+//!   against the component wire version (version-first, the REJECTED
+//!   version is named), with bounds and evidence rules preserved;
+//! - **typed component boundaries** — behavior declared in a manifest
+//!   (`page.host.json` beside the page; the portable `scenario.host.json`
+//!   spelling also reads — see migration behavior);
 //! - **dependency resolution with actionable failures** — implementation
-//!   dependencies resolve against the local component workspace; design
-//!   dependencies resolve against the manifest's pinned token profiles;
-//!   anything unresolved names the manifest key and the expected shape;
-//! - **deterministic render evidence** — every component renders to a
-//!   stable UI-neutral scene digest; identical input ⇒ identical digest;
-//! - **fixture/readiness/reset** — a declared synthetic fixture with a
-//!   typed mutable surface, a reset that reproduces EXACTLY the declared
-//!   initial state, and a readiness predicate;
-//! - **source/revision identity on every rendered artifact** — content
-//!   digest, page revision label, workspace revision, per-component digests;
-//! - **controlled lifecycle** — load → host → reset → unload; a reload
-//!   draws NO residual state (re-executed tests assert digest equality);
-//! - **error presentation with actionable locations** — fence index, byte
-//!   range, line:col, and the component path inside the tree
-//!   (`root.grid.children[2].plot.series`);
+//!   deps resolve against the local component workspace; design deps
+//!   against the manifest's pinned token profiles;
+//! - **deterministic render evidence** — per-fence scene digests,
+//!   identical input ⇒ identical digest, fixture state joined in;
+//! - **controlled lifecycle** — load → host → reset → unload through
+//!   `fixture_host::ScenarioHost`; a reload draws NO residual state;
+//! - **error presentation with actionable locations** — fence index,
+//!   byte range, line:col, tree path (`root.grid.children[2].plot.series`);
 //! - **ux-falsify evidence bundles** — `check`/`render`/`run`/`selftest`
-//!   emit the manifest-schema bundle of the ux-falsify skill.
+//!   emit the one shared schema.
 
+pub mod arm;
 pub mod bundle;
 pub mod digest;
 pub mod error;
@@ -45,10 +43,17 @@ pub mod selftest;
 
 pub use digest::component_digest;
 pub use error::{PageError, PageItemError};
-pub use host::{Digests, FixtureState, HostError, Lifecycle, PageHost};
-pub use manifest::{HostManifest, MANIFEST_CONTRACT_REV, MANIFEST_FILENAME};
+pub use fixture_host::bundle::Comparison;
+pub use fixture_host::selftest::SelftestReport;
+pub use fixture_host::{
+    ArmPlants, Digests, FixtureState, HostError, ItemDigest, Lifecycle, ScenarioHost,
+};
+pub use host::PageHost;
+pub use manifest::{
+    HostManifest, MANIFEST_CONTRACT_REV, MANIFEST_FILENAME, SCENARIO_MANIFEST_FILENAME,
+};
 pub use page::{Page, PageComponent, ParsedPage};
-pub use resolve::{Resolution, Resolutions};
+pub use resolve::{Resolution, Resolutions, Resolved};
 
 pub const HOST_VERSION: &str = concat!(
     "emd-page-host/0.1 (workspace ",

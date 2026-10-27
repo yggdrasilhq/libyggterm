@@ -8,6 +8,7 @@ description = "The reproducible executable test host for emd component pages: ve
 
 [dependencies]
 emd-renderer = { path = "../emd-renderer" }
+fixture-host = { path = "../fixture-host" }
 serde.workspace = true
 serde_json.workspace = true
 sha2.workspace = true

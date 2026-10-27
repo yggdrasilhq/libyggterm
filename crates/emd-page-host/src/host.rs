@@ -2,255 +2,118 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL-2.0/.
 
-//! The controlled hosted-component lifecycle:
-//!
-//! load (parse + manifest validation + dependency resolution)
-//!   → host (fixture set/read through the TYPED mutable surface)
-//!   → reset (EXACTLY the manifest-declared initial fixture)
-//!   → ready (a readiness predicate: validated, no pending fixture
-//!     mutation without re-render, digests recomputable)
-//!   → unload (drop; no page-level state survives on the host object).
-//!
-//! REPRODUCIBILITY (the claim being tested): re-loading the same page in
-//! the same workspace reconstructs an IDENTICAL host — fixture state resets
-//! to the declared values, digests recompute identically, nothing leaks
-//! between navigations. The `reload_is_clean` test is the repairable
-//! stated guarantee behind "repeated navigation/reload leaves no orphaned
-//! state and no duplicate handlers": the host object owns no process and
-//! registers nothing global — loading twice CANNOT duplicate anything.
+//! The emd PAGE HOST: the portable scenario lifecycle (`fixture_host::
+//! ScenarioHost` over a parsed page) plus the emd arm's own identity —
+//! the `Page`/`ParsedPage` types a page is loaded from. Parsing lives in
+//! [`crate::page`]; arm trait work in [`crate::arm`]; the HOST lifecycle
+//! laws (reset/readiness/reproducibility, the controlled surface) live
+//! ONCE in fixture-host. This module keeps the emd ecosystem's names
+//! (`PageHost`, `Page`) so call sites and evidence keep one spelling.
 
 use crate::error::PageError;
-use crate::resolve::{Resolutions, resolve_all};
-use crate::{HostManifest, Page, ParsedPage};
-use sha2::Digest as _;
+use crate::page::{Page, parse_page};
+use crate::resolve::Resolutions;
+use fixture_host::manifest::HostManifest;
+pub use fixture_host::HostError;
+use fixture_host::{Lifecycle, ScenarioHost};
+use std::ops::{Deref, DerefMut};
 
-/// The fixture as the HOST sees it: declared values plus mutations.
-#[derive(Debug, Clone, PartialEq)]
-pub struct FixtureState {
-    /// The manifest-declared initial fixture (never stored as a reference —
-    /// reset CLONES it back, so a corrupt reset can't alias page state).
-    pub initial: serde_json::Map<String, serde_json::Value>,
-    /// Declared mutable keys (the typed surface of mutation).
-    pub mutable_keys: Vec<String>,
-    /// Current values (initial at load/reset; mutated in between).
-    pub current: serde_json::Map<String, serde_json::Value>,
-}
-
-impl FixtureState {
-    pub fn initial_digest(&self) -> String {
-        crate::page::sha256_hex(
-            serde_json::to_string(&self.initial)
-                .unwrap_or_default()
-                .as_bytes(),
-        )
-    }
-
-    pub fn current_digest(&self) -> String {
-        crate::page::sha256_hex(
-            serde_json::to_string(&self.current)
-                .unwrap_or_default()
-                .as_bytes(),
-        )
-    }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum HostError {
-    Page(PageError),
-    Manifest(String),
-    Dependency(String),
-    NotReady(String),
-    Fixture(String),
-}
-
-impl std::fmt::Display for HostError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            HostError::Page(error) => write!(f, "page: {}", error.message),
-            HostError::Manifest(message) => write!(f, "{message}"),
-            HostError::Dependency(message) => write!(f, "dependency: {message}"),
-            HostError::NotReady(message) => write!(f, "not ready: {message}"),
-            HostError::Fixture(message) => write!(f, "fixture: {message}"),
-        }
-    }
-}
-
-impl std::error::Error for HostError {}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Lifecycle {
-    Loaded,
-    Hosted, // fixture mutated away from the declared initial state
-    Reset,  // back at the declared initial state after a reset
-    Unloaded,
-    /// A staged mutation LOST readiness (digest would differ from render);
-    /// explicit `reset` is required before claiming a state on this host.
-    LostReadiness,
-}
-
-#[derive(Debug, Clone, PartialEq)]
 pub struct PageHost {
+    /// The page identity (path + source + revision label).
     pub page: Page,
-    pub manifest: HostManifest,
-    pub parsed: ParsedPage,
-    pub fixture: FixtureState,
-    pub resolution: Resolutions,
-    pub lifecycle: Lifecycle,
-    /// Loaded time counter, for reload-leak detection in tests/mock drivers
-    /// (a reset must NOT advance it; but a RELOAD gets a fresh host).
-    pub load_generation: u64,
-    _private: (),
+    pub parsed: ParsedPageAlias,
+    /// The controlled LIFECYCLE owning the manifest, fixture state,
+    /// reset, and readiness — the portable contract. The emd arm = a
+    /// scene of fences (`ParsedPage` mounted as `fixture_host::Mounted`).
+    pub scenario: ScenarioHost<crate::page::ParsedPage>,
+}
+
+// The parsed page duplicates as the ARM type; the alias keeps doc names.
+pub type ParsedPageAlias = crate::page::ParsedPage;
+
+impl Deref for PageHost {
+    // Deref makes the scenario's OWN surface the page host's: host.manifest,
+    // host.fixture, host.fixture_set(..), host.reset(), host.ready(),
+    // host.digests(), host.unload(), host.load_generation.
+    type Target = ScenarioHost<crate::page::ParsedPage>;
+    fn deref(&self) -> &Self::Target {
+        &self.scenario
+    }
+}
+
+impl DerefMut for PageHost {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.scenario
+    }
+}
+
+/// Resolutions under their arm spelling: a page-alias re-export (kept for
+/// call sites that pattern-match on the resolution table).
+pub fn resolutions_of(scenario: &ScenarioHost<crate::page::ParsedPage>) -> &Resolutions {
+    &scenario.resolutions
+}
+
+impl std::fmt::Debug for PageHost {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("PageHost")
+            .field("page", &self.page.path)
+            .field("lifecycle", &self.scenario.lifecycle)
+            .field("load_generation", &self.scenario.load_generation)
+            .finish()
+    }
 }
 
 impl PageHost {
-    /// Load: parse the page, validate the manifest shape, resolve deps,
-    /// validate that mask fence spans name real fences, and confirm the
-    /// page is VALID (a page with fence errors loads but is never `ready` —
-    /// checking reports them; a host can render the visible error cards).
+    /// Load: parse the page through the documented path, validate the
+    /// manifest, resolve deps (through the ARM trait impls), and mount.
+    /// A page with fence errors LOADS but is never `ready` — checking
+    /// reports them; a host can render the visible error cards.
     pub fn load(page: Page, manifest: HostManifest) -> Result<Self, HostError> {
         if let Err(message) = manifest.validate() {
             return Err(HostError::Manifest(message));
         }
-        let parsed = crate::page::parse_page(&page).map_err(HostError::Page)?;
-        if let Err(message) = manifest.validate_fence_span(parsed.components.len()) {
-            return Err(HostError::Manifest(message));
-        }
-        let resolution = resolve_all(&manifest, &page);
-        let fixture = FixtureState {
-            initial: manifest.fixture.values.clone(),
-            mutable_keys: manifest.fixture.mutable_keys.clone(),
-            current: manifest.fixture.values.clone(),
-        };
+        let parsed = parse_page(&page).map_err(|error| HostError::Mount(error.message.clone()))?;
+        let scenario = ScenarioHost::load(&page.path, manifest, parsed.clone())?;
         Ok(PageHost {
             page,
-            manifest,
             parsed,
-            fixture,
-            resolution,
-            lifecycle: Lifecycle::Loaded,
-            load_generation: 1, // one load
-            _private: (),
+            scenario,
         })
     }
 
-    /// Mutation via the typed surface. An undeclared key is a boundary
-    /// violation the host REJECTS (the page is the boundary, not the app).
-    pub fn fixture_set(&mut self, key: &str, value: serde_json::Value) -> Result<(), HostError> {
-        if !self.manifest.is_mutable_key(key) {
-            return Err(HostError::Fixture(format!(
-                "page.host.json: fixture.mutable_keys does not declare {key:?} — a page host mutates ONLY declared keys (declare the key to make the mutation part of the page's declared behavior)"
-            )));
-        }
-        self.fixture.current.insert(key.to_string(), value);
-        self.lifecycle = Lifecycle::Hosted;
-        Ok(())
-    }
-
-    pub fn fixture_read(&self, key: &str) -> Option<&serde_json::Value> {
-        self.fixture.current.get(key)
-    }
-
-    /// Reset: restore EXACTLY the manifest-declared fixture and return to
-    /// Readiness-recomputable lifecycle. Declared fixture state is cleared
-    /// by construction (only the declared values remain).
-    pub fn reset(&mut self) -> Result<(), HostError> {
-        if self.lifecycle == Lifecycle::Unloaded {
-            return Err(HostError::NotReady(
-                "host already unloaded — reset on an unloaded host is a lifecycle violation; reload the page instead \
-                 (a reset must never resurrect a dropped host)"
-                    .to_string(),
-            ));
-        }
-        self.fixture.current = self.manifest.fixture.values.clone();
-        self.lifecycle = Lifecycle::Reset;
-        Ok(())
-    }
-
-    /// Readiness predicate. A ready host: valid page, resolved deps, no
-    /// fixture violation, and its digests COMPUTABLE TWICE identically
-    /// (per the determinism claim — the cheap local form of the same rule
-    /// ux-falsify applies to captures).
-    pub fn ready(&self) -> Result<bool, HostError> {
-        if !self.parsed.is_valid() {
-            return Ok(false);
-        }
-        if !self.resolution.ok() {
-            return Ok(false);
-        }
-        let digests = self.digests().map_err(|message| {
-            HostError::NotReady(format!("digest computation failed: {message}"))
-        })?;
-        if digests
-            != self.digests().map_err(|message| {
-                HostError::NotReady(format!("digest computation failed: {message}"))
-            })?
-        {
-            return Ok(false);
-        }
-        Ok(self.lifecycle != Lifecycle::LostReadiness)
-    }
-
-    /// Page digests: per-component digests + the page digest (fixture-joined).
-    pub fn digests(&self) -> Result<Digests, String> {
-        let mut components = Vec::new();
-        for component in &self.parsed.components {
-            match &component.component {
-                Some(document) => {
-                    let value = crate::digest::component_digest(&document.component)
-                        .map_err(|error| error.message)?;
-                    components.push(ComponentDigest {
-                        fence_index: component.location.fence_index,
-                        kind: component.kind.clone().unwrap_or_default(),
-                        digest: value,
-                        error: None,
-                    });
-                }
-                None => components.push(ComponentDigest {
-                    fence_index: component.location.fence_index,
-                    kind: component.kind.clone().unwrap_or_default(),
-                    digest: "invalid".to_string(),
-                    error: component.error.clone(),
-                }),
+    /// The emd arm's manifest spelling: accept BOTH `page.host.json`
+    /// (beside a page — the documented emd place) and the portable
+    /// `scenario.host.json`. MIGRATION: both parse identically (the
+    /// manifest model is shared); the portable spelling is looked for
+    /// FIRST, and either may be declared explicitly.
+    pub fn load_manifest_beside(
+        page_path: &std::path::Path,
+    ) -> Option<(std::path::PathBuf, HostManifest)> {
+        for name in [
+            fixture_host::SCENARIO_MANIFEST_FILENAME,
+            fixture_host::LEGACY_PAGE_MANIFEST_FILENAME,
+        ] {
+            let path = page_path
+                .parent()
+                .map(|p| p.join(name))
+                .unwrap_or_else(|| std::path::PathBuf::from(name));
+            if path.exists() {
+                return std::fs::read_to_string(&path)
+                    .ok()
+                    .and_then(|text| serde_json::from_str(&text).ok())
+                    .map(|manifest| (path, manifest));
             }
         }
-        let fixture_hash = self.fixture.current_digest();
-        let mut hasher = sha2::Sha256::new();
-        hasher.update(self.parsed.content_sha256.as_bytes());
-        for component in &components {
-            hasher.update(component.fence_index.to_le_bytes());
-            hasher.update(component.digest.as_bytes());
-        }
-        hasher.update(fixture_hash.as_bytes());
-        let page = hasher
-            .finalize()
-            .iter()
-            .map(|b| format!("{b:02x}"))
-            .collect();
-        Ok(Digests {
-            components,
-            fixture_hash,
-            page,
-        })
+        None
     }
 
-    /// Unload — the controlled terminal state. Returning the host consumed
-    /// proves nothing survives: every subsequent use is a fresh load.
+    /// Unload — the controlled terminal state (the scenario lifecycle,
+    /// reachable by the ecosystem name here).
     pub fn unload(self) -> Lifecycle {
-        Lifecycle::Unloaded
+        self.scenario.unload()
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct ComponentDigest {
-    pub fence_index: usize,
-    pub kind: String,
-    pub digest: String,
-    pub error: Option<String>,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct Digests {
-    pub components: Vec<ComponentDigest>,
-    pub fixture_hash: String,
-    pub page: String,
+fn _keep_error_in_scope(error: PageError) -> String {
+    error.message
 }
