@@ -5,6 +5,23 @@ are written from the git record, not from memory.
 
 ## Unreleased
 
+- **emd-page-host: the page as a reproducible executable test host** (new
+  workspace crate `emd-page-host` + `emd-page` CLI): version-first
+  component validation (unsupported AND pre-floor versions loud, with a
+  migration rule), the versioned `page.host.json` manifest (implementation
+  dependency pins, design/token dependency digest, synthetic-fixture
+  declared init with a typed mutable surface, declared masks, selftest
+  plant vocabulary), actionable fence errors (fence index/byte
+  range/line:col/tree path), deterministic per-component scene digests
+  (fixture state joined to the page digest), a two-fresh-reset deterministic
+  run verifier, and ux-falsify-schema evidence bundles written to the
+  hashed evidence store. Real-notebook corpus acceptance: every shipped
+  `design/notebooks/*.emd` page parses clean; the synthetic
+  t3codereversed-miniapp-section corpus page passes ref-vs-ref CLEAN and
+  all declared planted defects are detected. emd-renderer's evidence
+  validation now names the failing component path/field. Spec:
+  `docs/spec-emd-components.md` §Hosted-component contract.
+
 ## v0.14.4 — 2026-09-04
 
 - **The FROSTED BAR and the glass KEY become components** (`frosted_bar`):

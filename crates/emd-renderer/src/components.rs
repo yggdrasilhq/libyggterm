@@ -249,20 +249,43 @@ pub fn parse_component(source: &str) -> Result<ComponentDocument, String> {
     if source.len() > 256 * 1024 {
         return Err("EMD component exceeds the 256 KiB source limit".to_string());
     }
-    let document: ComponentDocument = serde_json::from_str(source)
+    // Two-phase: the WIRE VERSION is checked before structural parsing, so a
+    // future-version document reports "unsupported version N" rather than a
+    // misleading pile of shape errors (a host that grows the grammar must
+    // still be able to name the version it rejected).
+    let raw: serde_json::Value = serde_json::from_str(source)
         .map_err(|error| format!("invalid EMD component JSON: {error}"))?;
-    if document.version != COMPONENT_VERSION {
+    let wire_version = raw.get("version").and_then(|v| v.as_u64()).unwrap_or(
+        // absent version means the serde default path below would apply it;
+        // default validation still runs on the fully-parsed document.
+        COMPONENT_VERSION as u64,
+    );
+    if wire_version > COMPONENT_VERSION as u64 {
         return Err(format!(
             "unsupported EMD component version {}; this renderer supports {}",
-            document.version, COMPONENT_VERSION
+            wire_version, COMPONENT_VERSION
         ));
     }
+    if wire_version < COMPONENT_VERSION as u64 {
+        // A strictly older document would need a MIGRATION decision, not a
+        // silent reinterpretation — fail loud the same way unknown kinds do.
+        return Err(format!(
+            "EMD component version {} predates this renderer's floor {}; a migration decision is required before rendering",
+            wire_version, COMPONENT_VERSION
+        ));
+    }
+    let document: ComponentDocument = serde_json::from_str(source)
+        .map_err(|error| format!("invalid EMD component JSON: {error}"))?;
     let mut count = 0;
-    validate_component(&document.component, &mut count)?;
+    validate_component(&document.component, "root", &mut count)?;
     Ok(document)
 }
 
-fn validate_component(component: &EmdComponent, count: &mut usize) -> Result<(), String> {
+fn validate_component(
+    component: &EmdComponent,
+    path: &str,
+    count: &mut usize,
+) -> Result<(), String> {
     *count += 1;
     if *count > MAX_COMPONENTS {
         return Err(format!("EMD tree exceeds {MAX_COMPONENTS} components"));
@@ -270,53 +293,91 @@ fn validate_component(component: &EmdComponent, count: &mut usize) -> Result<(),
     match component {
         EmdComponent::Grid(spec) => {
             if !(1..=4).contains(&spec.columns) {
-                return Err("EMD grid columns must be between 1 and 4".to_string());
+                return Err(format!(
+                    "{path}.grid.columns: EMD grid columns must be between 1 and 4"
+                ));
             }
-            for child in &spec.children {
-                validate_component(child, count)?;
+            for (index, child) in spec.children.iter().enumerate() {
+                validate_component(child, &format!("{path}.grid.children[{index}]"), count)?;
             }
         }
         EmdComponent::Panel(spec) => {
-            for child in &spec.children {
-                validate_component(child, count)?;
+            for (index, child) in spec.children.iter().enumerate() {
+                validate_component(child, &format!("{path}.panel.children[{index}]"), count)?;
             }
         }
         EmdComponent::Plot(spec) => {
-            validate_evidence(&spec.evidence)?;
+            contextualize(path, validate_evidence(&spec.evidence))?;
             if spec.series.is_empty() {
-                return Err("EMD plot needs at least one series".to_string());
+                return Err(format!("{path}.plot.series: needs at least one series"));
             }
             if spec.series.len() > MAX_SERIES {
-                return Err(format!("EMD plot exceeds {MAX_SERIES} series"));
+                return Err(format!("{path}.plot.series: exceeds {MAX_SERIES} series"));
             }
             if !(120..=720).contains(&spec.height) {
-                return Err("EMD plot height must be between 120 and 720 px".to_string());
+                return Err(format!(
+                    "{path}.plot.height: must be between 120 and 720 px; got {}",
+                    spec.height
+                ));
             }
             let points: usize = spec.series.iter().map(|series| series.values.len()).sum();
             if points > MAX_POINTS {
-                return Err(format!("EMD plot exceeds {MAX_POINTS} points"));
+                return Err(format!(
+                    "{path}.plot.series: exceeds {MAX_POINTS} points ({points})"
+                ));
             }
         }
         EmdComponent::Sparkline(spec) => {
-            validate_evidence(&spec.evidence)?;
+            contextualize(path, validate_evidence(&spec.evidence))?;
             if spec.values.len() > MAX_POINTS {
-                return Err(format!("EMD sparkline exceeds {MAX_POINTS} points"));
+                return Err(format!(
+                    "{path}.sparkline.values: exceeds {MAX_POINTS} points"
+                ));
             }
         }
-        EmdComponent::Metric(spec) => validate_evidence(&spec.evidence)?,
-        EmdComponent::Query(spec) => validate_evidence(&spec.evidence)?,
+        EmdComponent::Metric(spec) => contextualize(path, validate_evidence(&spec.evidence))?,
+        EmdComponent::Query(spec) => contextualize(path, validate_evidence(&spec.evidence))?,
         EmdComponent::DataGrid(spec) => {
-            validate_evidence(&spec.evidence)?;
+            contextualize(path, validate_evidence(&spec.evidence))?;
             if spec.rows.len() > MAX_TABLE_ROWS {
-                return Err(format!("EMD data grid exceeds {MAX_TABLE_ROWS} rows"));
+                return Err(format!(
+                    "{path}.datagrid.rows: exceeds {MAX_TABLE_ROWS} rows ({})",
+                    spec.rows.len()
+                ));
             }
-            if spec.rows.iter().any(|row| row.len() != spec.columns.len()) {
-                return Err("every EMD data-grid row must match its column count".to_string());
+            if let Some(row) = spec
+                .rows
+                .iter()
+                .enumerate()
+                .find_map(|(i, row)| (row.len() != spec.columns.len()).then_some(i))
+            {
+                return Err(format!(
+                    "{path}.datagrid.rows[{row}]: width {} does not match the {} declared columns — every row must match its column count",
+                    spec.rows[row].len(),
+                    spec.columns.len()
+                ));
             }
         }
-        EmdComponent::AgentFinding(spec) => validate_evidence(&spec.evidence)?,
+        EmdComponent::AgentFinding(spec) => {
+            contextualize(path, validate_evidence(&spec.evidence))?;
+        }
     }
     Ok(())
+}
+
+/// Names the offending evidence field, not just the rule. A "bound violated"
+/// without the field it violated sends the author hunting.
+fn contextualize(path: &str, result: Result<(), String>) -> Result<(), String> {
+    result.map_err(|mut message| {
+        if let Some(rest) = message.strip_prefix("EMD evidence ") {
+            if let Some((name, tail)) = rest.split_once(' ') {
+                let field = name.trim_matches('`');
+                message = format!("{path}: evidence.{field}: {tail}");
+                return message;
+            }
+        }
+        format!("{path}: {message}")
+    })
 }
 
 fn validate_evidence(evidence: &EvidenceSpec) -> Result<(), String> {

@@ -1,0 +1,26 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+
+# t3codereversed miniapp sections — synthetic emd page-host corpus
+
+The t3codereversed miniapp's rendered sections (chapter-buttons,
+chapter-inputs, chapter-badges — `~/git/t3codereversed/miniapp`, MIT) define
+the section SHAPES this corpus exercises. The DATA here is fully synthetic:
+every value, label-with-numbers, and source reference is invented for the
+fixture (no real measurement ships in this repo). The page mirrors the
+"section = card of widgets" pattern the miniapp renders, expressed in the
+typed emd component vocabulary a ydesign host paints.
+
+```emd
+{"version":1,"kind":"grid","spec":{"columns":2,"gap_px":12,"children":[
+  {"kind":"metric","spec":{"label":"Primary actions","value":"6","detail":"buttons per section max","tone":"good","evidence":{"question":"how many actions land in every section?","source":"minapp/src/main.rs","window":"this build","freshness":"static","units":"actions","state":"observed","reproduction":"grep -c 'button' miniapp/src/main.rs"}}},
+  {"kind":"sparkline","spec":{"label":"Battery","values":[80.0,null,72.0,71.0,null,68.0],"value":"68%","delta":"-12 over the window","evidence":{"question":"is the synthetic battery series monotonic under gaps?","source":"t3corpus synthetic","window":"the 6 planted values","freshness":"static","units":"percent","state":"observed","reproduction":"emd-page selftest design/notebooks/t3miniapp-sections.emd"}}}
+]}}
+```
+
+```emd
+{"version":1,"kind":"metric","spec":{"label":"Badge tone","value":"good","detail":"tone vocabulary sane","tone":"good","evidence":{"question":"does the tone vocabulary render good/warning distinctly?","source":"t3corpus synthetic","window":"this build","freshness":"static","units":"tone","state":"observed","reproduction":"emd-page check design/notebooks/t3miniapp-sections.emd"}}}
+```
+
+```emd
+{"version":1,"kind":"data-grid","spec":{"title":"Input states","columns":["field","error","empty"],"rows":[["name","empty","ok"],["email","","empty"]],"compact":true,"evidence":{"question":"does the i-state corpus cover error rows on every grid?","source":"t3corpus synthetic","window":"this build","freshness":"static","units":"rows","state":"observed","reproduction":"emd-page check"}}}
+```

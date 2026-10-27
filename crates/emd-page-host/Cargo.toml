@@ -1,0 +1,18 @@
+[package]
+name = "emd-page-host"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license = "MPL-2.0"
+description = "The reproducible executable test host for emd component pages: versioned validation, typed dependency resolution, deterministic scene digests, fixture/reset/readiness, provenance, and ux-falsify evidence bundles. Spec: docs/spec-emd-components.md §Hosted-component contract."
+
+[dependencies]
+emd-renderer = { path = "../emd-renderer" }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+pulldown-cmark = { version = "0.12", default-features = false }
+
+[[bin]]
+name = "emd-page"
+path = "src/bin/emd-page.rs"

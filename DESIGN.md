@@ -12,7 +12,7 @@ ships UI carries `DESIGN.md` + `design/`.
 - [design/00-platform](design/00-platform.md) — the standing rules this repo owns: one visual decision one owner, fixed property-key sets, typed superset grammar, contracts name WHAT never WHERE, MPL-2.0 plain.
 - [design/Inheritance](design/Inheritance.md) — the chain: Dioxus (L0) → this repo (L1) → app languages (L2) → project overlays (L3).
 - [docs/spec-emd-renderer](docs/spec-emd-renderer.md) — what an emd document is; §8 names the extensibility contract (base extensions ship here; private extensions live in product pipeline repos).
-- [docs/spec-emd-components](docs/spec-emd-components.md) — the typed analytical component grammar (version 1 vocabulary, bounds, evidence contracts).
+- [docs/spec-emd-components](docs/spec-emd-components.md) — the typed analytical component grammar (version 1 vocabulary, bounds, evidence contracts) and the implemented **hosted-component contract** (crates/emd-page-host: the page as a reproducible executable test host — validation, fixtures/reset/readiness, scene digests, ux-falsify bundles).
 - [docs/spec-app-architecture](docs/spec-app-architecture.md) — the app architecture the components serve.
 - [crates/yggui-icons](crates/yggui-icons/) — the base icon blocks; the rendered catalogue page lives in the ydesign Icons notebook.
 - [design/assets](design/assets/) — icons/, fonts/, components/, img/ (by kind, never a flat dump).

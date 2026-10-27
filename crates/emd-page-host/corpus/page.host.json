@@ -1,0 +1,15 @@
+{
+  "contract_rev": 1,
+  "revision": "2026-10-27-r1",
+  "dependencies": {
+    "implementation": [{ "crate": "emd-renderer", "revision": "workspace:0.14.4" }],
+    "design": { "profile": "t3-synthetic-base", "digest": "sha256:f0f56f321bc92bc7a60aad8c2a548d442f7ff2a55f9d431cda30b1a7b4e8b3e0" }
+  },
+  "design": { "profiles": { "t3-synthetic-base": "sha256:f0f56f321bc92bc7a60aad8c2a548d442f7ff2a55f9d431cda30b1a7b4e8b3e0" } },
+  "fixture": {
+    "values": { "dataset": "synthetic-t3-miniapp-2026-10", "seed": 7 },
+    "mutable_keys": ["seed"]
+  },
+  "masks": [],
+  "selftest": { "plants": ["null-to-zero", "tone-drift", "version-skip"] }
+}
