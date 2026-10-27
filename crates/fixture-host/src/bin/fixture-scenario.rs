@@ -19,7 +19,7 @@ use fixture_host::plain::PlainScene;
 use fixture_host::{Digests, HostError, HostManifest, ScenarioHost};
 use std::path::PathBuf;
 
-const DRIVER: &str = concat!("fixture-scenario ", env!("CARGO_PKG_VERSION"));
+pub const DRIVER: &str = concat!("fixture-scenario ", env!("CARGO_PKG_VERSION"));
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -77,7 +77,8 @@ fn cli(args: &[String]) -> Result<i32, Fail> {
         return Ok(2);
     };
     let dir_path = resolve_dir(&dir_arg);
-    let manifest_path = std::path::Path::new(&dir_path).join(fixture_host::SCENARIO_MANIFEST_FILENAME);
+    let manifest_path =
+        std::path::Path::new(&dir_path).join(fixture_host::SCENARIO_MANIFEST_FILENAME);
     let text = std::fs::read_to_string(&manifest_path).map_err(|error| {
         Fail(format!(
             "unreadable manifest {}: {error} (a plain-arm scenario carries {} beside the launcher)",
@@ -116,7 +117,9 @@ fn cli(args: &[String]) -> Result<i32, Fail> {
 }
 
 fn resolve_dir(dir: &str) -> PathBuf {
-    std::path::PathBuf::from(dir).canonicalize().unwrap_or_else(|_| std::path::PathBuf::from(dir))
+    std::path::PathBuf::from(dir)
+        .canonicalize()
+        .unwrap_or_else(|_| std::path::PathBuf::from(dir))
 }
 
 /// Resolve a launcher path relative to the scenario dir (never silently:
@@ -134,9 +137,15 @@ fn resolve_launch(dir: &std::path::Path, launch: &str) -> String {
             if direct.exists() || token.starts_with('/') {
                 token.to_string()
             } else if as_scenariodir.exists() {
-                as_scenariodir.canonicalize().map(|p| p.to_string_lossy().into_owned()).unwrap_or_else(|_| token.to_string())
+                as_scenariodir
+                    .canonicalize()
+                    .map(|p| p.to_string_lossy().into_owned())
+                    .unwrap_or_else(|_| token.to_string())
             } else if as_sibling.exists() {
-                as_sibling.canonicalize().map(|p| p.to_string_lossy().into_owned()).unwrap_or_else(|_| token.to_string())
+                as_sibling
+                    .canonicalize()
+                    .map(|p| p.to_string_lossy().into_owned())
+                    .unwrap_or_else(|_| token.to_string())
             } else {
                 token.to_string()
             }
@@ -182,9 +191,15 @@ fn check(launch: &str, manifest: HostManifest) -> Result<i32, Fail> {
             "findings": [error.to_string()],
         }),
     };
-    println!("{}", serde_json::to_string_pretty(&value).unwrap_or_default());
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&value).unwrap_or_default()
+    );
     Ok(i32::from(
-        !value.get("valid").and_then(|v| v.as_bool()).unwrap_or(false),
+        !value
+            .get("valid")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false),
     ))
 }
 
@@ -202,10 +217,9 @@ fn run(launch: &str, manifest: HostManifest, rounds: usize) -> Result<i32, Fail>
         let host = mount(launch, &manifest)?;
         match host.ready() {
             Ok(true) => {
-                digests.push(
-                    host.digests()
-                        .map_err(|error| Fail(format!("round {round}: digest computation failed: {error}")))?,
-                );
+                digests.push(host.digests().map_err(|error| {
+                    Fail(format!("round {round}: digest computation failed: {error}"))
+                })?);
             }
             _ => {
                 return Err(Fail(format!(
@@ -219,13 +233,19 @@ fn run(launch: &str, manifest: HostManifest, rounds: usize) -> Result<i32, Fail>
     let mut verdict = "CLEAN".to_string();
     let mut findings: Vec<String> = Vec::new();
     for digest_set in digests.iter().skip(1) {
-        let Comparison { verdict: compared, findings: compared_findings } =
-            fixture_host::bundle::compare(&manifest, &digests[0], digest_set);
+        let Comparison {
+            verdict: compared,
+            findings: compared_findings,
+        } = fixture_host::bundle::compare(&manifest, &digests[0], digest_set);
         if compared != "CLEAN" {
             verdict = compared;
             findings.extend(compared_findings);
         }
     }
+    // Evidence bundle: the reference round is retained (hashed) under the
+    // env-exported evidence root — the plain arm shares the emd arm's ONE
+    // bundle schema (`fixture-host::bundle`).
+    retain_run_bundle(launch, &manifest, "run");
     println!(
         "{}",
         serde_json::json!({
@@ -237,6 +257,55 @@ fn run(launch: &str, manifest: HostManifest, rounds: usize) -> Result<i32, Fail>
         })
     );
     Ok(i32::from(verdict != "CLEAN"))
+}
+
+/// The evidence-bundle retention leg: mount fresh, render, join the CLI's
+/// git revision, retain hashed (never silently missing provenance).
+fn retain_run_bundle(launch: &str, manifest: &HostManifest, verb: &str) {
+    match mount(launch, manifest) {
+        Ok(host) => {
+            let mut bundle = fixture_host::bundle::render_bundle(
+                &host,
+                fixture_host::ArmIdentity {
+                    driver: DRIVER.to_string(),
+                    arm: "plain",
+                    pixel_note: "UNVERIFIED — pixels are a surface adapter's job (the miniapp's own window capture is one surface)",
+                },
+                verb,
+            );
+            fixture_host::bundle::join_identity(&mut bundle, git_revision());
+            match fixture_host::bundle::retain(&bundle, &evidence_root()) {
+                Ok(path) => println!("bundle retained: {}", path.display()),
+                Err(error) => eprintln!("bundle retention failed: {error}"),
+            }
+            let _unloaded = host.unload();
+        }
+        // A mount failure is reported by the verb verdict; the bundle is
+        // UNVERIFIED-shaped, never faked into a pass.
+        Err(error) => eprintln!("bundle UNVERIFIED: {error}"),
+    }
+}
+
+fn git_revision() -> Option<String> {
+    let output = std::process::Command::new("git")
+        .args(["rev-parse", "HEAD"])
+        .output()
+        .ok()?;
+    let stdout = String::from_utf8(output.stdout).ok()?;
+    Some(stdout.trim().to_string()).filter(|rev| !rev.is_empty())
+}
+
+fn evidence_root() -> String {
+    std::env::var("UX_FALSIFY_EVIDENCE").unwrap_or_else(|_| {
+        std::env::var_os("HOME")
+            .map(|h| {
+                h.to_string_lossy().into_owned()
+                    + "/.local/share/ux-falsify-evidence/fixture-scenario"
+            })
+            .unwrap_or_else(|| {
+                "/root/.local/share/ux-falsify-evidence/fixture-scenario".to_string()
+            })
+    })
 }
 
 /// The plain arm's declared plant vocabulary: plants mutate the LAUNCHER
@@ -261,7 +330,11 @@ fn plain_arm_plants() -> fixture_host::ArmPlants {
         let planted = source.replacen(needle, replacement, 1);
         let candidate = std::env::temp_dir().join(stem);
         std::fs::write(&candidate, &planted).ok()?;
-        std::fs::set_permissions(&candidate, std::os::unix::fs::PermissionsExt::from_mode(0o755)).ok()?;
+        std::fs::set_permissions(
+            &candidate,
+            std::os::unix::fs::PermissionsExt::from_mode(0o755),
+        )
+        .ok()?;
         Some(format!("sh {}", candidate.display()))
     }
     fn plant_item_drop(launch: &str) -> Option<String> {
@@ -270,7 +343,12 @@ fn plain_arm_plants() -> fixture_host::ArmPlants {
         // app"). Detected through axis=bounds.
         let path = launcher_path(launch)?;
         let source = std::fs::read_to_string(&path).ok()?;
-        candidate_of(&source, "include_badges=1", "include_badges=0", "fixture-item-drop-candidate.sh")
+        candidate_of(
+            &source,
+            "include_badges=1",
+            "include_badges=0",
+            "fixture-item-drop-candidate.sh",
+        )
     }
     fn plant_initial_drift(launch: &str) -> Option<String> {
         // A candidate launcher whose reset reproduces DIFFERENT initial
@@ -279,10 +357,18 @@ fn plain_arm_plants() -> fixture_host::ArmPlants {
         // the fixture cross-check names the reset lie.
         let path = launcher_path(launch)?;
         let source = std::fs::read_to_string(&path).ok()?;
-        candidate_of(&source, "SEED_INITIAL=7", "SEED_INITIAL=9", "fixture-initial-drift-candidate.sh")
+        candidate_of(
+            &source,
+            "SEED_INITIAL=7",
+            "SEED_INITIAL=9",
+            "fixture-initial-drift-candidate.sh",
+        )
     }
     fixture_host::ArmPlants {
-        plants: vec![("item-drop", plant_item_drop), ("initial-drift", plant_initial_drift)],
+        plants: vec![
+            ("item-drop", plant_item_drop),
+            ("initial-drift", plant_initial_drift),
+        ],
         slot_probe: None,
     }
 }
@@ -295,7 +381,11 @@ fn validate_declared_plants(
         if !arm_plants.plants.iter().any(|(id, _)| id == declared) {
             return Err(format!(
                 "manifest: selftest.plants declares unknown plant {declared:?}; the plain arm's vocabulary is {:?}",
-                arm_plants.plants.iter().map(|(id, _)| *id).collect::<Vec<_>>()
+                arm_plants
+                    .plants
+                    .iter()
+                    .map(|(id, _)| *id)
+                    .collect::<Vec<_>>()
             ));
         }
     }
@@ -311,8 +401,7 @@ fn selftest(launch: &str, manifest: HostManifest) -> Result<i32, Fail> {
     // the LAUNCH string (a candidate launcher script), so candidates mount
     // through the same contract with their own identity.
     let mount = |_path: &str, launch: &str| mount(launch, &manifest);
-    let report =
-        fixture_host::selftest::run_selftest(launch, &manifest, &mount, &arm_plants);
+    let report = fixture_host::selftest::run_selftest(launch, &manifest, &mount, &arm_plants);
     println!(
         "selftest: ref-vs-ref {} · plants detected {}/{} declared",
         report.ref_vs_ref.verdict, report.detected, report.declared_plants
@@ -331,4 +420,3 @@ fn selftest(launch: &str, manifest: HostManifest) -> Result<i32, Fail> {
     }
     Ok(i32::from(!report.passed))
 }
-

@@ -157,7 +157,11 @@ fn a_resolved_workspace_dependency_is_clean() {
         ),
     }];
     let host = PageHost::load(synthetic_page(), manifest).unwrap();
-    assert!(host.scenario.resolutions.ok(), "{:?}", host.scenario.resolutions.failures());
+    assert!(
+        host.scenario.resolutions.ok(),
+        "{:?}",
+        host.scenario.resolutions.failures()
+    );
     assert!(host.ready().unwrap());
 }
 

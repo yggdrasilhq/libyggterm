@@ -9,9 +9,9 @@
 //! first, then every DECLARED plant detected through the common contract.
 
 use crate::page::{Page, ParsedPage};
+use fixture_host::ScenarioHost;
 use fixture_host::manifest::HostManifest;
 use fixture_host::selftest::{ArmPlants, SelftestReport};
-use fixture_host::ScenarioHost;
 
 /// The emd arm's plants; ids in `manifest.selftest.plants`.
 pub fn arm_plants() -> ArmPlants {
@@ -45,14 +45,18 @@ pub fn run_selftest(page: &Page, manifest: &HostManifest) -> SelftestReport {
         }
     }
     let page_path = page.path.clone();
-    let mount = |path: &str, source: &str| -> Result<ScenarioHost<ParsedPage>, fixture_host::HostError> {
-        let subject_path = if path.is_empty() {
-            page_path.clone()
-        } else {
-            format!("{path}{}", page_path.split('/').last().unwrap_or("page.emd"))
+    let mount =
+        |path: &str, source: &str| -> Result<ScenarioHost<ParsedPage>, fixture_host::HostError> {
+            let subject_path = if path.is_empty() {
+                page_path.clone()
+            } else {
+                format!(
+                    "{path}{}",
+                    page_path.split('/').last().unwrap_or("page.emd")
+                )
+            };
+            mount_scene(&subject_path, source, &manifest.clone())
         };
-        mount_scene(&subject_path, source, &manifest.clone())
-    };
     fixture_host::selftest::run_selftest(&page.source, manifest, &mount, &arm_plants())
 }
 
@@ -163,9 +167,5 @@ fn replace_at(source: &str, index: usize, needle: &str, replacement: &str) -> St
 // (kept lean: mutation is where correctness lives; a fuzzer could join
 // later under the same contract)
 pub fn supported_plants() -> Vec<&'static str> {
-    arm_plants()
-        .plants
-        .iter()
-        .map(|(id, _)| *id)
-        .collect()
+    arm_plants().plants.iter().map(|(id, _)| *id).collect()
 }

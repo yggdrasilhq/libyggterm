@@ -26,7 +26,10 @@ pub const WIRE_VERSION: u16 = emd_renderer::components::COMPONENT_VERSION;
 /// component workspace — the arm IS the workspace that supplies the
 /// components). Key/value pairs stay in "key" position: the REPORT names
 /// the failing key.
-pub fn resolve_implementation(manifest: &HostManifest, manifest_name: &str) -> Vec<(String, Resolution)> {
+pub fn resolve_implementation(
+    manifest: &HostManifest,
+    manifest_name: &str,
+) -> Vec<(String, Resolution)> {
     manifest
         .dependencies
         .implementation
@@ -208,7 +211,10 @@ impl Mounted for ParsedPage {
     }
 
     fn resolutions(&self, manifest: &HostManifest) -> Resolutions {
-        Resolutions { implementation: resolve_implementation(manifest, "page.host.json"), design: resolve_design(manifest, &self.content_sha256, "page.host.json") }
+        Resolutions {
+            implementation: resolve_implementation(manifest, "page.host.json"),
+            design: resolve_design(manifest, &self.content_sha256, "page.host.json"),
+        }
     }
 
     fn null_slots(&self) -> Option<usize> {
@@ -220,4 +226,6 @@ impl Mounted for ParsedPage {
     }
 }
 
-fn _satisfy_type_alias(_error: &PageError) -> &'static str { "" }
+fn _satisfy_type_alias(_error: &PageError) -> &'static str {
+    ""
+}

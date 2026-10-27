@@ -51,4 +51,8 @@ pub use mounted::{ItemDigest, Mounted};
 pub use resolution::{Resolution, Resolutions, Resolved};
 pub use selftest::{ArmPlants, PlantResult, SelftestReport};
 
-pub const HOST_VERSION: &str = concat!("fixture-host/0.1 (workspace ", env!("CARGO_PKG_VERSION"), ")");
+pub const HOST_VERSION: &str = concat!(
+    "fixture-host/0.1 (workspace ",
+    env!("CARGO_PKG_VERSION"),
+    ")"
+);

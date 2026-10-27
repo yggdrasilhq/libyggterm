@@ -8,9 +8,9 @@
 //! run rounds, and the planted-defect selftest. One judge, everywhere —
 //! the same reason the TUI and web adapters share one differ law.
 
+use crate::host::{Digests, ScenarioHost};
 use crate::manifest::HostManifest;
 use crate::mounted::Mounted;
-use crate::host::{Digests, ScenarioHost};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::path::PathBuf;

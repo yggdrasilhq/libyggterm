@@ -13,8 +13,8 @@
 use crate::error::PageError;
 use crate::page::{Page, parse_page};
 use crate::resolve::Resolutions;
-use fixture_host::manifest::HostManifest;
 pub use fixture_host::HostError;
+use fixture_host::manifest::HostManifest;
 use fixture_host::{Lifecycle, ScenarioHost};
 use std::ops::{Deref, DerefMut};
 

@@ -11,8 +11,8 @@
 
 pub use fixture_host::manifest::{
     Dependencies, DesignDep, DesignProfiles, DigestMask, FixtureDecl, HostManifest,
-    ImplementationDep, Kind, SelftestDecl, LEGACY_PAGE_MANIFEST_FILENAME,
-    MANIFEST_CONTRACT_REV, SCENARIO_MANIFEST_FILENAME,
+    ImplementationDep, Kind, LEGACY_PAGE_MANIFEST_FILENAME, MANIFEST_CONTRACT_REV,
+    SCENARIO_MANIFEST_FILENAME, SelftestDecl,
 };
 
 /// The emd arm's manifest FILENAME (the documented place, kept so a

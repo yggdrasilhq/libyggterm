@@ -26,7 +26,10 @@ pub use crate::arm::{HOST_WORKSPACE_VERSION, WIRE_VERSION, design_token_digest};
 
 /// Page-shaped alias kept so tests exercising per-page resolution via
 /// parse results keep a single spelling.
-pub fn resolve_parsed(manifest: &crate::manifest::HostManifest, parsed: &ParsedPage) -> Resolutions {
+pub fn resolve_parsed(
+    manifest: &crate::manifest::HostManifest,
+    parsed: &ParsedPage,
+) -> Resolutions {
     use crate::arm as arm_impl;
     Resolutions {
         implementation: arm_impl::resolve_implementation(manifest, "page.host.json"),

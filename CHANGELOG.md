@@ -5,22 +5,47 @@ are written from the git record, not from memory.
 
 ## Unreleased
 
-- **emd-page-host: the page as a reproducible executable test host** (new
-  workspace crate `emd-page-host` + `emd-page` CLI): version-first
-  component validation (unsupported AND pre-floor versions loud, with a
-  migration rule), the versioned `page.host.json` manifest (implementation
-  dependency pins, design/token dependency digest, synthetic-fixture
-  declared init with a typed mutable surface, declared masks, selftest
-  plant vocabulary), actionable fence errors (fence index/byte
-  range/line:col/tree path), deterministic per-component scene digests
-  (fixture state joined to the page digest), a two-fresh-reset deterministic
-  run verifier, and ux-falsify-schema evidence bundles written to the
-  hashed evidence store. Real-notebook corpus acceptance: every shipped
+- **fixture-host: the portable SCENARIO contract (the chain-0029 rescope
+  of the emd runtime)**: the falsifiable unit is the scenario, not the
+  notebook. New workspace crate `fixture-host` + `fixture-scenario` CLI:
+  ONE renderer-agnostic manifest model (`scenario.host.json`, contract
+  rev 1 — kind/launch/revision/dependency pins/synthetic fixture with
+  typed mutable keys/declared masks/declared plant vocabulary), ONE
+  mounted-scene abstraction (`Mounted`), ONE controlled lifecycle
+  (`ScenarioHost`: load/host/reset/ready/unload — reset restores EXACTLY
+  the declared initial, readiness recomputes digests twice, a reload
+  draws no residual state), ONE comparison judge
+  (`CLEAN|MISMATCH`, `UNVERIFIED`-never-faked), and ONE ux-falsify
+  bundle schema shared with the emd arm.
+- **The plain fixture-app arm (the miniapp pattern)**: a fixture app is
+  mounted through the RUNNER COMMAND CONTRACT (capabilities /
+  reset_fixture / observe); the app's own reported fixture is
+  cross-checked against the manifest's declared initial; declared plants
+  (`item-drop`, `initial-drift`) mutate a candidate launcher through a
+  temp file and are judged through the same contract. Synthetic corpus:
+  `crates/fixture-host/corpus/plain-fixture-app.sh` (dash-compatible,
+  deterministic, no private data) + `scenario.host.json`.
+- **emd-page-host is now the emd ARM of that contract** (same crates,
+  same CLI): `PageHost` wraps `fixture_host::ScenarioHost<ParsedPage>`;
+  parsing/digests/resolution live once on the arm trait impl
+  (`arm.rs`). The manifest type is the portable `HostManifest`; the
+  loader accepts BOTH `scenario.host.json` and the legacy
+  `page.host.json` beside a page (ev 1 — both spellings one schema;
+  `"fence"` reads as an alias of portable `"item"`). Migration
+  behavior + the 6-scenario comparison runbook documented:
+  `docs/spec-emd-components.md`, `docs/comparison-scenarios.md`.
+- emd-page-host (first landed, kept): the page as a reproducible
+  executable test host — version-first component validation (unsupported
+  AND pre-floor versions loud, with a migration rule), actionable fence
+  errors (fence index/byte range/line:col/tree path), deterministic
+  per-fence scene digests (fixture state joined to the page digest), a
+  two-fresh-reset deterministic run verifier, and ux-falsify-schema
+  evidence bundles. Real-notebook corpus acceptance: every shipped
   `design/notebooks/*.emd` page parses clean; the synthetic
-  t3codereversed-miniapp-section corpus page passes ref-vs-ref CLEAN and
-  all declared planted defects are detected. emd-renderer's evidence
-  validation now names the failing component path/field. Spec:
+  t3miniapp-section corpus page passes ref-vs-ref CLEAN and detects all
+  declared planted defects. Spec:
   `docs/spec-emd-components.md` §Hosted-component contract.
+
 
 ## v0.14.4 — 2026-09-04
 

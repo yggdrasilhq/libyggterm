@@ -22,7 +22,7 @@
 
 use crate::digest_util::sha256_hex;
 use crate::mounted::{ItemDigest, Mounted, validation_item};
-use crate::resolution::{Resolutions, Resolution, Resolved};
+use crate::resolution::{Resolution, Resolutions, Resolved};
 use serde_json::Value;
 
 pub const PROTOCOL_REV: u64 = 1;
@@ -66,8 +66,9 @@ impl PlainScene {
                 )),
             });
         }
-        let parsed: Value = serde_json::from_str(&stdout)
-            .map_err(|error| PlainError::Launch(format!("observe output is not contract JSON: {error}")))?;
+        let parsed: Value = serde_json::from_str(&stdout).map_err(|error| {
+            PlainError::Launch(format!("observe output is not contract JSON: {error}"))
+        })?;
         let fixture = parsed
             .get("fixture")
             .and_then(Value::as_object)
@@ -99,15 +100,17 @@ impl PlainScene {
     /// Capabilities check: the app must speak contract rev 1 with the
     /// required verbs. A mismatch is actionable, never interpreted.
     pub fn check_capabilities(launch: &str) -> Result<(), PlainError> {
-        let (code, stdout, _) = run_verb(launch, "capabilities")
-            .map_err(|error| PlainError::Capabilities(format!("capabilities launch failed: {error}")))?;
+        let (code, stdout, _) = run_verb(launch, "capabilities").map_err(|error| {
+            PlainError::Capabilities(format!("capabilities launch failed: {error}"))
+        })?;
         if code != 0 {
             return Err(PlainError::Capabilities(format!(
                 "capabilities exited with code {code} — the fixture app is not speakable through the runner contract"
             )));
         }
-        let caps: Value = serde_json::from_str(&stdout)
-            .map_err(|error| PlainError::Capabilities(format!("capabilities output is not contract JSON: {error}")))?;
+        let caps: Value = serde_json::from_str(&stdout).map_err(|error| {
+            PlainError::Capabilities(format!("capabilities output is not contract JSON: {error}"))
+        })?;
         let speakers = caps.get("protocol").and_then(Value::as_u64);
         if speakers != Some(PROTOCOL_REV) {
             return Err(PlainError::Capabilities(format!(

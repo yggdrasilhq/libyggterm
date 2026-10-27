@@ -74,7 +74,9 @@ where
     // Reference digests (the arm's own load path — never a side door).
     let base_host = match mount("", source) {
         Ok(host) => host,
-        Err(error) => return all_unverified(format!("selftest UNVERIFIED: base mount failed: {error}")),
+        Err(error) => {
+            return all_unverified(format!("selftest UNVERIFIED: base mount failed: {error}"));
+        }
     };
     if !base_host.mounted.is_valid() {
         return all_unverified(
@@ -94,9 +96,7 @@ where
             return all_unverified(format!("selftest UNVERIFIED: second mount failed: {error}"));
         }
     }
-    .map_err(|error| {
-        all_unverified(format!("selftest UNVERIFIED: second digest pass: {error}"))
-    });
+    .map_err(|error| all_unverified(format!("selftest UNVERIFIED: second digest pass: {error}")));
     let re_digests = match re_digests {
         Ok(digests) => digests,
         Err(report) => return report,
@@ -107,7 +107,12 @@ where
     let mut plants = Vec::new();
     let mut detected = 0;
     for (id, apply) in &arm.plants {
-        if !manifest.selftest.plants.iter().any(|declared| declared == id) {
+        if !manifest
+            .selftest
+            .plants
+            .iter()
+            .any(|declared| declared == id)
+        {
             // Not declared — the selftest runs only DECLARED plants
             // (undeclared plants would widen the guarded surface silently).
             continue;
@@ -127,8 +132,10 @@ where
         // Candidate identity: a DISTINCT revision path, never the
         // scenario's own — provenance must never conflate candidate and
         // reference.
-        let candidate = match mount(&format!("synthetic-candidate/plant-{id}/"), &candidate_source)
-        {
+        let candidate = match mount(
+            &format!("synthetic-candidate/plant-{id}/"),
+            &candidate_source,
+        ) {
             Ok(host) => host,
             Err(error) => {
                 // An unmountable candidate — most "wipe the evidence"

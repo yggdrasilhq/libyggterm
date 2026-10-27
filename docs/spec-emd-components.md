@@ -142,6 +142,35 @@ data; the real corpus for CI is the shipped design/notebooks pages plus a
 synthetic page derived from a consumer miniapp's SECTION SHAPES
 (`crates/emd-page-host/corpus/`). No private data enters the repo.
 
+## The portable scenario contract — `fixture-host` (chain 0029, 2026-10-27)
+
+The falsifiable unit is the SCENARIO (implementation + fixture +
+interaction sequence + expected observations), and it must survive the
+notebook renderer disappearing. The arm-neutral half lives in
+`crates/fixture-host` (workspace): ONE manifest model (`HostManifest`,
+contract rev 1), ONE mount abstraction (`Mounted`), ONE controlled
+lifecycle (`ScenarioHost` — load/host/reset/ready/unload), ONE comparison
+judge (`bundle::compare`: CLEAN|MISMATCH, UNVERIFIED when capture cannot
+happen), and ONE evidence-bundle schema. Two arms implement it:
+
+- **emd arm** (this repo, `emd-page-host`): a parsed emd page mounts as a
+  scene of fences; the CLI is `emd-page check|render|run|selftest`.
+- **plain arm** (`fixture-host::plain` + the `fixture-scenario` CLI): an
+  ordinary fixture app (the miniapp pattern) mounted through the RUNNER
+  COMMAND CONTRACT — the app is invoked as `<launch> capabilities`,
+  `<launch> reset_fixture`, `<launch> observe`; observation items are
+  canonical JSON nodes digested deterministically, and the app's OWN
+  reported fixture is cross-checked against the manifest's declared
+  initial (the manifest is the boundary, not the app's word). The plain
+  arm's declared plant vocabulary is `item-drop` and `initial-drift`
+  (candidate launcher scripts — the deployed app is never edited).
+
+Which arm WINS on time/reset/detection/maintenance is the deciding
+experiment (`docs/comparison-scenarios.md`) — NOT decided by this
+contract; the emd arm stays out of the 1.0.0 acceptance path until it
+wins that comparison (the runbook's honest verdicts are UNVERIFIED until
+driven on real fixtures by the reviewer).
+
 ## Migration behavior
 
 - **Grammar version up (1 → 2)**: a host MAY add kinds; it must keep v1
@@ -149,6 +178,15 @@ synthetic page derived from a consumer miniapp's SECTION SHAPES
   executes (see 1). A publisher crossing versions declares the migration
   in the manifest (`contract_rev` bump + page revision), and old pages
   keep their declared pins — never silently widened.
+- **Manifest filename migration (the `fixture-host` split)**: 
+  `page.host.json` beside an emd page REMAINS VALID (contract rev 1,
+  legacy spelling — the loader reads it); the portable spelling is
+  `scenario.host.json` and parses IDENTICALLY under the same schema (the
+  emd beside-loader tries the portable name FIRST, then the legacy name;
+  either may be passed explicitly). Under contract rev 1 both spellings
+  are one schema; the mask spelling `"fence"` reads as an alias of the
+  portable `"item"`. A FUTURE schema change ships as a new contract rev
+  with its own loader — never a silent extension of rev 1.
 - **Notebook/cache pages WITHOUT a manifest**: they keep working as
   read-only hosts (validation-only). Adding a `page.host.json` is the
   migration path for a page that wants fixture behavior, a declared

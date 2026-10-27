@@ -8,8 +8,8 @@
 //! one spelling.
 
 use crate::host::PageHost;
-use fixture_host::bundle::{self as portable, ArmIdentity};
 pub use fixture_host::bundle::Comparison;
+use fixture_host::bundle::{self as portable, ArmIdentity};
 use serde_json::Value;
 use std::path::PathBuf;
 
@@ -42,8 +42,12 @@ pub fn join_identity(bundle: &mut Value, git_revision: Option<String>) {
 /// bundle's own canonical serialization; generated runs stay out of git.
 pub fn retain(bundle_value: &Value) -> Result<PathBuf, String> {
     // Env rule preserved: UX_FALSIFY_EVIDENCE overrides the evidence root.
-    let root = std::env::var("UX_FALSIFY_EVIDENCE")
-        .unwrap_or_else(|_| home().join(".local/share/ux-falsify-evidence/emd-page-host").to_string_lossy().into_owned());
+    let root = std::env::var("UX_FALSIFY_EVIDENCE").unwrap_or_else(|_| {
+        home()
+            .join(".local/share/ux-falsify-evidence/emd-page-host")
+            .to_string_lossy()
+            .into_owned()
+    });
     portable::retain(bundle_value, &root)
 }
 
@@ -62,4 +66,3 @@ pub fn compare(
 ) -> Comparison {
     portable::compare(manifest, base, candidate)
 }
-

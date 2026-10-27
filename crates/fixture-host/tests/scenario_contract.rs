@@ -67,9 +67,15 @@ fn the_manifest_refuses_unknown_contract_revs_and_undeclared_mutable_keys() {
 
 #[test]
 fn the_lifecycle_load_host_reset_unload_rules_hold_for_any_mount() {
-    let mut host =
-        ScenarioHost::load("mock", mock_manifest(), MockScene { digests: vec![], valid: true })
-            .unwrap();
+    let mut host = ScenarioHost::load(
+        "mock",
+        mock_manifest(),
+        MockScene {
+            digests: vec![],
+            valid: true,
+        },
+    )
+    .unwrap();
     // Typed boundary: undeclared key rejected, no residue.
     assert!(matches!(
         host.fixture_set("dataset", serde_json::json!("x")),
@@ -145,8 +151,7 @@ fn the_plain_corpus_reproduces_declared_fixture_after_reset() {
 /// command contract).
 fn mount(launch: &str, manifest: &HostManifest) -> Result<ScenarioHost<PlainScene>, HostError> {
     PlainScene::check_capabilities(launch).map_err(|error| HostError::Mount(error.to_string()))?;
-    PlainScene::reset_fixture(launch)
-        .map_err(|error| HostError::Mount(error.to_string()))?;
+    PlainScene::reset_fixture(launch).map_err(|error| HostError::Mount(error.to_string()))?;
     let scene = PlainScene::observe(launch).map_err(|error| HostError::Mount(error.to_string()))?;
     // The manifest-word cross-check: the app's OWN reported fixture must
     // reproduce the DECLARED initial — the boundary, not the app's word.
@@ -161,11 +166,10 @@ fn mount(launch: &str, manifest: &HostManifest) -> Result<ScenarioHost<PlainScen
 fn unresolved_dependencies_name_the_key_through_the_plain_arm() {
     let mut manifest: HostManifest =
         serde_json::from_str(include_str!("../corpus/scenario.host.json")).unwrap();
-    manifest.dependencies.implementation =
-        vec![fixture_host::manifest::ImplementationDep {
-            crate_name: "fixture-miniapp".into(),
-            revision: "grievance:9".into(),
-        }];
+    manifest.dependencies.implementation = vec![fixture_host::manifest::ImplementationDep {
+        crate_name: "fixture-miniapp".into(),
+        revision: "grievance:9".into(),
+    }];
     let scene = PlainScene {
         launch: "true".to_string(),
         observation: "{}".to_string(),
@@ -195,7 +199,10 @@ fn a_failing_app_an_item_never_silently_disappears() {
     });
     let validation = scene.validation_items();
     assert_eq!(validation.len(), 1);
-    assert_eq!(validation[0]["axis"], validation_item(0, String::new(), "x")["axis"]);
+    assert_eq!(
+        validation[0]["axis"],
+        validation_item(0, String::new(), "x")["axis"]
+    );
     let digests = scene.item_digests().unwrap();
     assert_eq!(digests.len(), 1);
     assert!(digests[0].error.is_some());
@@ -223,8 +230,12 @@ fn plant_detection_runs_through_the_common_contract() {
     candidate.components[0].digest = "Z".to_string();
     let comparison = fixture_host::bundle::compare(&manifest, &base, &candidate);
     assert_eq!(comparison.verdict, "MISMATCH");
-    // And the resolution REPORT names the fixture-jerking meaning?? no —
-    // the resolution table is not the judge; assert on the finding axis.
-    assert!(comparison.findings.iter().any(|f| f.starts_with("axis=scene")));
-    let _unused: Option<Resolution> = None;
+    // The judge, not the resolution table, owns the verdict; the finding
+    // names the scene axis.
+    assert!(
+        comparison
+            .findings
+            .iter()
+            .any(|f| f.starts_with("axis=scene"))
+    );
 }

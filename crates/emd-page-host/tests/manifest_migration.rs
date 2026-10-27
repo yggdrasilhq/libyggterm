@@ -43,11 +43,13 @@ fn the_emd_beside_loader_reads_both_spellings_scenario_first() {
     let manifest = r#"{"contract_rev":1,"revision":"x"}"#;
     std::fs::write(a.join(MANIFEST_FILENAME), manifest).unwrap();
     std::fs::write(b.join(SCENARIO_MANIFEST_FILENAME), manifest).unwrap();
-    let (_, a_manifest) = emd_page_host::PageHost::load_manifest_beside(&tmp.join("legacy").join("page.emd"))
-        .expect("legacy spelling beside a page LOADS");
+    let (_, a_manifest) =
+        emd_page_host::PageHost::load_manifest_beside(&tmp.join("legacy").join("page.emd"))
+            .expect("legacy spelling beside a page LOADS");
     assert_eq!(a_manifest.contract_rev, 1);
-    let (path, b_manifest) = emd_page_host::PageHost::load_manifest_beside(&tmp.join("portable").join("page.emd"))
-        .expect("portable spelling beside a page LOADS");
+    let (path, b_manifest) =
+        emd_page_host::PageHost::load_manifest_beside(&tmp.join("portable").join("page.emd"))
+            .expect("portable spelling beside a page LOADS");
     assert!(path.ends_with("scenario.host.json"));
     assert_eq!(a_manifest.revision, b_manifest.revision);
     let _ = std::fs::remove_dir_all(&tmp);
